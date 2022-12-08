@@ -1,38 +1,22 @@
+const mysql2 = require("mysql2");
 const config = require("../config/db.config.js");
 
-const Sequelize = require("sequelize");
-const sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
+const connection = mysql2.createConnection({
   host: config.HOST,
-  dialect: config.dialect,
-  operatorsAliases: false,
+  user: config.USER,
+  password: config.PASSWORD,
+  database: config.DB,
+  port: config.PORT,
+});
 
-  pool: {
-    max: config.pool.max,
-    min: config.pool.min,
-    acquire: config.pool.acquire,
-    idle: config.pool.idle,
-  },
+connection.connect(error => {
+  if (error) throw error;
+  console.log("Successfully connected to the database.");
 });
 
 const db = {};
-
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
-
-db.user = require("../models/user.model.js")(sequelize, Sequelize);
-db.role = require("../models/role.model.js")(sequelize, Sequelize);
-
-db.role.belongsToMany(db.user, {
-  through: "user_roles",
-  foreignKey: "roleId",
-  otherKey: "userId",
-});
-db.user.belongsToMany(db.role, {
-  through: "user_roles",
-  foreignKey: "userId",
-  otherKey: "roleId",
-});
-
-db.ROLES = ["user", "admin", "moderator"];
+db.ROLES = ["Ban điều hành", "Cơ sở sản xuất", "Đại lý phân phối", "Trung tâm bảo hành"];
+db.TYPES = ["parentDirectory", "brotherDirectory", "childDirectory"];
+db.connection = connection;
 
 module.exports = db;
