@@ -25,18 +25,18 @@ module.exports = function(app) {
   );
 
   app.put(
-    "/api/moderator/account/:id",
+    "/api/moderator/account",
     [authJwt.verifyToken, authJwt.isModerator],
     controller.ModeratorAccept
   );
 
   app.delete(
-    "/api/moderator/account/:id",
+    "/api/moderator/account",
     [authJwt.verifyToken, authJwt.isModerator],
     controller.ModeratorReject
   );
 
-  // Xem tất cả danh mục
+  // Xem tất cả danh mục sản phẩm
   app.get(
     "/api/moderator/directory/product",
     [authJwt.verifyToken, authJwt.isModerator],
@@ -45,19 +45,19 @@ module.exports = function(app) {
 
   // Khi bấm vào nút thêm mới
   app.get(
-    "/api/moderator/directory/product/create/:type",
+    "/api/moderator/directory/product/create",
     [authJwt.verifyToken, authJwt.isModerator],
-    controller.ModeratorDirectoryProductDependentType
+    controller.ModeratorDirectoryProduct
   );
 
-  // Khi chọn tên danh mục liên quan
+  // Khi chọn tên danh mục sản phẩm liên quan
   app.get(
     "/api/moderator/directory/product/create/:type/:directoryName",
     [authJwt.verifyToken, authJwt.isModerator],
     controller.ModeratorDirectoryProductId
   );
 
-  // Submit tạo danh mục
+  // Khi submit tạo danh mục
   app.post(
     "/api/moderator/directory/product/:type/:directoryName",
     [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],

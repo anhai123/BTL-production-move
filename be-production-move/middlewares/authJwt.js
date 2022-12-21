@@ -22,108 +22,104 @@ verifyToken = (req, res, next) => {
   });
 };
 
-isModerator = (req, res, next) => {
-  User.findById(req.userId, (err, user) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found User with id ${req.userId}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving User with id " + req.userId
-        });
-      }
-    } else {
-      if (user.roleId === 1) {
-        next();
-        return;
-      }
-
-      res.status(403).send({
-        message: "Require Moderator Role!"
-      });
+isModerator = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.roleId === 1) {
+      next();
       return;
-    };
-  });
+    }
+
+    res.status(403).send({
+      message: "Require Moderator Role!"
+    });
+    return;
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found User with id ${req.userId}.`
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving User with id " + req.userId
+      });
+    }
+  }
 };
 
-isProductionFacility = (req, res, next) => {
-  User.findById(req.userId, (err, user) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found User with id ${req.userId}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving User with id " + req.userId
-        });
-      }
-    } else {
-      if (user.roleId === 2) {
-        next();
-        return;
-      }
-
-      res.status(403).send({
-        message: "Require Production Facility Role!"
-      });
+isProductionFacility = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.roleId === 2) {
+      next();
       return;
-    };
-  });
+    }
+
+    res.status(403).send({
+      message: "Require Production Facility Role!"
+    });
+    return;
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found User with id ${req.userId}.`
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving User with id " + req.userId
+      });
+    }
+  }
 };
 
-isDistributionAgent = (req, res, next) => {
-  User.findById(req.userId, (err, user) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found User with id ${req.userId}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving User with id " + req.userId
-        });
-      }
-    } else {
-      if (user.roleId === 3) {
-        next();
-        return;
-      }
-
-      res.status(403).send({
-        message: "Require Distribution Agent Role!"
-      });
+isDistributionAgent = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.roleId === 3) {
+      next();
       return;
-    };
-  });
+    }
+
+    res.status(403).send({
+      message: "Require Distribution Agent Role!"
+    });
+    return;
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found User with id ${req.userId}.`
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving User with id " + req.userId
+      });
+    }
+  }
 };
 
-isWarrantyCenter = (req, res, next) => {
-  User.findById(req.userId, (err, user) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found User with id ${req.userId}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving User with id " + req.userId
-        });
-      }
-    } else {
-      if (user.roleId === 4) {
-        next();
-        return;
-      }
-
-      res.status(403).send({
-        message: "Require Warranty Center Role!"
-      });
+isWarrantyCenter = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (user.roleId === 4) {
+      next();
       return;
-    };
-  });
+    }
+
+    res.status(403).send({
+      message: "Require Warranty Center Role!"
+    });
+    return;
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found User with id ${req.userId}.`
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving User with id " + req.userId
+      });
+    }
+  }
 };
 
 const authJwt = {

@@ -7,306 +7,312 @@ const DirectoryProduct = function (directoryProduct) {
   this.directoryName = directoryProduct.directoryName;
 };
 
-DirectoryProduct.create = (newDirectoryProduct, result) => {
-  sql.query("INSERT INTO directoryProducts SET ?", newDirectoryProduct, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-
-    console.log("created directory product: ", { id: res.insertId, ...newDirectoryProduct });
-    result(null, { id: res.insertId, ...newDirectoryProduct });
-  });
-};
-
-DirectoryProduct.getAll = (result) => {
-  sql.query("SELECT * FROM directoryProducts", (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-
-    console.log("directory products: ", res);
-    result(null, res);
-  });
-};
-
-DirectoryProduct.findById = (id, result) => {
-  sql.query(`SELECT * FROM directoryProducts WHERE id = '${id}'`, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-
-    if (res.length) {
-      console.log("found directory product: ", res[0]);
-      result(null, res[0]);
-      return;
-    }
-
-    // not found Directory Product with the id
-    result({ kind: "not_found" }, null);
-  });
-};
-
-DirectoryProduct.findByDirectoryName = (directoryName, result) => {
-  sql.query(`SELECT * FROM directoryProducts WHERE directoryName = '${directoryName}'`, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-
-    if (res.length) {
-      console.log("found directory product: ", res[0]);
-      result(null, res[0]);
-      return;
-    }
-
-    // not found Directory Product with the directory name
-    result({ kind: "not_found" }, null);
-  });
-};
-
-DirectoryProduct.findByParentDirectory = (parentDirectory, result) => {
-  sql.query("SELECT * FROM directoryProducts WHERE parentDirectory = ?", parentDirectory, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-
-    if (res.length) {
-      console.log("found parent directory products: ", res);
-      result(null, res);
-      return;
-    }
-
-    // not found Directory Product with the parent directory name
-    result({ kind: "not_found" }, null);
-  });
-};
-
-DirectoryProduct.findIdByParentDirectory = (parentDirectory, result) => {
-  sql.query("SELECT id FROM directoryProducts WHERE parentDirectory = ?", parentDirectory, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-
-    if (res.length) {
-      console.log("found parent directory products: ", res);
-      result(null, res);
-      return;
-    }
-
-    // not found Directory Product Id with the parent directory name
-    result({ kind: "not_found" }, null);
-  });
-};
-
-DirectoryProduct.normalizeIdUp = (id, result) => {
-  sql.query("SELECT MAX(id) as maxId FROM directoryProducts", (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result([{ kind: "select_max_error" }, err], null);
-      return;
-    }
-
-    if (res.affectedRows == 0) {
-      // not found max id from directory products
-      result([{ kind: "not_found_max" }], null);
-      return;
-    }
-
-    console.log("max id from directory products: ", res[0].maxId);
-    if (res[0].maxId === null || id > res[0].maxId) {
-      result(null, null);
-      return;
-    }
-    for (var i = res[0].maxId; i >= id; i--) {
-      sql.query(
-        "UPDATE directoryProducts SET id = ? WHERE id = ?",
-        [i + 1, i],
-        (err, res) => {
-          if (err) {
-            console.log("error: ", err);
-            result([{ kind: "update_loop_error" }, err], null);
-            return;
-          }
-
-          if (res.affectedRows == 0) {
-            // not found Directory Product with the id
-            result([{ kind: "not_found" }], null);
-            return;
-          }
-
-          console.log("updated directory product: ", { idOld: i, idNew: i + 1 });
-          result(null, null);
-        }
-      );
-    }
-  });
-}
-
-DirectoryProduct.normalizeIdDown = (id, result) => {
-  id = parseInt(id);
-  sql.query("SELECT MAX(id) as maxId FROM directoryProducts", (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result([{ kind: "select_max_error" }, err], null);
-      return;
-    }
-
-    if (res.affectedRows == 0) {
-      // not found max id from directory products
-      result([{ kind: "not_found_max" }], null);
-      return;
-    }
-
-    console.log("max id from directory products: ", res[0].maxId);
-    if (id + 1 > res[0].maxId)
-    {
-      console.log("heeeeeeeeeeeeeeee");
-      console.log(id + 1);
-      console.log(id + 1 > res[0].maxId);
-      result(null, null);
-    }
-    for (var i = id + 1; i <= res[0].maxId; i++) {
-      sql.query(
-        "UPDATE directoryProducts SET id = ? WHERE id = ?",
-        [i - 1, i],
-        (err, res) => {
-          if (err) {
-            console.log("error: ", err);
-            result([{ kind: "update_loop_error" }, err], null);
-            return;
-          }
-
-          if (res.affectedRows == 0) {
-            // not found Directory Product with the id
-            result([{ kind: "not_found" }], null);
-            return;
-          }
-
-          console.log("updated directory product: ", { idOld: i, idNew: i - 1 });
-          result(null, null);
-        }
-      );
-    }
-  })
-}
-
-DirectoryProduct.updateById = (id, directoryProduct, result) => {
-  if (id !== directoryProduct.id) {
-    let hasError = false;
-    sql.query("SELECT MAX(id) FROM directoryProducts", (err, res) => {
+DirectoryProduct.create = newDirectoryProduct => {
+  return new Promise((resolve, reject) => {
+    sql.query("INSERT INTO directoryProducts SET ?", newDirectoryProduct, (err, res) => {
       if (err) {
         console.log("error: ", err);
-        result([{ kind: "select_max_error" }, err], null);
-        hasError = true;
-        return;
+        return reject(err);
+      }
+
+      console.log("created directory product: ", { id: res.insertId, ...newDirectoryProduct });
+      resolve({ id: res.insertId, ...newDirectoryProduct });
+    });
+  });
+};
+
+DirectoryProduct.getAll = () => {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT * FROM directoryProducts", (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+
+      console.log("directory products: ", res);
+      resolve(res);
+    });
+  });
+};
+
+DirectoryProduct.findById = id => {
+  return new Promise((resolve, reject) => {
+    sql.query(`SELECT * FROM directoryProducts WHERE id = '${id}'`, (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+
+      if (res.length) {
+        console.log("found directory product: ", res[0]);
+        return resolve(res[0]);
+      }
+
+      // not found Directory Product with the id
+      reject({ kind: "not_found" });
+    });
+  });
+};
+
+DirectoryProduct.findByDirectoryName = directoryName => {
+  return new Promise((resolve, reject) => {
+    sql.query(`SELECT * FROM directoryProducts WHERE directoryName = '${directoryName}'`, (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+
+      if (res.length) {
+        console.log("found directory product: ", res[0]);
+        return resolve(res[0]);
+      }
+
+      // not found Directory Product with the directory name
+      reject({ kind: "not_found" });
+    });
+  });
+};
+
+DirectoryProduct.findByParentDirectory = parentDirectory => {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT * FROM directoryProducts WHERE parentDirectory = ?", parentDirectory, (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+
+      if (res.length) {
+        console.log("found parent directory products: ", res);
+        return resolve(res);
+      }
+
+      // not found Directory Product with the parent directory name
+      reject({ kind: "not_found" });
+    });
+  });
+};
+
+DirectoryProduct.findIdByParentDirectory = parentDirectory => {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT id FROM directoryProducts WHERE parentDirectory = ?", parentDirectory, (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+
+      if (res.length) {
+        console.log("found parent directory products: ", res);
+        const ids =[];
+        for (let i of res) {
+          ids.push(i.id);
+        }
+        return resolve(ids);
+      }
+
+      // not found Directory Product Id with the parent directory name
+      reject({ kind: "not_found" });
+    });
+  });
+};
+
+DirectoryProduct.selectMaxId = () => {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT MAX(id) as maxId FROM directoryProducts", (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject({
+          kind: "select_max_error",
+          content: err,
+        });
       }
 
       if (res.affectedRows == 0) {
         // not found max id from directory products
-        result({ kind: "not_found_max" }, null);
-        hasError = true;
-        return;
+        return reject({ kind: "not_found_max" });
       }
 
-      console.log("max id from directory products: ", res);
-      for (var i = res; i > id; i--) {
+      console.log("max id from directory products: ", res[0].maxId);
+      resolve(res[0].maxId);
+    });
+  });
+}
+
+DirectoryProduct.normalizeIdUp = id => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const maxId = await DirectoryProduct.selectMaxId();
+      if (maxId === null || id > maxId) {
+        return resolve({
+          message: "Successfully!",
+        });
+      }
+      for (var i = maxId; i >= id; i--) {
         sql.query(
           "UPDATE directoryProducts SET id = ? WHERE id = ?",
           [i + 1, i],
           (err, res) => {
             if (err) {
               console.log("error: ", err);
-              result([{ kind: "update_loop_error" }, err], null);
-              hasError = true;
-              return;
+              return reject({
+                kind: "update_loop_error",
+                content: err,
+              });
             }
 
             if (res.affectedRows == 0) {
               // not found Directory Product with the id
-              result({ kind: "not_found" }, null);
-              hasError = true;
-              return;
+              return reject({ kind: "not_found" });
             }
-
+            // test
             console.log("updated directory product: ", { idOld: i, idNew: i + 1 });
+            resolve({
+              message: "Successfully!",
+            });
           }
         );
       }
-    })
-    if (hasError) return;
-  }
-  sql.query(
-    "UPDATE directoryProducts SET id = ?, parentDirectory = ?, directoryName = ? WHERE id = ?",
-    [directoryProduct.id, directoryProduct.parentDirectory, directoryProduct.directoryName, id],
-    (err, res) => {
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+DirectoryProduct.normalizeIdDown = id => {
+  return new Promise(async (resolve, reject) => {
+    id = parseInt(id);
+    try {
+      const maxId = await DirectoryProduct.selectMaxId();
+      if (id + 1 > maxId) {
+        return resolve({
+          message: "Successfully!",
+        });
+      }
+      for (var i = id + 1; i <= maxId; i++) {
+        sql.query(
+          "UPDATE directoryProducts SET id = ? WHERE id = ?",
+          [i - 1, i],
+          (err, res) => {
+            if (err) {
+              console.log("error: ", err);
+              return reject({
+                kind: "update_loop_error",
+                content: err,
+              });
+            }
+
+            if (res.affectedRows == 0) {
+              // not found Directory Product with the id
+              return reject({ kind: "not_found" });
+            }
+            // test
+            console.log("updated directory product: ", { idOld: i, idNew: i - 1 });
+            resolve({
+              message: "Successfully!",
+            });
+          }
+        );
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+DirectoryProduct.updateById = (id, directoryProduct) => {
+  return new Promise(async (resolve, reject) => {
+    if (id !== directoryProduct.id) {
+      let hasError = false;
+      try {
+        const maxId = await DirectoryProduct.selectMaxId();
+        for (var i = maxId; i > id; i--) {
+          sql.query(
+            "UPDATE directoryProducts SET id = ? WHERE id = ?",
+            [i + 1, i],
+            (err, res) => {
+              if (err) {
+                console.log("error: ", err);
+                hasError = true;
+                return reject({
+                  kind: "update_loop_error",
+                  content: err,
+                });
+              }
+
+              if (res.affectedRows == 0) {
+                // not found Directory Product with the id
+                hasError = true;
+                return reject({ kind: "not_found" });
+              }
+              // test
+              console.log("updated directory product: ", { idOld: i, idNew: i + 1 });
+            }
+          );
+        }
+        if (hasError) return;
+      } catch (err) {
+        // test
+      }
+    }
+    sql.query(
+      "UPDATE directoryProducts SET id = ?, parentDirectory = ?, directoryName = ? WHERE id = ?",
+      [directoryProduct.id, directoryProduct.parentDirectory, directoryProduct.directoryName, id],
+      (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          return reject(err);
+        }
+
+        if (res.affectedRows == 0) {
+          // not found Directory Product with the id
+          return reject({ kind: "not_found" });
+        }
+
+        console.log("updated directory product: ", { idOld: id, ...directoryProduct });
+        resolve({ idOld: id, ...directoryProduct });
+      }
+    );
+  });
+};
+
+DirectoryProduct.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
+  return new Promise((resolve, reject) => {
+    sql.query(
+      "UPDATE directoryProducts SET parentDirectory = ? WHERE parentDirectory = ?",
+      [parentDirectoryNew, parentDirectoryOld],
+      (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          return reject(err);
+        }
+
+        if (res.affectedRows == 0) {
+          // not found Directory Product with the parent directory
+          return reject({ kind: "not_found" });
+        }
+
+        console.log("directory product update successfully!");
+        resolve(res);
+      }
+    );
+  });
+};
+
+DirectoryProduct.remove = id => {
+  return new Promise((resolve, reject) => {
+    sql.query("DELETE FROM directoryProducts WHERE id = ?", id, (err, res) => {
       if (err) {
         console.log("error: ", err);
-        result(err, null);
-        return;
+        return reject(err);
       }
 
       if (res.affectedRows == 0) {
         // not found Directory Product with the id
-        result({ kind: "not_found" }, null);
-        return;
+        return reject({ kind: "not_found" });
       }
 
-      console.log("updated directory product: ", { idOld: id, ...directoryProduct });
-      result(null, { idOld: id, ...directoryProduct });
-    }
-  );
-};
-
-DirectoryProduct.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew, result) => {
-  sql.query(
-    "UPDATE directoryProducts SET parentDirectory = ? WHERE parentDirectory = ?",
-    [parentDirectoryNew, parentDirectoryOld],
-    (err, res) => {
-      if (err) {
-        console.log("error: ", err);
-        result(err, null);
-        return;
-      }
-
-      if (res.affectedRows == 0) {
-        // not found Directory Product with the parent directory
-        result({ kind: "not_found" }, null);
-        return;
-      }
-
-      console.log("directory product update successfully!");
-      result(null, res);
-    }
-  );
-};
-
-DirectoryProduct.remove = (id, result) => {
-  sql.query("DELETE FROM directoryProducts WHERE id = ?", id, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-
-    if (res.affectedRows == 0) {
-      // not found Directory Product with the id
-      result({ kind: "not_found" }, null);
-      return;
-    }
-
-    console.log("deleted directory products with id: ", id);
-    result(null, res);
+      console.log("deleted directory products with id: ", id);
+      resolve(res);
+    });
   });
 };
 

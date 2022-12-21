@@ -2,40 +2,38 @@ const db = require("../models");
 const ROLES = db.ROLES;
 const User = require("../models/user.model");
 
-checkDuplicateUsernameOrEmail = (req, res, next) => {
+checkDuplicateUsernameOrEmail = async (req, res, next) => {
   // Username
-  User.findByUserName(req.body.username, (err, user) => {
-    if (err) {
-      if (err.kind === "not_found") {
-        // Email
-        User.findByEmail(req.body.email, (err, user) => {
-          if (err) {
-            if (err.kind === "not_found") {
-              next();
-            } else {
-              res.status(500).send({
-                message: "Error retrieving User with email " + req.body.email
-              });
-            }
-          } else {
-            res.status(400).send({
-              message: "Failed! Email is already in use!",
-            });
-            return;
-          };
+  try {
+    await User.findByUserName(req.body.username);
+    res.status(400).send({
+      message: "Failed! Username is already in use!",
+    });
+    return;
+  } catch (err) {
+    if (err.kind === "not_found") {
+      // Email
+      try {
+        await User.findByEmail(req.body.email);
+        res.status(400).send({
+          message: "Failed! Email is already in use!",
         });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving User with username " + req.body.username
-        });
+        return;
+      } catch (err) {
+        if (err.kind === "not_found") {
+          next();
+        } else {
+          res.status(500).send({
+            message: "Error retrieving User with email " + req.body.email
+          });
+        }
       }
     } else {
-      res.status(400).send({
-        message: "Failed! Username is already in use!",
+      res.status(500).send({
+        message: "Error retrieving User with username " + req.body.username
       });
-      return;
-    };
-  });
+    }
+  }
 };
 
 checkRolesExisted = (req, res, next) => {
