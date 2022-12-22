@@ -3,13 +3,13 @@ const sql = require("./").connection;
 // constructor
 const DirectoryProduct = function (directoryProduct) {
   this.id = directoryProduct.id;
-  this.parentDirectory = directoryProduct.parentDirectory;
-  this.directoryName = directoryProduct.directoryName;
+  this.danh_muc_cha = directoryProduct.danh_muc_cha;
+  this.ten_danh_muc_sp = directoryProduct.ten_danh_muc_sp;
 };
 
 DirectoryProduct.create = newDirectoryProduct => {
   return new Promise((resolve, reject) => {
-    sql.query("INSERT INTO directoryProducts SET ?", newDirectoryProduct, (err, res) => {
+    sql.query("INSERT INTO danh_muc_sp SET ?", newDirectoryProduct, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -23,7 +23,7 @@ DirectoryProduct.create = newDirectoryProduct => {
 
 DirectoryProduct.getAll = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM directoryProducts", (err, res) => {
+    sql.query("SELECT * FROM danh_muc_sp", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -37,7 +37,7 @@ DirectoryProduct.getAll = () => {
 
 DirectoryProduct.findById = id => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM directoryProducts WHERE id = '${id}'`, (err, res) => {
+    sql.query(`SELECT * FROM danh_muc_sp WHERE id = '${id}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -56,7 +56,7 @@ DirectoryProduct.findById = id => {
 
 DirectoryProduct.findByDirectoryName = directoryName => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM directoryProducts WHERE directoryName = '${directoryName}'`, (err, res) => {
+    sql.query(`SELECT * FROM danh_muc_sp WHERE ten_danh_muc_sp = '${directoryName}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -75,7 +75,7 @@ DirectoryProduct.findByDirectoryName = directoryName => {
 
 DirectoryProduct.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM directoryProducts WHERE parentDirectory = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT * FROM danh_muc_sp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -94,7 +94,7 @@ DirectoryProduct.findByParentDirectory = parentDirectory => {
 
 DirectoryProduct.findIdByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT id FROM directoryProducts WHERE parentDirectory = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT id FROM danh_muc_sp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -117,7 +117,7 @@ DirectoryProduct.findIdByParentDirectory = parentDirectory => {
 
 DirectoryProduct.selectMaxId = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT MAX(id) as maxId FROM directoryProducts", (err, res) => {
+    sql.query("SELECT MAX(id) as maxId FROM danh_muc_sp", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject({
@@ -148,7 +148,7 @@ DirectoryProduct.normalizeIdUp = id => {
       }
       for (var i = maxId; i >= id; i--) {
         sql.query(
-          "UPDATE directoryProducts SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_sp SET id = ? WHERE id = ?",
           [i + 1, i],
           (err, res) => {
             if (err) {
@@ -189,7 +189,7 @@ DirectoryProduct.normalizeIdDown = id => {
       }
       for (var i = id + 1; i <= maxId; i++) {
         sql.query(
-          "UPDATE directoryProducts SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_sp SET id = ? WHERE id = ?",
           [i - 1, i],
           (err, res) => {
             if (err) {
@@ -277,7 +277,7 @@ DirectoryProduct.updateById = (id, directoryProduct) => {
 DirectoryProduct.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE directoryProducts SET parentDirectory = ? WHERE parentDirectory = ?",
+      "UPDATE danh_muc_sp SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
       [parentDirectoryNew, parentDirectoryOld],
       (err, res) => {
         if (err) {
@@ -299,7 +299,7 @@ DirectoryProduct.updateParentDirectoryByParentDirectory = (parentDirectoryOld, p
 
 DirectoryProduct.remove = id => {
   return new Promise((resolve, reject) => {
-    sql.query("DELETE FROM directoryProducts WHERE id = ?", id, (err, res) => {
+    sql.query("DELETE FROM danh_muc_sp WHERE id = ?", id, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);

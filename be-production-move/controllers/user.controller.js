@@ -16,22 +16,35 @@ exports.ModeratorAccount = async (req, res) => {
     const usersFix = [];
     for (let user of users) {
       try {
-        const role = await Role.findById(user.roleId);
+        let subject, cua, id;
+        if (user.id_co_so_sx) {
+          id = user.id_co_so_sx;
+          subject = await Role.findProductionFacility(id);
+          cua = subject.ten_co_so;
+        } else if (user.id_dai_ly) {
+          id = user.id_dai_ly;
+          subject = await Role.findDistributionAgent(id);
+          cua = subject.ten_dai_ly;
+        } else {
+          id = user.id_trung_tam_bh;
+          subject = await Role.findWarrantyCenter(id);
+          cua = subject.ten_trung_tam;
+        }
         usersFix.push({
           id: user.id,
-          username: user.username,
+          tai_khoan: user.tai_khoan,
           email: user.email,
-          role: role.name,
+          cua: cua,
         });
       } catch (err) {
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Role with id ${user.roleId}.`
+            message: `Not found subject with id ${id}.`
           });
           return;
         } else {
           res.status(500).send({
-            message: "Error retrieving Role with id " + user.roleId
+            message: "Error retrieving subject with id " + id
           });
           return;
         }
@@ -50,8 +63,8 @@ exports.ModeratorAccept = async (req, res) => {
   for (let id of req.body.ids) {
     try {
       const user = await User.findById(id);
-      user.accepted = 1;
-      await User.updateById(id, new User(user));
+      user.hop_le = 1;
+      await User.updateById(user);
     } catch (err) {
       if (err.kind === "not_found") {
         res.status(404).send({
@@ -111,7 +124,7 @@ exports.ModeratorDirectoryProductCreate = async (req, res) => {
   } else if (req.params.type === "brotherDirectory") {
     try {
       const brotherDirectoryProduct = await DirectoryProduct.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = brotherDirectoryProduct.parentDirectory;
+      parentDirectoryT = brotherDirectoryProduct.danh_muc_cha;
     } catch (err) {
       hasError = true;
       if (err.kind === "not_found") {
@@ -127,18 +140,18 @@ exports.ModeratorDirectoryProductCreate = async (req, res) => {
   } else if (req.params.type === "childDirectory") {
     try {
       const childDirectoryProduct = await DirectoryProduct.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = childDirectoryProduct.parentDirectory;
+      parentDirectoryT = childDirectoryProduct.danh_muc_cha;
       try {
-        await DirectoryProduct.updateParentDirectoryByParentDirectory(childDirectoryProduct.parentDirectory, req.body.directoryName);
+        await DirectoryProduct.updateParentDirectoryByParentDirectory(childDirectoryProduct.danh_muc_cha, req.body.ten_danh_muc_sp);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Product with parent directory name ${childDirectoryProduct.parentDirectory}.`
+            message: `Not found Directory Product with parent directory name ${childDirectoryProduct.danh_muc_cha}.`
           });
         } else {
           res.status(500).send({
-            message: "Error updating Directory Product with parent directory name " + childDirectoryProduct.parentDirectory
+            message: "Error updating Directory Product with parent directory name " + childDirectoryProduct.danh_muc_cha
           });
         }
       }
@@ -163,8 +176,8 @@ exports.ModeratorDirectoryProductCreate = async (req, res) => {
     try {
       await DirectoryProduct.create(new DirectoryProduct({
         id: req.body.id,
-        parentDirectory: parentDirectoryT,
-        directoryName: req.body.directoryName,
+        danh_muc_cha: parentDirectoryT,
+        ten_danh_muc_sp: req.body.ten_danh_muc_sp,
       }));
       res.send({ message: "Directory product was created successfully!" });
     } catch (err) {
@@ -232,14 +245,14 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
       try {
         const brotherDirectoryProduct = await DirectoryProduct.findByDirectoryName(req.params.directoryName);
         try {
-          const brotherDirectoryProductIds = await DirectoryProduct.findIdByParentDirectory(brotherDirectoryProduct.parentDirectory);
+          const brotherDirectoryProductIds = await DirectoryProduct.findIdByParentDirectory(brotherDirectoryProduct.danh_muc_cha);
           brotherDirectoryProductIds.push(brotherDirectoryProductIds[brotherDirectoryProductIds.length - 1] + 1);
           res.status(200).send([allDirectoryProducts, {
             id: brotherDirectoryProductIds
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory products with directory name " + brotherDirectoryProduct.parentDirectory
+            message: "Error retrieving brother directory products with directory name " + brotherDirectoryProduct.danh_muc_cha
           });
         }
       } catch (err) {
@@ -257,13 +270,13 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
       try {
         const childDirectoryProduct = await DirectoryProduct.findByDirectoryName(req.params.directoryName);
         try {
-          var brotherDirectoryProducts = await DirectoryProduct.findByParentDirectory(childDirectoryProduct.parentDirectory);
+          var brotherDirectoryProducts = await DirectoryProduct.findByParentDirectory(childDirectoryProduct.danh_muc_cha);
           res.status(200).send([allDirectoryProducts, {
             id: [brotherDirectoryProducts[0].id]
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory products with directory name " + brotherDirectoryProducts.parentDirectory
+            message: "Error retrieving brother directory products with directory name " + brotherDirectoryProducts.danh_muc_cha
           });
         }
       } catch (err) {
@@ -291,9 +304,9 @@ exports.ModeratorDirectoryProductDelete = async (req, res) => {
   try {
     const directoryProduct = await DirectoryProduct.findById(req.params.id);
     try {
-      const childrenDirectoryProduct = await DirectoryProduct.findByParentDirectory(directoryProduct.directoryName);
+      const childrenDirectoryProduct = await DirectoryProduct.findByParentDirectory(directoryProduct.ten_danh_muc_sp);
       try {
-        await DirectoryProduct.updateParentDirectoryByParentDirectory(directoryProduct.directoryName, directoryProduct.parentDirectory);
+        await DirectoryProduct.updateParentDirectoryByParentDirectory(directoryProduct.ten_danh_muc_sp, directoryProduct.danh_muc_cha);
         try {
           const data = await DirectoryProduct.remove(req.params.id);
           try {
@@ -333,18 +346,18 @@ exports.ModeratorDirectoryProductDelete = async (req, res) => {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Product with parent directory name ${directoryProduct.directoryName}.`
+            message: `Not found Directory Product with parent directory name ${directoryProduct.ten_danh_muc_sp}.`
           });
         } else {
           res.status(500).send({
-            message: `Error updating Directory Product with parent directory name ${directoryProduct.directoryName}.`
+            message: `Error updating Directory Product with parent directory name ${directoryProduct.ten_danh_muc_sp}.`
           });
         }
       }
     } catch (err) {
       if (err.kind !== "not_found") {
         res.status(500).send({
-          message: `Error retrieving directory products with parent directory name ${directoryProduct.directoryName}.`
+          message: `Error retrieving directory products with parent directory name ${directoryProduct.ten_danh_muc_sp}.`
         });
       } else {
         try {

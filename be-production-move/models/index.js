@@ -15,7 +15,6 @@ connection.connect(error => {
 });
 
 const db = {};
-db.ROLES = ["Ban điều hành", "Cơ sở sản xuất", "Đại lý phân phối", "Trung tâm bảo hành"];
 db.TYPES = ["parentDirectory", "brotherDirectory", "childDirectory"];
 db.connection = connection;
 

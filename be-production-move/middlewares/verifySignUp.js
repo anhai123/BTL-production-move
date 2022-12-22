@@ -1,11 +1,9 @@
-const db = require("../models");
-const ROLES = db.ROLES;
 const User = require("../models/user.model");
 
 checkDuplicateUsernameOrEmail = async (req, res, next) => {
   // Username
   try {
-    await User.findByUserName(req.body.username);
+    await User.findByUserName(req.body.tai_khoan);
     res.status(400).send({
       message: "Failed! Username is already in use!",
     });
@@ -30,28 +28,14 @@ checkDuplicateUsernameOrEmail = async (req, res, next) => {
       }
     } else {
       res.status(500).send({
-        message: "Error retrieving User with username " + req.body.username
+        message: "Error retrieving User with username " + req.body.tai_khoan
       });
     }
   }
-};
-
-checkRolesExisted = (req, res, next) => {
-  if (req.body.role) {
-    if (!ROLES.includes(req.body.role)) {
-      res.status(400).send({
-        message: "Failed! Role does not exist = " + req.body.role,
-      });
-      return;
-    }
-  }
-
-  next();
 };
 
 const verifySignUp = {
   checkDuplicateUsernameOrEmail: checkDuplicateUsernameOrEmail,
-  checkRolesExisted: checkRolesExisted,
 };
 
 module.exports = verifySignUp;

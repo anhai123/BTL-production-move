@@ -2,16 +2,18 @@ const sql = require("./").connection;
 
 // constructor
 const User = function (user) {
-  this.username = user.username;
+  this.tai_khoan = user.tai_khoan;
   this.email = user.email;
-  this.password = user.password;
-  this.accepted = user.accepted;
-  this.roleId = user.roleId;
+  this.mat_khau = user.mat_khau;
+  this.id_co_so_sx = user.id_co_so_sx;
+  this.id_dai_ly = user.id_dai_ly;
+  this.id_trung_tam_bh = user.id_trung_tam_bh;
+  this.hop_le = user.hop_le;
 };
 
 User.create = newUser => {
   return new Promise((resolve, reject) => {
-    sql.query("INSERT INTO users SET ?", newUser, (err, res) => {
+    sql.query("INSERT INTO ban_quan_ly SET ?", newUser, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -25,7 +27,7 @@ User.create = newUser => {
 
 User.findById = id => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM users WHERE id = ${id}`, (err, res) => {
+    sql.query(`SELECT * FROM ban_quan_ly WHERE id = ${id}`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -42,9 +44,9 @@ User.findById = id => {
   });
 };
 
-User.findByUserName = username => {
+User.findByUserName = tai_khoan => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM users WHERE username = '${username}'`, (err, res) => {
+    sql.query(`SELECT * FROM ban_quan_ly WHERE tai_khoan = '${tai_khoan}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -63,7 +65,7 @@ User.findByUserName = username => {
 
 User.findByEmail = email => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM users WHERE email = '${email}'`, (err, res) => {
+    sql.query(`SELECT * FROM ban_quan_ly WHERE email = '${email}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -100,9 +102,9 @@ User.getAll = title => {
   });
 };
 
-User.getAllByAccepted = accepted => {
+User.getAllByAccepted = hop_le => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM users WHERE accepted=${accepted}`, (err, res) => {
+    sql.query(`SELECT * FROM ban_quan_ly WHERE hop_le=${hop_le}`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -114,11 +116,11 @@ User.getAllByAccepted = accepted => {
   });
 };
 
-User.updateById = (id, user) => {
+User.updateById = user => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE users SET username = ?, email = ?, password = ?, accepted = ?, roleId = ? WHERE id = ?",
-      [user.username, user.email, user.password, user.accepted, user.roleId, id],
+      "UPDATE ban_quan_ly SET ? WHERE id = ?",
+      [user, user.id],
       (err, res) => {
         if (err) {
           console.log("error: ", err);
@@ -130,8 +132,8 @@ User.updateById = (id, user) => {
           return reject({ kind: "not_found" });
         }
 
-        console.log("updated user: ", { id: id, ...user });
-        resolve({ id: id, ...user });
+        console.log("updated user: ", { id: user.id, ...user });
+        resolve({ id: user.id, ...user });
       }
     );
   });
@@ -139,7 +141,7 @@ User.updateById = (id, user) => {
 
 User.remove = id => {
   return new Promise((resolve, reject) => {
-    sql.query("DELETE FROM users WHERE id = ?", id, (err, res) => {
+    sql.query("DELETE FROM ban_quan_ly WHERE id = ?", id, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);

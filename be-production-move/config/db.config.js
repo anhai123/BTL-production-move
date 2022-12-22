@@ -2,6 +2,6 @@ module.exports = {
   HOST: "localhost",
   USER: "root",
   PASSWORD: "123456",
-  DB: "pmdbtest",
+  DB: "bigcorptest",
   PORT: 3307,
 };

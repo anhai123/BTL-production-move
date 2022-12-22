@@ -25,7 +25,7 @@ verifyToken = (req, res, next) => {
 isModerator = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
-    if (user.roleId === 1) {
+    if (!user.id_co_so_sx && !user.id_dai_ly && !user.id_trung_tam_bh) {
       next();
       return;
     }
@@ -50,7 +50,7 @@ isModerator = async (req, res, next) => {
 isProductionFacility = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
-    if (user.roleId === 2) {
+    if (user.id_co_so_sx) {
       next();
       return;
     }
@@ -75,7 +75,7 @@ isProductionFacility = async (req, res, next) => {
 isDistributionAgent = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
-    if (user.roleId === 3) {
+    if (user.id_dai_ly) {
       next();
       return;
     }
@@ -100,7 +100,7 @@ isDistributionAgent = async (req, res, next) => {
 isWarrantyCenter = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
-    if (user.roleId === 4) {
+    if (user.id_trung_tam_bh) {
       next();
       return;
     }

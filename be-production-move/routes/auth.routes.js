@@ -10,11 +10,15 @@ module.exports = function (app) {
     next();
   });
 
+  app.get(
+    "/api/auth/signup",
+    controller.rolepick
+  );
+
   app.post(
     "/api/auth/signup",
     [
       verifySignUp.checkDuplicateUsernameOrEmail,
-      verifySignUp.checkRolesExisted,
     ],
     controller.signup
   );
