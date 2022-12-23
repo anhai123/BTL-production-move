@@ -15,27 +15,27 @@ DirectoryDistributionAgent.create = newDirectoryDistributionAgent => {
         return reject(err);
       }
 
-      console.log("created directory production facility: ", { id: res.insertId, ...newDirectoryDistributionAgent });
+      console.log("created directory distribution agent: ", { id: res.insertId, ...newDirectoryDistributionAgent });
       resolve({ id: res.insertId, ...newDirectoryDistributionAgent });
     });
   });
 };
-// here
-DirectoryProductionFacility.getAll = () => {
+
+DirectoryDistributionAgent.getAll = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_cssx", (err, res) => {
+    sql.query("SELECT * FROM danh_muc_dlpp", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
-      console.log("directory production facilitys: ", res);
+      console.log("directory distribution agents: ", res);
       resolve(res);
     });
   });
 };
 
-DirectoryProductionFacility.findById = id => {
+DirectoryDistributionAgent.findById = id => {
   return new Promise((resolve, reject) => {
     sql.query(`SELECT * FROM danh_muc_cssx WHERE id = '${id}'`, (err, res) => {
       if (err) {
@@ -54,7 +54,7 @@ DirectoryProductionFacility.findById = id => {
   });
 };
 
-DirectoryProductionFacility.findByDirectoryName = directoryName => {
+DirectoryDistributionAgent.findByDirectoryName = directoryName => {
   return new Promise((resolve, reject) => {
     sql.query(`SELECT * FROM danh_muc_cssx WHERE ten_danh_muc_cssx = '${directoryName}'`, (err, res) => {
       if (err) {
@@ -73,7 +73,7 @@ DirectoryProductionFacility.findByDirectoryName = directoryName => {
   });
 };
 
-DirectoryProductionFacility.findByParentDirectory = parentDirectory => {
+DirectoryDistributionAgent.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
     sql.query("SELECT * FROM danh_muc_cssx WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
@@ -92,7 +92,7 @@ DirectoryProductionFacility.findByParentDirectory = parentDirectory => {
   });
 };
 
-DirectoryProductionFacility.findIdByParentDirectory = parentDirectory => {
+DirectoryDistributionAgent.findIdByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
     sql.query("SELECT id FROM danh_muc_cssx WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
@@ -115,7 +115,7 @@ DirectoryProductionFacility.findIdByParentDirectory = parentDirectory => {
   });
 };
 
-DirectoryProductionFacility.selectMaxId = () => {
+DirectoryDistributionAgent.selectMaxId = () => {
   return new Promise((resolve, reject) => {
     sql.query("SELECT MAX(id) as maxId FROM danh_muc_cssx", (err, res) => {
       if (err) {
@@ -137,7 +137,7 @@ DirectoryProductionFacility.selectMaxId = () => {
   });
 }
 
-DirectoryProductionFacility.normalizeIdUp = id => {
+DirectoryDistributionAgent.normalizeIdUp = id => {
   return new Promise(async (resolve, reject) => {
     try {
       const maxId = await DirectoryProductionFacility.selectMaxId();
@@ -177,7 +177,7 @@ DirectoryProductionFacility.normalizeIdUp = id => {
   });
 }
 
-DirectoryProductionFacility.normalizeIdDown = id => {
+DirectoryDistributionAgent.normalizeIdDown = id => {
   return new Promise(async (resolve, reject) => {
     id = parseInt(id);
     try {
@@ -218,7 +218,7 @@ DirectoryProductionFacility.normalizeIdDown = id => {
   });
 }
 
-DirectoryProductionFacility.updateById = (id, directoryProductionFacility) => {
+DirectoryDistributionAgent.updateById = (id, directoryProductionFacility) => {
   return new Promise(async (resolve, reject) => {
     if (id !== directoryProductionFacility.id) {
       let hasError = false;
@@ -274,7 +274,7 @@ DirectoryProductionFacility.updateById = (id, directoryProductionFacility) => {
   });
 };
 
-DirectoryProductionFacility.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
+DirectoryDistributionAgent.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
       "UPDATE danh_muc_cssx SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
@@ -297,7 +297,7 @@ DirectoryProductionFacility.updateParentDirectoryByParentDirectory = (parentDire
   });
 };
 
-DirectoryProductionFacility.remove = id => {
+DirectoryDistributionAgent.remove = id => {
   return new Promise((resolve, reject) => {
     sql.query("DELETE FROM danh_muc_cssx WHERE id = ?", id, (err, res) => {
       if (err) {
@@ -316,4 +316,4 @@ DirectoryProductionFacility.remove = id => {
   });
 };
 
-module.exports = DirectoryProductionFacility;
+module.exports = DirectoryDistributionAgent;

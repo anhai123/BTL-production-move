@@ -103,15 +103,15 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isModerator],
     controller.ModeratorDirectoryProductionFacilityDelete
   );
-// here
+
   // Xem tất cả danh mục đại lý phân phối
   app.get(
     "/api/moderator/directory/distribution-agent",
     [authJwt.verifyToken, authJwt.isModerator],
     controller.ModeratorDirectoryDistributionAgent
   );
-
-  // Khi bấm vào nút thêm mới danh mục cơ sở sản xuất
+// here
+  // Khi bấm vào nút thêm mới danh mục đại lý phân phối
   app.get(
     "/api/moderator/directory/production-facility/create",
     [authJwt.verifyToken, authJwt.isModerator],

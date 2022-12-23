@@ -2,6 +2,7 @@ const User = require("../models/user.model.js");
 const Role = require("../models/role.model.js");
 const DirectoryProduct = require("../models/directoryProduct.model");
 const DirectoryProductionFacility = require("../models/directoryProductionFacility.model");
+const DirectoryDistributionAgent = require("../models/directoryDistributionAgent.model");
 
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
@@ -726,15 +727,15 @@ exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
     }
   }
 };
-// here
+
 exports.ModeratorDirectoryDistributionAgent = async (req, res) => {
   try {
     const directoryDistributionAgents = await DirectoryDistributionAgent.getAll();
-    res.status(200).send(directoryProductionFacilitys);
+    res.status(200).send(directoryDistributionAgents);
   } catch (err) {
     res.status(500).send({
       message:
-        err.message || "Some error occurred while retrieving directory production facilitys."
+        err.message || "Some error occurred while retrieving directory distribution agents."
     });
   }
 };

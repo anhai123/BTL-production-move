@@ -11,7 +11,7 @@ module.exports = function (app) {
   });
 
   app.get(
-    "/api/auth/signup",
+    "/api/auth/signup/:idVaiTro",
     controller.rolepick
   );
 

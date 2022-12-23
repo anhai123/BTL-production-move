@@ -6,17 +6,25 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 exports.rolepick = async (req, res) => {
+  id = parseInt(req.params.idVaiTro);
   try {
-    const roles = await Role.getAll();
-    res.status(200).send(roles);
+    let all;
+    if (id === 2) {
+      all = await Role.findAllProductionFacility();
+    } else if (id === 3) {
+      all = await Role.findAllDistributionAgent();
+    } else {
+      all = await Role.findAllWarrantyCenter();
+    }
+    res.status(200).send(all);
   } catch (err) {
     if (err.kind === "not_found") {
       res.status(404).send({
-        message: `Not found roles.`
+        message: `Not found.`
       });
     } else {
       res.status(500).send({
-        message: "Error retrieving roles"
+        message: "Error retrieving"
       });
     }
   }

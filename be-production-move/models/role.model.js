@@ -119,4 +119,61 @@ Role.findWarrantyCenter = id => {
   });
 };
 
+Role.findAllProductionFacility = () => {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT * FROM co_so_san_xuat", (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+  
+      if (res.length) {
+        console.log("found production facilitys: ", res);
+        return resolve(res);
+      }
+  
+      // not found production facilitys
+      reject({ kind: "not_found" });
+    });
+  });
+};
+
+Role.findAllDistributionAgent = () => {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT * FROM dai_ly_phan_phoi", (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+  
+      if (res.length) {
+        console.log("found distribution agents: ", res);
+        return resolve(res);
+      }
+  
+      // not found distribution agents
+      reject({ kind: "not_found" });
+    });
+  });
+};
+
+Role.findAllWarrantyCenter = () => {
+  return new Promise((resolve, reject) => {
+    sql.query("SELECT * FROM trung_tam_bao_hanh", (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        return reject(err);
+      }
+  
+      if (res.length) {
+        console.log("found warranty centers: ", res);
+        return resolve(res);
+      }
+  
+      // not found warranty centers
+      reject({ kind: "not_found" });
+    });
+  });
+};
+
 module.exports = Role;
