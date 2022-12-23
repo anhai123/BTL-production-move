@@ -1,64 +1,34 @@
 const config = require("../config/auth.config");
 const User = require("../models/user.model");
-const Role = require("../models/role.model");
+const ProductionFacility = require("../models/productionFacility.model");
+const DistributionAgent = require("../models/distributionAgent.model");
+const WarrantyCenter = require("../models/warrantyCenter.model");
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-exports.rolepick = async (req, res) => {
-  id = parseInt(req.params.idVaiTro);
-  try {
-    let all, facilities = [];
-    if (id === 2) {
-      all = await Role.findAllProductionFacility();
-      for (let facility of all) {
-        facilities.push({
-          id: facility.id,
-          ten: facility.ten_co_so,
-        });
-      }
-    } else if (id === 3) {
-      all = await Role.findAllDistributionAgent();
-      for (let facility of all) {
-        facilities.push({
-          id: facility.id,
-          ten: facility.ten_dai_ly,
-        });
-      }
-    } else {
-      all = await Role.findAllWarrantyCenter();
-      for (let facility of all) {
-        facilities.push({
-          id: facility.id,
-          ten: facility.ten_trung_tam,
-        });
-      }
-    }
-    res.status(200).send(facilities);
-  } catch (err) {
-    if (err.kind === "not_found") {
-      res.status(404).send({
-        message: `Not found.`
-      });
-    } else {
-      res.status(500).send({
-        message: "Error retrieving"
-      });
-    }
-  }
-};
-
 exports.signup = async (req, res) => {
   // Save User to Database
   try {
+    let id_co_so_sx, id_dai_ly, id_trung_tam_bh, facilities;
+    if (req.body.id_vai_tro === 2) {
+      facilities = await ProductionFacility.create(new ProductionFacility(req.body));
+      id_co_so_sx = facilities.id;
+    } else if (req.body.id_vai_tro === 3) {
+      facilities = await DistributionAgent.create(new DistributionAgent(req.body));
+      id_dai_ly = facilities.id;
+    } else {
+      facilities = await WarrantyCenter.create(new WarrantyCenter(req.body));
+      id_trung_tam_bh = facilities.id;
+    }
     await User.create(new User({
       tai_khoan: req.body.tai_khoan,
       email: req.body.email,
       mat_khau: bcrypt.hashSync(req.body.mat_khau, 8),
       hop_le: 0,
-      id_co_so_sx: req.body.id_co_so_sx,
-      id_dai_ly: req.body.id_dai_ly,
-      id_trung_tam_bh: req.body.id_trung_tam_bh,
+      id_co_so_sx: id_co_so_sx,
+      id_dai_ly: id_dai_ly,
+      id_trung_tam_bh: id_trung_tam_bh,
     }));
     res.send({ message: "User was registered successfully!" })
   } catch (err) {

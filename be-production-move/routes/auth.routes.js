@@ -10,11 +10,6 @@ module.exports = function (app) {
     next();
   });
 
-  app.get(
-    "/api/auth/signup/:idVaiTro",
-    controller.rolepick
-  );
-
   app.post(
     "/api/auth/signup",
     [

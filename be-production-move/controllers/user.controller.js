@@ -4,6 +4,10 @@ const DirectoryProduct = require("../models/directoryProduct.model");
 const DirectoryProductionFacility = require("../models/directoryProductionFacility.model");
 const DirectoryDistributionAgent = require("../models/directoryDistributionAgent.model");
 const DirectoryWarrantyCenter = require("../models/directoryWarrantyCenter.model");
+const Status = require("../models/status.model.js");
+const ProductionFacility = require("../models/productionFacility.model");
+const DistributionAgent = require("../models/distributionAgent.model");
+const WarrantyCenter = require("../models/warrantyCenter.model");
 
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
@@ -22,15 +26,15 @@ exports.ModeratorAccount = async (req, res) => {
         let subject, cua, id;
         if (user.id_co_so_sx) {
           id = user.id_co_so_sx;
-          subject = await Role.findProductionFacility(id);
+          subject = await ProductionFacility.findById(id);
           cua = subject.ten_co_so;
         } else if (user.id_dai_ly) {
           id = user.id_dai_ly;
-          subject = await Role.findDistributionAgent(id);
+          subject = await DistributionAgent.findById(id);
           cua = subject.ten_dai_ly;
         } else {
           id = user.id_trung_tam_bh;
-          subject = await Role.findWarrantyCenter(id);
+          subject = await WarrantyCenter.findById(id);
           cua = subject.ten_trung_tam;
         }
         usersFix.push({
@@ -98,15 +102,23 @@ exports.ModeratorAccept = async (req, res) => {
 exports.ModeratorReject = async (req, res) => {
   for (let id of req.body.ids) {
     try {
+      let user = await User.findById(id);
       await User.remove(id);
+      if (user.id_co_so_sx) {
+        await ProductionFacility.remove(user.id_co_so_sx);
+      } else if (user.id_dai_ly) {
+        await DistributionAgent.remove(user.id_dai_ly);
+      } else if (user.id_trung_tam_bh) {
+        await WarrantyCenter.remove(user.id_trung_tam_bh);
+      }
     } catch (err) {
       if (err.kind === "not_found") {
         res.status(404).send({
-          message: `Not found User with id ${id}.`
+          message: `Not found with id ${id}.`
         });
       } else {
         res.status(500).send({
-          message: "Could not delete User with id " + id
+          message: "Could not delete with id " + id
         });
       }
       return;
@@ -1343,59 +1355,24 @@ exports.ModeratorDirectoryWarrantyCenterDelete = async (req, res) => {
   }
 };
 
-// exports.ModeratorProduct = async (req, res) => {
+// exports.ModeratorProductFilterData = async (req, res) => {
 //   try {
-//     const users = await User.getAllByAccepted(0);
-//     const usersFix = [];
-//     for (let user of users) {
-//       try {
-//         let subject, cua, id;
-//         if (user.id_co_so_sx) {
-//           id = user.id_co_so_sx;
-//           subject = await Role.findProductionFacility(id);
-//           cua = subject.ten_co_so;
-//         } else if (user.id_dai_ly) {
-//           id = user.id_dai_ly;
-//           subject = await Role.findDistributionAgent(id);
-//           cua = subject.ten_dai_ly;
-//         } else {
-//           id = user.id_trung_tam_bh;
-//           subject = await Role.findWarrantyCenter(id);
-//           cua = subject.ten_trung_tam;
-//         }
-//         usersFix.push({
-//           id: user.id,
-//           tai_khoan: user.tai_khoan,
-//           email: user.email,
-//           cua: cua,
-//         });
-//       } catch (err) {
-//         if (err.kind === "not_found") {
-//           res.status(404).send({
-//             message: `Not found subject with id ${id}.`
-//           });
-//           return;
-//         } else {
-//           res.status(500).send({
-//             message: "Error retrieving subject with id " + id
-//           });
-//           return;
-//         }
-//       }
-//     }
-//     res.status(200).send(usersFix);
+//     const [statuses, productionFacilitys, distributionAgents, warrantyCenters] = await Promise.all([Status.getAll(), ProductionFacility.getAll(), DistributionAgent.getAll(), WarrantyCenter.getAll()])
+//     res.status(200).send({
+//       statuses: statuses,
+//       productionFacilitys: productionFacilitys,
+//       distributionAgents: distributionAgents,
+//       warrantyCenters: warrantyCenters,
+//     });
 //   } catch (err) {
 //     if (err.kind === "not_found") {
 //       res.status(404).send({
-//         message: `Không có tài khoản cần xử lý.`
+//         message: `Not found data.`
 //       });
-//       return;
 //     } else {
 //       res.status(500).send({
-//         message:
-//           err.message || "Some error occurred while retrieving users."
+//         message: "Error retrieving data"
 //       });
-//       return;
 //     }
 //   }
 // };
@@ -1409,15 +1386,15 @@ exports.ModeratorDirectoryWarrantyCenterDelete = async (req, res) => {
 //         let subject, cua, id;
 //         if (user.id_co_so_sx) {
 //           id = user.id_co_so_sx;
-//           subject = await Role.findProductionFacility(id);
+//           subject = await ProductionFacility.findById(id);
 //           cua = subject.ten_co_so;
 //         } else if (user.id_dai_ly) {
 //           id = user.id_dai_ly;
-//           subject = await Role.findDistributionAgent(id);
+//           subject = await DistributionAgent.findById(id);
 //           cua = subject.ten_dai_ly;
 //         } else {
 //           id = user.id_trung_tam_bh;
-//           subject = await Role.findWarrantyCenter(id);
+//           subject = await WarrantyCenter.findById(id);
 //           cua = subject.ten_trung_tam;
 //         }
 //         usersFix.push({
