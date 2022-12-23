@@ -172,6 +172,20 @@ module.exports = function(app) {
     controller.ModeratorDirectoryWarrantyCenterDelete
   );
 
+  // // Khi bấm vào nút thống kê sản phẩm
+  // app.get(
+  //   "/api/moderator/product",
+  //   [authJwt.verifyToken, authJwt.isModerator],
+  //   controller.ModeratorProductFilterData
+  // );
+
+  // // Khi bấm xem sản phẩm
+  // app.post(
+  //   "/api/moderator/product",
+  //   [authJwt.verifyToken, authJwt.isModerator],
+  //   controller.ModeratorProduct
+  // );
+
   app.get(
     "/api/production-facility",
     [authJwt.verifyToken, authJwt.isProductionFacility],
