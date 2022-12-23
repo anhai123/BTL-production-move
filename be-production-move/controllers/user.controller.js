@@ -740,86 +740,86 @@ exports.ModeratorDirectoryDistributionAgent = async (req, res) => {
   }
 };
 
-exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
+exports.ModeratorDirectoryDistributionAgentId = async (req, res) => {
   try {
-    const allDirectoryProductionFacilitys = await DirectoryProductionFacility.getAll();
+    const allDirectoryDistributionAgents = await DirectoryDistributionAgent.getAll();
     if (req.params.type === "parentDirectory") {
       try {
-        const childrenDirectoryProductionFacilityId = await DirectoryProductionFacility.findIdByParentDirectory(req.params.directoryName);
-        childrenDirectoryProductionFacilityId.push(childrenDirectoryProductionFacilityId[childrenDirectoryProductionFacilityId.length - 1] + 1)
-        res.status(200).send([allDirectoryProductionFacilitys, {
-          ids: childrenDirectoryProductionFacilityId
+        const childrenDirectoryDistributionAgentId = await DirectoryDistributionAgent.findIdByParentDirectory(req.params.directoryName);
+        childrenDirectoryDistributionAgentId.push(childrenDirectoryDistributionAgentId[childrenDirectoryDistributionAgentId.length - 1] + 1)
+        res.status(200).send([allDirectoryDistributionAgents, {
+          ids: childrenDirectoryDistributionAgentId
         }]);
       } catch (err) {
         if (err.kind === "not_found") {
           try {
-            const parentDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
-            res.status(200).send([allDirectoryProductionFacilitys, {
-              ids: [parentDirectoryProductionFacility.id + 1]
+            const parentDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
+            res.status(200).send([allDirectoryDistributionAgents, {
+              ids: [parentDirectoryDistributionAgent.id + 1]
             }]);
           } catch (err) {
             if (err.kind === "not_found") {
               res.status(404).send({
-                message: `Not found parent directory production facility with directory name ${req.params.directoryName}.`
+                message: `Not found parent directory distribution agent with directory name ${req.params.directoryName}.`
               });
             } else {
               res.status(500).send({
-                message: "Error retrieving parent directory production facility with directory name " + req.params.directoryName
+                message: "Error retrieving parent directory distribution agent with directory name " + req.params.directoryName
               });
             }
           }
         } else {
           res.status(500).send({
-            message: "Error retrieving children directory production facility with directory name " + req.params.directoryName
+            message: "Error retrieving children directory distribution agent with directory name " + req.params.directoryName
           });
         }
       }
     } else if (req.params.type === "brotherDirectory") {
       try {
-        const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        const brotherDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
         try {
-          const brotherDirectoryProductionFacilityIds = await DirectoryProductionFacility.findIdByParentDirectory(brotherDirectoryProductionFacility.danh_muc_cha);
-          brotherDirectoryProductionFacilityIds.push(brotherDirectoryProductionFacilityIds[brotherDirectoryProductionFacilityIds.length - 1] + 1);
-          res.status(200).send([allDirectoryProductionFacilitys, {
-            id: brotherDirectoryProductionFacilityIds
+          const brotherDirectoryDistributionAgentIds = await DirectoryDistributionAgent.findIdByParentDirectory(brotherDirectoryDistributionAgent.danh_muc_cha);
+          brotherDirectoryDistributionAgentIds.push(brotherDirectoryProductionFacilityIds[brotherDirectoryProductionFacilityIds.length - 1] + 1);
+          res.status(200).send([allDirectoryDistributionAgents, {
+            id: brotherDirectoryDistributionAgentIds
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacility.danh_muc_cha
+            message: "Error retrieving brother directory distribution agents with directory name " + brotherDirectoryDistributionAgent.danh_muc_cha
           });
         }
       } catch (err) {
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
+            message: `Not found brother directory distribution agent with directory name ${req.params.directoryName}.`
           });
         } else {
           res.status(500).send({
-            message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
+            message: "Error retrieving brother directory distribution agent with directory name " + req.params.directoryName
           });
         }
       }
     } else {
       try {
-        const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        const childDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
         try {
-          var brotherDirectoryProductionFacilitys = await DirectoryProductionFacility.findByParentDirectory(childDirectoryProductionFacility.danh_muc_cha);
-          res.status(200).send([allDirectoryProductionFacilitys, {
-            id: [brotherDirectoryProductionFacilitys[0].id]
+          var brotherDirectoryDistributionAgents = await DirectoryDistributionAgent.findByParentDirectory(childDirectoryDistributionAgent.danh_muc_cha);
+          res.status(200).send([allDirectoryDistributionAgents, {
+            id: [brotherDirectoryDistributionAgents[0].id]
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacilitys.danh_muc_cha
+            message: "Error retrieving brother directory distribution agents with directory name " + brotherDirectoryDistributionAgents.danh_muc_cha
           });
         }
       } catch (err) {
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
+            message: `Not found child directory distribution agent with directory name ${req.params.directoryName}.`
           });
         } else {
           res.status(500).send({
-            message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
+            message: "Error retrieving child directory distribution agent with directory name " + req.params.directoryName
           });
         }
       }
@@ -827,47 +827,47 @@ exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
   } catch (err) {
     res.status(500).send({
       message:
-        err.message || "Some error occurred while retrieving directory production facilitys."
+        err.message || "Some error occurred while retrieving directory distribution agents."
     });
   }
 };
 
-exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
+exports.ModeratorDirectoryDistributionAgentCreate = async (req, res) => {
   let parentDirectoryT;
   let hasError = false;
   if (req.params.type === "parentDirectory") {
     parentDirectoryT = req.params.directoryName;
   } else if (req.params.type === "brotherDirectory") {
     try {
-      const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = brotherDirectoryProductionFacility.danh_muc_cha;
+      const brotherDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
+      parentDirectoryT = brotherDirectoryDistributionAgent.danh_muc_cha;
     } catch (err) {
       hasError = true;
       if (err.kind === "not_found") {
         res.status(404).send({
-          message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
+          message: `Not found brother directory distribution agent with directory name ${req.params.directoryName}.`
         });
       } else {
         res.status(500).send({
-          message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
+          message: "Error retrieving brother directory distribution agent with directory name " + req.params.directoryName
         });
       }
     }
   } else if (req.params.type === "childDirectory") {
     try {
-      const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = childDirectoryProductionFacility.danh_muc_cha;
+      const childDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
+      parentDirectoryT = childDirectoryDistributionAgent.danh_muc_cha;
       try {
-        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(childDirectoryProductionFacility.danh_muc_cha, req.body.ten_danh_muc_cssx);
+        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(childDirectoryDistributionAgent.danh_muc_cha, req.body.ten_danh_muc_dlpp);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Production Facility with parent directory name ${childDirectoryProductionFacility.danh_muc_cha}.`
+            message: `Not found Directory Distribution Agent with parent directory name ${childDirectoryDistributionAgent.danh_muc_cha}.`
           });
         } else {
           res.status(500).send({
-            message: "Error updating Directory Production Facility with parent directory name " + childDirectoryProductionFacility.danh_muc_cha
+            message: "Error updating Directory Distribution Agent with parent directory name " + childDirectoryDistributionAgent.danh_muc_cha
           });
         }
       }
@@ -875,11 +875,11 @@ exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
       hasError = true;
       if (err.kind === "not_found") {
         res.status(404).send({
-          message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
+          message: `Not found child directory distribution agent with directory name ${req.params.directoryName}.`
         });
       } else {
         res.status(500).send({
-          message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
+          message: "Error retrieving child directory distribution agent with directory name " + req.params.directoryName
         });
       }
     }
@@ -888,81 +888,81 @@ exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
     return;
   }
   try {
-    await DirectoryProductionFacility.normalizeIdUp(req.body.id);
+    await DirectoryDistributionAgent.normalizeIdUp(req.body.id);
     try {
-      await DirectoryProductionFacility.create(new DirectoryProductionFacility({
+      await DirectoryDistributionAgent.create(new DirectoryDistributionAgent({
         id: req.body.id,
         danh_muc_cha: parentDirectoryT,
-        ten_danh_muc_cssx: req.body.ten_danh_muc_cssx,
+        ten_danh_muc_dlpp: req.body.ten_danh_muc_dlpp,
       }));
-      res.send({ message: "Directory production facility was created successfully!" });
+      res.send({ message: "Directory distribution agent was created successfully!" });
     } catch (err) {
       res.status(500).send({
         message:
-          err.message || "Some error occurred while creating the Directory production facility."
+          err.message || "Some error occurred while creating the Directory distribution agent."
       });
     }
   } catch (err) {
     if (err[0].kind === "select_max_error") {
       res.status(500).send([{
-        message: "Error select Directory Production Facility id max"
+        message: "Error select Directory Distribution Agent id max"
       }, err[1]]);
     } else if (err[0].kind === "not_found_max") {
       res.status(404).send([{
-        message: "Not found Directory Production Facility id max"
+        message: "Not found Directory Distribution Agent id max"
       }]);
     } else if (err[0].kind === "update_loop_error") {
       res.status(500).send([{
-        message: "Error update Directory Production Facility id in loop"
+        message: "Error update Directory Distribution Agent id in loop"
       }, err[1]]);
     } else if (err[0].kind === "not_found") {
       res.status(404).send([{
-        message: "Not found Directory Production Facility with id"
+        message: "Not found Directory Distribution Agent with id"
       }]);
     }
   }
 };
 
-exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
+exports.ModeratorDirectoryDistributionAgentDelete = async (req, res) => {
   let hasError = false;
   try {
-    const directoryProductionFacility = await DirectoryProductionFacility.findById(req.params.id);
+    const directoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.id);
     try {
-      const childrenDirectoryProductionFacility = await DirectoryProductionFacility.findByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx);
+      const childrenDirectoryDistributionAgent = await DirectoryDistributionAgent.findByParentDirectory(directoryDistributionAgent.ten_danh_muc_dlpp);
       try {
-        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx, directoryProductionFacility.danh_muc_cha);
+        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(directoryDistributionAgent.ten_danh_muc_dlpp, directoryDistributionAgent.danh_muc_cha);
         try {
-          const data = await DirectoryProductionFacility.remove(req.params.id);
+          const data = await DirectoryDistributionAgent.remove(req.params.id);
           try {
-            const data = await DirectoryProductionFacility.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Production Facility was deleted successfully!` });
+            const data = await DirectoryDistributionAgent.normalizeIdDown(req.params.id);
+            res.send({ message: `Directory Distribution Agent was deleted successfully!` });
           } catch (err) {
             if (err[0].kind === "select_max_error") {
               res.status(500).send([{
-                message: "Error select Directory Production Facility id max"
+                message: "Error select Directory Distribution Agent id max"
               }, err[1]]);
             } else if (err[0].kind === "not_found_max") {
               res.status(404).send([{
-                message: "Not found Directory Production Facility id max"
+                message: "Not found Directory Distribution Agent id max"
               }]);
             } else if (err[0].kind === "update_loop_error") {
               res.status(500).send([{
-                message: "Error update Directory Production Facility id in loop"
+                message: "Error update Directory Distribution Agent id in loop"
               }, err[1]]);
             } else if (err[0].kind === "not_found") {
               res.status(404).send([{
-                message: "Not found Directory Production Facility with id"
+                message: "Not found Directory Distribution Agenty with id"
               }]);
             }
           }
         } catch (err) {
           if (err.kind === "not_found") {
             res.status(404).send({
-              message: `Not found Directory Production Facility with id ${req.params.id}.`
+              message: `Not found Directory Distribution Agent with id ${req.params.id}.`
             });
           } else {
             res.status(500).send({
-              message: "Could not delete Directory Production Facility with id " + req.params.id
+              message: "Could not delete Directory Distribution Agent with id " + req.params.id
             });
           }
         }
@@ -970,52 +970,52 @@ exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+            message: `Not found Directory Distribution Agent with parent directory name ${directoryDistributionAgent.ten_danh_muc_dlpp}.`
           });
         } else {
           res.status(500).send({
-            message: `Error updating Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+            message: `Error updating Directory Distribution Agent with parent directory name ${directoryDistributionAgent.ten_danh_muc_dlpp}.`
           });
         }
       }
     } catch (err) {
       if (err.kind !== "not_found") {
         res.status(500).send({
-          message: `Error retrieving directory production facilitys with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+          message: `Error retrieving directory distribution agents with parent directory name ${directoryDistributionAgent.ten_danh_muc_dlpp}.`
         });
       } else {
         try {
-          const data = await DirectoryProductionFacility.remove(req.params.id);
+          const data = await DirectoryDistributionAgent.remove(req.params.id);
           try {
-            await DirectoryProductionFacility.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Production Facility was deleted successfully!` });
+            await DirectoryDistributionAgent.normalizeIdDown(req.params.id);
+            res.send({ message: `Directory Distribution Agent was deleted successfully!` });
           } catch (err) {
             if (err[0].kind === "select_max_error") {
               res.status(500).send([{
-                message: "Error select Directory Production Facility id max"
+                message: "Error select Directory Distribution Agent id max"
               }, err[1]]);
             } else if (err[0].kind === "not_found_max") {
               res.status(404).send([{
-                message: "Not found Directory Production Facility id max"
+                message: "Not found Directory Distribution Agent id max"
               }]);
             } else if (err[0].kind === "update_loop_error") {
               res.status(500).send([{
-                message: "Error update Directory Production Facility id in loop"
+                message: "Error update Directory Distribution Agent id in loop"
               }, err[1]]);
             } else if (err[0].kind === "not_found") {
               res.status(404).send([{
-                message: "Not found Directory Production Facility with id"
+                message: "Not found Directory Distribution Agent with id"
               }]);
             }
           }
         } catch (err) {
           if (err.kind === "not_found") {
             res.status(404).send({
-              message: `Not found Directory Production Facility with id ${req.params.id}.`
+              message: `Not found Directory Distribution Agent with id ${req.params.id}.`
             });
           } else {
             res.status(500).send({
-              message: "Could not delete Directory Production Facility with id " + req.params.id
+              message: "Could not delete Directory Distribution Agent with id " + req.params.id
             });
           }
         }
@@ -1025,11 +1025,11 @@ exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
     hasError = true;
     if (err.kind === "not_found") {
       res.status(404).send({
-        message: `Not found Directory Production Facility with id ${req.params.id}.`
+        message: `Not found Directory Distribution Agent with id ${req.params.id}.`
       });
     } else {
       res.status(500).send({
-        message: "Error retrieving Directory Production Facility with id " + req.params.id
+        message: "Error retrieving Directory Distribution Agent with id " + req.params.id
       });
     }
   }

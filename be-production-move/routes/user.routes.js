@@ -110,32 +110,66 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isModerator],
     controller.ModeratorDirectoryDistributionAgent
   );
-// here
+
   // Khi bấm vào nút thêm mới danh mục đại lý phân phối
   app.get(
-    "/api/moderator/directory/production-facility/create",
+    "/api/moderator/directory/distribution-agent/create",
     [authJwt.verifyToken, authJwt.isModerator],
-    controller.ModeratorDirectoryProductionFacility
+    controller.ModeratorDirectoryDistributionAgent
   );
 
-  // Khi chọn tên danh mục cơ sở sản xuất liên quan
+  // Khi chọn tên danh mục đại lý phân phối liên quan
   app.get(
-    "/api/moderator/directory/production-facility/create/:type/:directoryName",
+    "/api/moderator/directory/distribution-agent/create/:type/:directoryName",
     [authJwt.verifyToken, authJwt.isModerator],
-    controller.ModeratorDirectoryProductionFacilityId
+    controller.ModeratorDirectoryDistributionAgentId
   );
 
-  // Khi submit tạo danh mục cơ sở sản xuất
+  // Khi submit tạo danh mục đại lý phân phối
   app.post(
-    "/api/moderator/directory/production-facility/:type/:directoryName",
+    "/api/moderator/directory/distribution-agent/:type/:directoryName",
     [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
-    controller.ModeratorDirectoryProductionFacilityCreate
+    controller.ModeratorDirectoryDistributionAgentCreate
   );
 
   app.delete(
-    "/api/moderator/directory/production-facility/:id",
+    "/api/moderator/directory/distribution-agent/:id",
     [authJwt.verifyToken, authJwt.isModerator],
-    controller.ModeratorDirectoryProductionFacilityDelete
+    controller.ModeratorDirectoryDistributionAgentDelete
+  );
+
+  // Xem tất cả danh mục trung tâm bảo hành
+  app.get(
+    "/api/moderator/directory/warranty-center",
+    [authJwt.verifyToken, authJwt.isModerator],
+    controller.ModeratorDirectoryWarrantyCenter
+  );
+
+  // Khi bấm vào nút thêm mới danh mục trung tâm bảo hành
+  app.get(
+    "/api/moderator/directory/warranty-center/create",
+    [authJwt.verifyToken, authJwt.isModerator],
+    controller.ModeratorDirectoryWarrantyCenter
+  );
+
+  // Khi chọn tên danh mục trung tâm bảo hành liên quan
+  app.get(
+    "/api/moderator/directory/warranty-center/create/:type/:directoryName",
+    [authJwt.verifyToken, authJwt.isModerator],
+    controller.ModeratorDirectoryWarrantyCenterId
+  );
+
+  // Khi submit tạo danh mục trung tâm bảo hành
+  app.post(
+    "/api/moderator/directory/warranty-center/:type/:directoryName",
+    [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
+    controller.ModeratorDirectoryWarrantyCenterCreate
+  );
+
+  app.delete(
+    "/api/moderator/directory/warranty-center/:id",
+    [authJwt.verifyToken, authJwt.isModerator],
+    controller.ModeratorDirectoryWarrantyCenterDelete
   );
 
   app.get(

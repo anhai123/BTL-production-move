@@ -1,107 +1,107 @@
 const sql = require(".").connection;
 
 // constructor
-const DirectoryDistributionAgent = function (directoryDistributionAgent) {
-  this.id = directoryDistributionAgent.id;
-  this.danh_muc_cha = directoryDistributionAgent.danh_muc_cha;
-  this.ten_danh_muc_dlpp = directoryDistributionAgent.ten_danh_muc_dlpp;
+const DirectoryWarrantyCenter = function (directoryWarrantyCenter) {
+  this.id = directoryWarrantyCenter.id;
+  this.danh_muc_cha = directoryWarrantyCenter.danh_muc_cha;
+  this.ten_danh_muc_ttbh = directoryWarrantyCenter.ten_danh_muc_ttbh;
 };
 
-DirectoryDistributionAgent.create = newDirectoryDistributionAgent => {
+DirectoryWarrantyCenter.create = newDirectoryWarrantyCenter => {
   return new Promise((resolve, reject) => {
-    sql.query("INSERT INTO danh_muc_dlpp SET ?", newDirectoryDistributionAgent, (err, res) => {
+    sql.query("INSERT INTO danh_muc_ttbh SET ?", newDirectoryWarrantyCenter, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
-      console.log("created directory distribution agent: ", { id: res.insertId, ...newDirectoryDistributionAgent });
-      resolve({ id: res.insertId, ...newDirectoryDistributionAgent });
+      console.log("created directory warranty center: ", { id: res.insertId, ...newDirectoryWarrantyCenter });
+      resolve({ id: res.insertId, ...newDirectoryWarrantyCenter });
     });
   });
 };
 
-DirectoryDistributionAgent.getAll = () => {
+DirectoryWarrantyCenter.getAll = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_dlpp", (err, res) => {
+    sql.query("SELECT * FROM danh_muc_ttbh", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
-      console.log("directory distribution agents: ", res);
+      console.log("directory warranty centers: ", res);
       resolve(res);
     });
   });
 };
 
-DirectoryDistributionAgent.findById = id => {
+DirectoryWarrantyCenter.findById = id => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM danh_muc_dlpp WHERE id = '${id}'`, (err, res) => {
+    sql.query(`SELECT * FROM danh_muc_ttbh WHERE id = '${id}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found directory distribution agent: ", res[0]);
+        console.log("found directory warranty center: ", res[0]);
         return resolve(res[0]);
       }
 
-      // not found Directory Distribution Agent with the id
+      // not found Directory Warranty Center with the id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryDistributionAgent.findByDirectoryName = directoryName => {
+DirectoryWarrantyCenter.findByDirectoryName = directoryName => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM danh_muc_dlpp WHERE ten_danh_muc_dlpp = '${directoryName}'`, (err, res) => {
+    sql.query(`SELECT * FROM danh_muc_ttbh WHERE ten_danh_muc_ttbh = '${directoryName}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found directory distribution agent: ", res[0]);
+        console.log("found directory warranty center: ", res[0]);
         return resolve(res[0]);
       }
 
-      // not found Directory Distribution Agent with the directory name
+      // not found Directory Warranty Center with the directory name
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryDistributionAgent.findByParentDirectory = parentDirectory => {
+DirectoryWarrantyCenter.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_dlpp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT * FROM danh_muc_ttbh WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found parent directory distribution agents: ", res);
+        console.log("found parent directory warranty centers: ", res);
         return resolve(res);
       }
 
-      // not found Directory Distribution Agent with the parent directory name
+      // not found Directory Warranty Center with the parent directory name
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryDistributionAgent.findIdByParentDirectory = parentDirectory => {
+DirectoryWarrantyCenter.findIdByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT id FROM danh_muc_dlpp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT id FROM danh_muc_ttbh WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found parent directory distribution agents: ", res);
+        console.log("found parent directory warranty centers: ", res);
         const ids =[];
         for (let i of res) {
           ids.push(i.id);
@@ -109,15 +109,15 @@ DirectoryDistributionAgent.findIdByParentDirectory = parentDirectory => {
         return resolve(ids);
       }
 
-      // not found Directory Distribution Agent Id with the parent directory name
+      // not found Directory Warranty Center Id with the parent directory name
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryDistributionAgent.selectMaxId = () => {
+DirectoryWarrantyCenter.selectMaxId = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT MAX(id) as maxId FROM danh_muc_dlpp", (err, res) => {
+    sql.query("SELECT MAX(id) as maxId FROM danh_muc_ttbh", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject({
@@ -127,20 +127,20 @@ DirectoryDistributionAgent.selectMaxId = () => {
       }
 
       if (res.affectedRows == 0) {
-        // not found max id from directory distribution agents
+        // not found max id from directory warranty centers
         return reject({ kind: "not_found_max" });
       }
 
-      console.log("max id from directory distribution agents: ", res[0].maxId);
+      console.log("max id from directory warranty centers: ", res[0].maxId);
       resolve(res[0].maxId);
     });
   });
 }
 
-DirectoryDistributionAgent.normalizeIdUp = id => {
+DirectoryWarrantyCenter.normalizeIdUp = id => {
   return new Promise(async (resolve, reject) => {
     try {
-      const maxId = await DirectoryDistributionAgent.selectMaxId();
+      const maxId = await DirectoryWarrantyCenter.selectMaxId();
       if (maxId === null || id > maxId) {
         return resolve({
           message: "Successfully!",
@@ -148,7 +148,7 @@ DirectoryDistributionAgent.normalizeIdUp = id => {
       }
       for (var i = maxId; i >= id; i--) {
         sql.query(
-          "UPDATE danh_muc_dlpp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_ttbh SET id = ? WHERE id = ?",
           [i + 1, i],
           (err, res) => {
             if (err) {
@@ -160,11 +160,11 @@ DirectoryDistributionAgent.normalizeIdUp = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Distribution Agent with the id
+              // not found Directory Warranty Center with the id
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory distribution agent: ", { idOld: i, idNew: i + 1 });
+            console.log("updated directory warranty center: ", { idOld: i, idNew: i + 1 });
             resolve({
               message: "Successfully!",
             });
@@ -177,11 +177,11 @@ DirectoryDistributionAgent.normalizeIdUp = id => {
   });
 }
 
-DirectoryDistributionAgent.normalizeIdDown = id => {
+DirectoryWarrantyCenter.normalizeIdDown = id => {
   return new Promise(async (resolve, reject) => {
     id = parseInt(id);
     try {
-      const maxId = await DirectoryDistributionAgent.selectMaxId();
+      const maxId = await DirectoryWarrantyCenter.selectMaxId();
       if (id + 1 > maxId) {
         return resolve({
           message: "Successfully!",
@@ -189,7 +189,7 @@ DirectoryDistributionAgent.normalizeIdDown = id => {
       }
       for (var i = id + 1; i <= maxId; i++) {
         sql.query(
-          "UPDATE danh_muc_dlpp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_ttbh SET id = ? WHERE id = ?",
           [i - 1, i],
           (err, res) => {
             if (err) {
@@ -201,11 +201,11 @@ DirectoryDistributionAgent.normalizeIdDown = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Distribution Agent with the id
+              // not found Directory Warranty Center with the id
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory distribution agent: ", { idOld: i, idNew: i - 1 });
+            console.log("updated directory warranty center: ", { idOld: i, idNew: i - 1 });
             resolve({
               message: "Successfully!",
             });
@@ -218,15 +218,15 @@ DirectoryDistributionAgent.normalizeIdDown = id => {
   });
 }
 
-DirectoryDistributionAgent.updateById = (id, directoryDistributionAgent) => {
+DirectoryWarrantyCenter.updateById = (id, directoryWarrantyCenter) => {
   return new Promise(async (resolve, reject) => {
-    if (id !== directoryDistributionAgent.id) {
+    if (id !== directoryWarrantyCenter.id) {
       let hasError = false;
       try {
-        const maxId = await DirectoryDistributionAgent.selectMaxId();
+        const maxId = await DirectoryWarrantyCenter.selectMaxId();
         for (var i = maxId; i > id; i--) {
           sql.query(
-            "UPDATE danh_muc_dlpp SET id = ? WHERE id = ?",
+            "UPDATE danh_muc_ttbh SET id = ? WHERE id = ?",
             [i + 1, i],
             (err, res) => {
               if (err) {
@@ -239,12 +239,12 @@ DirectoryDistributionAgent.updateById = (id, directoryDistributionAgent) => {
               }
 
               if (res.affectedRows == 0) {
-                // not found Directory Distribution Agent with the id
+                // not found Directory Warranty Center with the id
                 hasError = true;
                 return reject({ kind: "not_found" });
               }
               // test
-              console.log("updated directory distribution agent: ", { idOld: i, idNew: i + 1 });
+              console.log("updated directory warranty center: ", { idOld: i, idNew: i + 1 });
             }
           );
         }
@@ -254,8 +254,8 @@ DirectoryDistributionAgent.updateById = (id, directoryDistributionAgent) => {
       }
     }
     sql.query(
-      "UPDATE danh_muc_dlpp SET ? WHERE id = ?",
-      [directoryDistributionAgent, id],
+      "UPDATE danh_muc_ttbh SET ? WHERE id = ?",
+      [directoryWarrantyCenter, id],
       (err, res) => {
         if (err) {
           console.log("error: ", err);
@@ -263,21 +263,21 @@ DirectoryDistributionAgent.updateById = (id, directoryDistributionAgent) => {
         }
 
         if (res.affectedRows == 0) {
-          // not found Directory Distribution Agent with the id
+          // not found Directory Warranty Center with the id
           return reject({ kind: "not_found" });
         }
 
-        console.log("updated directory distribution agent: ", { idOld: id, ...directoryDistributionAgent });
-        resolve({ idOld: id, ...directoryDistributionAgent });
+        console.log("updated directory warranty center: ", { idOld: id, ...directoryWarrantyCenter });
+        resolve({ idOld: id, ...directoryWarrantyCenter });
       }
     );
   });
 };
 
-DirectoryDistributionAgent.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
+DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE danh_muc_dlpp SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
+      "UPDATE danh_muc_ttbh SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
       [parentDirectoryNew, parentDirectoryOld],
       (err, res) => {
         if (err) {
@@ -286,34 +286,34 @@ DirectoryDistributionAgent.updateParentDirectoryByParentDirectory = (parentDirec
         }
 
         if (res.affectedRows == 0) {
-          // not found Directory Distribution Agent with the parent directory
+          // not found Directory Warranty Center with the parent directory
           return reject({ kind: "not_found" });
         }
 
-        console.log("directory distribution agent update successfully!");
+        console.log("directory warranty center update successfully!");
         resolve(res);
       }
     );
   });
 };
 
-DirectoryDistributionAgent.remove = id => {
+DirectoryWarrantyCenter.remove = id => {
   return new Promise((resolve, reject) => {
-    sql.query("DELETE FROM danh_muc_dlpp WHERE id = ?", id, (err, res) => {
+    sql.query("DELETE FROM danh_muc_ttbh WHERE id = ?", id, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.affectedRows == 0) {
-        // not found Directory Distribution Agent with the id
+        // not found Directory Warranty Center with the id
         return reject({ kind: "not_found" });
       }
 
-      console.log("deleted directory distribution agents with id: ", id);
+      console.log("deleted directory warranty centers with id: ", id);
       resolve(res);
     });
   });
 };
 
-module.exports = DirectoryDistributionAgent;
+module.exports = DirectoryWarrantyCenter;
