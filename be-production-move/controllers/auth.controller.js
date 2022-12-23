@@ -8,15 +8,33 @@ const bcrypt = require("bcryptjs");
 exports.rolepick = async (req, res) => {
   id = parseInt(req.params.idVaiTro);
   try {
-    let all;
+    let all, facilities = [];
     if (id === 2) {
       all = await Role.findAllProductionFacility();
+      for (let facility of all) {
+        facilities.push({
+          id: facility.id,
+          ten: facility.ten_co_so,
+        });
+      }
     } else if (id === 3) {
       all = await Role.findAllDistributionAgent();
+      for (let facility of all) {
+        facilities.push({
+          id: facility.id,
+          ten: facility.ten_dai_ly,
+        });
+      }
     } else {
       all = await Role.findAllWarrantyCenter();
+      for (let facility of all) {
+        facilities.push({
+          id: facility.id,
+          ten: facility.ten_trung_tam,
+        });
+      }
     }
-    res.status(200).send(all);
+    res.status(200).send(facilities);
   } catch (err) {
     if (err.kind === "not_found") {
       res.status(404).send({
