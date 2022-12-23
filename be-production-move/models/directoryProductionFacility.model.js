@@ -1,107 +1,107 @@
-const sql = require("./").connection;
+const sql = require(".").connection;
 
 // constructor
-const DirectoryProduct = function (directoryProduct) {
-  this.id = directoryProduct.id;
-  this.danh_muc_cha = directoryProduct.danh_muc_cha;
-  this.ten_danh_muc_sp = directoryProduct.ten_danh_muc_sp;
+const DirectoryProductionFacility = function (directoryProductionFacility) {
+  this.id = directoryProductionFacility.id;
+  this.danh_muc_cha = directoryProductionFacility.danh_muc_cha;
+  this.ten_danh_muc_sp = directoryProductionFacility.ten_danh_muc_sp;
 };
 
-DirectoryProduct.create = newDirectoryProduct => {
+DirectoryProductionFacility.create = newDirectoryProductionFacility => {
   return new Promise((resolve, reject) => {
-    sql.query("INSERT INTO danh_muc_sp SET ?", newDirectoryProduct, (err, res) => {
+    sql.query("INSERT INTO danh_muc_cssx SET ?", newDirectoryProductionFacility, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
-      console.log("created directory product: ", { id: res.insertId, ...newDirectoryProduct });
-      resolve({ id: res.insertId, ...newDirectoryProduct });
+      console.log("created directory production facility: ", { id: res.insertId, ...newDirectoryProductionFacility });
+      resolve({ id: res.insertId, ...newDirectoryProductionFacility });
     });
   });
 };
 
-DirectoryProduct.getAll = () => {
+DirectoryProductionFacility.getAll = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_sp", (err, res) => {
+    sql.query("SELECT * FROM danh_muc_cssx", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
-      console.log("directory products: ", res);
+      console.log("directory production facilitys: ", res);
       resolve(res);
     });
   });
 };
 
-DirectoryProduct.findById = id => {
+DirectoryProductionFacility.findById = id => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM danh_muc_sp WHERE id = '${id}'`, (err, res) => {
+    sql.query(`SELECT * FROM danh_muc_cssx WHERE id = '${id}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found directory product: ", res[0]);
+        console.log("found directory production facility: ", res[0]);
         return resolve(res[0]);
       }
 
-      // not found Directory Product with the id
+      // not found Directory Production Facility with the id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryProduct.findByDirectoryName = directoryName => {
+DirectoryProductionFacility.findByDirectoryName = directoryName => {
   return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM danh_muc_sp WHERE ten_danh_muc_sp = '${directoryName}'`, (err, res) => {
+    sql.query(`SELECT * FROM danh_muc_cssx WHERE ten_danh_muc_cssx = '${directoryName}'`, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found directory product: ", res[0]);
+        console.log("found directory production facility: ", res[0]);
         return resolve(res[0]);
       }
 
-      // not found Directory Product with the directory name
+      // not found Directory Production Facility with the directory name
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryProduct.findByParentDirectory = parentDirectory => {
+DirectoryProductionFacility.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_sp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT * FROM danh_muc_cssx WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found parent directory products: ", res);
+        console.log("found parent directory production facilitys: ", res);
         return resolve(res);
       }
 
-      // not found Directory Product with the parent directory name
+      // not found Directory Production Facility with the parent directory name
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryProduct.findIdByParentDirectory = parentDirectory => {
+DirectoryProductionFacility.findIdByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT id FROM danh_muc_sp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT id FROM danh_muc_cssx WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found parent directory products: ", res);
+        console.log("found parent directory production facilitys: ", res);
         const ids =[];
         for (let i of res) {
           ids.push(i.id);
@@ -109,15 +109,15 @@ DirectoryProduct.findIdByParentDirectory = parentDirectory => {
         return resolve(ids);
       }
 
-      // not found Directory Product Id with the parent directory name
+      // not found Directory Production Facility Id with the parent directory name
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryProduct.selectMaxId = () => {
+DirectoryProductionFacility.selectMaxId = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT MAX(id) as maxId FROM danh_muc_sp", (err, res) => {
+    sql.query("SELECT MAX(id) as maxId FROM danh_muc_cssx", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject({
@@ -127,20 +127,20 @@ DirectoryProduct.selectMaxId = () => {
       }
 
       if (res.affectedRows == 0) {
-        // not found max id from directory products
+        // not found max id from directory production facilitys
         return reject({ kind: "not_found_max" });
       }
 
-      console.log("max id from directory products: ", res[0].maxId);
+      console.log("max id from directory production facilitys: ", res[0].maxId);
       resolve(res[0].maxId);
     });
   });
 }
 
-DirectoryProduct.normalizeIdUp = id => {
+DirectoryProductionFacility.normalizeIdUp = id => {
   return new Promise(async (resolve, reject) => {
     try {
-      const maxId = await DirectoryProduct.selectMaxId();
+      const maxId = await DirectoryProductionFacility.selectMaxId();
       if (maxId === null || id > maxId) {
         return resolve({
           message: "Successfully!",
@@ -148,7 +148,7 @@ DirectoryProduct.normalizeIdUp = id => {
       }
       for (var i = maxId; i >= id; i--) {
         sql.query(
-          "UPDATE danh_muc_sp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_cssx SET id = ? WHERE id = ?",
           [i + 1, i],
           (err, res) => {
             if (err) {
@@ -160,11 +160,11 @@ DirectoryProduct.normalizeIdUp = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Product with the id
+              // not found Directory Production Facility with the id
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory product: ", { idOld: i, idNew: i + 1 });
+            console.log("updated directory production facility: ", { idOld: i, idNew: i + 1 });
             resolve({
               message: "Successfully!",
             });
@@ -177,11 +177,11 @@ DirectoryProduct.normalizeIdUp = id => {
   });
 }
 
-DirectoryProduct.normalizeIdDown = id => {
+DirectoryProductionFacility.normalizeIdDown = id => {
   return new Promise(async (resolve, reject) => {
     id = parseInt(id);
     try {
-      const maxId = await DirectoryProduct.selectMaxId();
+      const maxId = await DirectoryProductionFacility.selectMaxId();
       if (id + 1 > maxId) {
         return resolve({
           message: "Successfully!",
@@ -189,7 +189,7 @@ DirectoryProduct.normalizeIdDown = id => {
       }
       for (var i = id + 1; i <= maxId; i++) {
         sql.query(
-          "UPDATE danh_muc_sp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_cssx SET id = ? WHERE id = ?",
           [i - 1, i],
           (err, res) => {
             if (err) {
@@ -201,11 +201,11 @@ DirectoryProduct.normalizeIdDown = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Product with the id
+              // not found Directory Production Facility with the id
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory product: ", { idOld: i, idNew: i - 1 });
+            console.log("updated directory production facility: ", { idOld: i, idNew: i - 1 });
             resolve({
               message: "Successfully!",
             });
@@ -218,15 +218,15 @@ DirectoryProduct.normalizeIdDown = id => {
   });
 }
 
-DirectoryProduct.updateById = (id, directoryProduct) => {
+DirectoryProductionFacility.updateById = (id, directoryProductionFacility) => {
   return new Promise(async (resolve, reject) => {
-    if (id !== directoryProduct.id) {
+    if (id !== directoryProductionFacility.id) {
       let hasError = false;
       try {
-        const maxId = await DirectoryProduct.selectMaxId();
+        const maxId = await DirectoryProductionFacility.selectMaxId();
         for (var i = maxId; i > id; i--) {
           sql.query(
-            "UPDATE danh_muc_sp SET id = ? WHERE id = ?",
+            "UPDATE danh_muc_cssx SET id = ? WHERE id = ?",
             [i + 1, i],
             (err, res) => {
               if (err) {
@@ -239,12 +239,12 @@ DirectoryProduct.updateById = (id, directoryProduct) => {
               }
 
               if (res.affectedRows == 0) {
-                // not found Directory Product with the id
+                // not found Directory Production Facility with the id
                 hasError = true;
                 return reject({ kind: "not_found" });
               }
               // test
-              console.log("updated directory product: ", { idOld: i, idNew: i + 1 });
+              console.log("updated directory production facility: ", { idOld: i, idNew: i + 1 });
             }
           );
         }
@@ -254,8 +254,8 @@ DirectoryProduct.updateById = (id, directoryProduct) => {
       }
     }
     sql.query(
-      "UPDATE directoryProducts SET ? WHERE id = ?",
-      [directoryProduct, id],
+      "UPDATE danh_muc_cssx SET ? WHERE id = ?",
+      [directoryProductionFacility, id],
       (err, res) => {
         if (err) {
           console.log("error: ", err);
@@ -263,21 +263,21 @@ DirectoryProduct.updateById = (id, directoryProduct) => {
         }
 
         if (res.affectedRows == 0) {
-          // not found Directory Product with the id
+          // not found Directory Production Facility with the id
           return reject({ kind: "not_found" });
         }
 
-        console.log("updated directory product: ", { idOld: id, ...directoryProduct });
-        resolve({ idOld: id, ...directoryProduct });
+        console.log("updated directory production facility: ", { idOld: id, ...directoryProductionFacility });
+        resolve({ idOld: id, ...directoryProductionFacility });
       }
     );
   });
 };
 
-DirectoryProduct.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
+DirectoryProductionFacility.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE danh_muc_sp SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
+      "UPDATE danh_muc_cssx SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
       [parentDirectoryNew, parentDirectoryOld],
       (err, res) => {
         if (err) {
@@ -286,34 +286,34 @@ DirectoryProduct.updateParentDirectoryByParentDirectory = (parentDirectoryOld, p
         }
 
         if (res.affectedRows == 0) {
-          // not found Directory Product with the parent directory
+          // not found Directory Production Facility with the parent directory
           return reject({ kind: "not_found" });
         }
 
-        console.log("directory product update successfully!");
+        console.log("directory production facility update successfully!");
         resolve(res);
       }
     );
   });
 };
 
-DirectoryProduct.remove = id => {
+DirectoryProductionFacility.remove = id => {
   return new Promise((resolve, reject) => {
-    sql.query("DELETE FROM danh_muc_sp WHERE id = ?", id, (err, res) => {
+    sql.query("DELETE FROM danh_muc_cssx WHERE id = ?", id, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.affectedRows == 0) {
-        // not found Directory Product with the id
+        // not found Directory Production Facility with the id
         return reject({ kind: "not_found" });
       }
 
-      console.log("deleted directory products with id: ", id);
+      console.log("deleted directory production facilitys with id: ", id);
       resolve(res);
     });
   });
 };
 
-module.exports = DirectoryProduct;
+module.exports = DirectoryProductionFacility;

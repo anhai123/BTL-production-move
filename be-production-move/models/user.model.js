@@ -110,8 +110,13 @@ User.getAllByAccepted = hop_le => {
         return reject(err);
       }
 
-      console.log("users: ", res);
-      resolve(res);
+      if (res.length) {
+        console.log("found users: ", res);
+        return resolve(res);
+      }
+
+      // not found Users with the hop_le
+      reject({ kind: "not_found" });
     });
   });
 };

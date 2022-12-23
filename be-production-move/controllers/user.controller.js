@@ -1,6 +1,7 @@
 const User = require("../models/user.model.js");
 const Role = require("../models/role.model.js");
 const DirectoryProduct = require("../models/directoryProduct.model");
+const DirectoryProductionFacility = require("../models/directoryProductionFacility.model");
 
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
@@ -52,10 +53,18 @@ exports.ModeratorAccount = async (req, res) => {
     }
     res.status(200).send(usersFix);
   } catch (err) {
-    res.status(500).send({
-      message:
-        err.message || "Some error occurred while retrieving users."
-    });
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có tài khoản cần xử lý.`
+      });
+      return;
+    } else {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving users."
+      });
+      return;
+    }
   }
 };
 
@@ -409,7 +418,621 @@ exports.ModeratorDirectoryProductDelete = async (req, res) => {
       });
     }
   }
-}
+};
+
+exports.ModeratorDirectoryProductionFacility = async (req, res) => {
+  try {
+    const directoryProductionFacilitys = await DirectoryProductionFacility.getAll();
+    res.status(200).send(directoryProductionFacilitys);
+  } catch (err) {
+    res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving directory production facilitys."
+    });
+  }
+};
+
+exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
+  try {
+    const allDirectoryProductionFacilitys = await DirectoryProductionFacility.getAll();
+    if (req.params.type === "parentDirectory") {
+      try {
+        const childrenDirectoryProductionFacilityId = await DirectoryProductionFacility.findIdByParentDirectory(req.params.directoryName);
+        childrenDirectoryProductionFacilityId.push(childrenDirectoryProductionFacilityId[childrenDirectoryProductionFacilityId.length - 1] + 1)
+        res.status(200).send([allDirectoryProductionFacilitys, {
+          ids: childrenDirectoryProductionFacilityId
+        }]);
+      } catch (err) {
+        if (err.kind === "not_found") {
+          try {
+            const parentDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+            res.status(200).send([allDirectoryProductionFacilitys, {
+              ids: [parentDirectoryProductionFacility.id + 1]
+            }]);
+          } catch (err) {
+            if (err.kind === "not_found") {
+              res.status(404).send({
+                message: `Not found parent directory production facility with directory name ${req.params.directoryName}.`
+              });
+            } else {
+              res.status(500).send({
+                message: "Error retrieving parent directory production facility with directory name " + req.params.directoryName
+              });
+            }
+          }
+        } else {
+          res.status(500).send({
+            message: "Error retrieving children directory production facility with directory name " + req.params.directoryName
+          });
+        }
+      }
+    } else if (req.params.type === "brotherDirectory") {
+      try {
+        const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        try {
+          const brotherDirectoryProductionFacilityIds = await DirectoryProductionFacility.findIdByParentDirectory(brotherDirectoryProductionFacility.danh_muc_cha);
+          brotherDirectoryProductionFacilityIds.push(brotherDirectoryProductionFacilityIds[brotherDirectoryProductionFacilityIds.length - 1] + 1);
+          res.status(200).send([allDirectoryProductionFacilitys, {
+            id: brotherDirectoryProductionFacilityIds
+          }]);
+        } catch (err) {
+          res.status(500).send({
+            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacility.danh_muc_cha
+          });
+        }
+      } catch (err) {
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
+          });
+        } else {
+          res.status(500).send({
+            message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
+          });
+        }
+      }
+    } else {
+      try {
+        const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        try {
+          var brotherDirectoryProductionFacilitys = await DirectoryProductionFacility.findByParentDirectory(childDirectoryProductionFacility.danh_muc_cha);
+          res.status(200).send([allDirectoryProductionFacilitys, {
+            id: [brotherDirectoryProductionFacilitys[0].id]
+          }]);
+        } catch (err) {
+          res.status(500).send({
+            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacilitys.danh_muc_cha
+          });
+        }
+      } catch (err) {
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
+          });
+        } else {
+          res.status(500).send({
+            message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
+          });
+        }
+      }
+    }
+  } catch (err) {
+    res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving directory production facilitys."
+    });
+  }
+};
+
+exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
+  let parentDirectoryT;
+  let hasError = false;
+  if (req.params.type === "parentDirectory") {
+    parentDirectoryT = req.params.directoryName;
+  } else if (req.params.type === "brotherDirectory") {
+    try {
+      const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+      parentDirectoryT = brotherDirectoryProductionFacility.danh_muc_cha;
+    } catch (err) {
+      hasError = true;
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
+        });
+      }
+    }
+  } else if (req.params.type === "childDirectory") {
+    try {
+      const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+      parentDirectoryT = childDirectoryProductionFacility.danh_muc_cha;
+      try {
+        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(childDirectoryProductionFacility.danh_muc_cha, req.body.ten_danh_muc_cssx);
+      } catch (err) {
+        hasError = true;
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found Directory Production Facility with parent directory name ${childDirectoryProductionFacility.danh_muc_cha}.`
+          });
+        } else {
+          res.status(500).send({
+            message: "Error updating Directory Production Facility with parent directory name " + childDirectoryProductionFacility.danh_muc_cha
+          });
+        }
+      }
+    } catch (err) {
+      hasError = true;
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
+        });
+      }
+    }
+  }
+  if (hasError) {
+    return;
+  }
+  try {
+    await DirectoryProductionFacility.normalizeIdUp(req.body.id);
+    try {
+      await DirectoryProductionFacility.create(new DirectoryProductionFacility({
+        id: req.body.id,
+        danh_muc_cha: parentDirectoryT,
+        ten_danh_muc_cssx: req.body.ten_danh_muc_cssx,
+      }));
+      res.send({ message: "Directory production facility was created successfully!" });
+    } catch (err) {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while creating the Directory production facility."
+      });
+    }
+  } catch (err) {
+    if (err[0].kind === "select_max_error") {
+      res.status(500).send([{
+        message: "Error select Directory Production Facility id max"
+      }, err[1]]);
+    } else if (err[0].kind === "not_found_max") {
+      res.status(404).send([{
+        message: "Not found Directory Production Facility id max"
+      }]);
+    } else if (err[0].kind === "update_loop_error") {
+      res.status(500).send([{
+        message: "Error update Directory Production Facility id in loop"
+      }, err[1]]);
+    } else if (err[0].kind === "not_found") {
+      res.status(404).send([{
+        message: "Not found Directory Production Facility with id"
+      }]);
+    }
+  }
+};
+
+exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
+  let hasError = false;
+  try {
+    const directoryProductionFacility = await DirectoryProductionFacility.findById(req.params.id);
+    try {
+      const childrenDirectoryProductionFacility = await DirectoryProductionFacility.findByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx);
+      try {
+        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx, directoryProductionFacility.danh_muc_cha);
+        try {
+          const data = await DirectoryProductionFacility.remove(req.params.id);
+          try {
+            const data = await DirectoryProductionFacility.normalizeIdDown(req.params.id);
+            res.send({ message: `Directory Production Facility was deleted successfully!` });
+          } catch (err) {
+            if (err[0].kind === "select_max_error") {
+              res.status(500).send([{
+                message: "Error select Directory Production Facility id max"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found_max") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility id max"
+              }]);
+            } else if (err[0].kind === "update_loop_error") {
+              res.status(500).send([{
+                message: "Error update Directory Production Facility id in loop"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility with id"
+              }]);
+            }
+          }
+        } catch (err) {
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `Not found Directory Production Facility with id ${req.params.id}.`
+            });
+          } else {
+            res.status(500).send({
+              message: "Could not delete Directory Production Facility with id " + req.params.id
+            });
+          }
+        }
+      } catch (err) {
+        hasError = true;
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+          });
+        } else {
+          res.status(500).send({
+            message: `Error updating Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+          });
+        }
+      }
+    } catch (err) {
+      if (err.kind !== "not_found") {
+        res.status(500).send({
+          message: `Error retrieving directory production facilitys with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+        });
+      } else {
+        try {
+          const data = await DirectoryProductionFacility.remove(req.params.id);
+          try {
+            await DirectoryProductionFacility.normalizeIdDown(req.params.id);
+            res.send({ message: `Directory Production Facility was deleted successfully!` });
+          } catch (err) {
+            if (err[0].kind === "select_max_error") {
+              res.status(500).send([{
+                message: "Error select Directory Production Facility id max"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found_max") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility id max"
+              }]);
+            } else if (err[0].kind === "update_loop_error") {
+              res.status(500).send([{
+                message: "Error update Directory Production Facility id in loop"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility with id"
+              }]);
+            }
+          }
+        } catch (err) {
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `Not found Directory Production Facility with id ${req.params.id}.`
+            });
+          } else {
+            res.status(500).send({
+              message: "Could not delete Directory Production Facility with id " + req.params.id
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    hasError = true;
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found Directory Production Facility with id ${req.params.id}.`
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving Directory Production Facility with id " + req.params.id
+      });
+    }
+  }
+};
+// here
+exports.ModeratorDirectoryDistributionAgent = async (req, res) => {
+  try {
+    const directoryDistributionAgents = await DirectoryDistributionAgent.getAll();
+    res.status(200).send(directoryProductionFacilitys);
+  } catch (err) {
+    res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving directory production facilitys."
+    });
+  }
+};
+
+exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
+  try {
+    const allDirectoryProductionFacilitys = await DirectoryProductionFacility.getAll();
+    if (req.params.type === "parentDirectory") {
+      try {
+        const childrenDirectoryProductionFacilityId = await DirectoryProductionFacility.findIdByParentDirectory(req.params.directoryName);
+        childrenDirectoryProductionFacilityId.push(childrenDirectoryProductionFacilityId[childrenDirectoryProductionFacilityId.length - 1] + 1)
+        res.status(200).send([allDirectoryProductionFacilitys, {
+          ids: childrenDirectoryProductionFacilityId
+        }]);
+      } catch (err) {
+        if (err.kind === "not_found") {
+          try {
+            const parentDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+            res.status(200).send([allDirectoryProductionFacilitys, {
+              ids: [parentDirectoryProductionFacility.id + 1]
+            }]);
+          } catch (err) {
+            if (err.kind === "not_found") {
+              res.status(404).send({
+                message: `Not found parent directory production facility with directory name ${req.params.directoryName}.`
+              });
+            } else {
+              res.status(500).send({
+                message: "Error retrieving parent directory production facility with directory name " + req.params.directoryName
+              });
+            }
+          }
+        } else {
+          res.status(500).send({
+            message: "Error retrieving children directory production facility with directory name " + req.params.directoryName
+          });
+        }
+      }
+    } else if (req.params.type === "brotherDirectory") {
+      try {
+        const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        try {
+          const brotherDirectoryProductionFacilityIds = await DirectoryProductionFacility.findIdByParentDirectory(brotherDirectoryProductionFacility.danh_muc_cha);
+          brotherDirectoryProductionFacilityIds.push(brotherDirectoryProductionFacilityIds[brotherDirectoryProductionFacilityIds.length - 1] + 1);
+          res.status(200).send([allDirectoryProductionFacilitys, {
+            id: brotherDirectoryProductionFacilityIds
+          }]);
+        } catch (err) {
+          res.status(500).send({
+            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacility.danh_muc_cha
+          });
+        }
+      } catch (err) {
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
+          });
+        } else {
+          res.status(500).send({
+            message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
+          });
+        }
+      }
+    } else {
+      try {
+        const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        try {
+          var brotherDirectoryProductionFacilitys = await DirectoryProductionFacility.findByParentDirectory(childDirectoryProductionFacility.danh_muc_cha);
+          res.status(200).send([allDirectoryProductionFacilitys, {
+            id: [brotherDirectoryProductionFacilitys[0].id]
+          }]);
+        } catch (err) {
+          res.status(500).send({
+            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacilitys.danh_muc_cha
+          });
+        }
+      } catch (err) {
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
+          });
+        } else {
+          res.status(500).send({
+            message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
+          });
+        }
+      }
+    }
+  } catch (err) {
+    res.status(500).send({
+      message:
+        err.message || "Some error occurred while retrieving directory production facilitys."
+    });
+  }
+};
+
+exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
+  let parentDirectoryT;
+  let hasError = false;
+  if (req.params.type === "parentDirectory") {
+    parentDirectoryT = req.params.directoryName;
+  } else if (req.params.type === "brotherDirectory") {
+    try {
+      const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+      parentDirectoryT = brotherDirectoryProductionFacility.danh_muc_cha;
+    } catch (err) {
+      hasError = true;
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
+        });
+      }
+    }
+  } else if (req.params.type === "childDirectory") {
+    try {
+      const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+      parentDirectoryT = childDirectoryProductionFacility.danh_muc_cha;
+      try {
+        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(childDirectoryProductionFacility.danh_muc_cha, req.body.ten_danh_muc_cssx);
+      } catch (err) {
+        hasError = true;
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found Directory Production Facility with parent directory name ${childDirectoryProductionFacility.danh_muc_cha}.`
+          });
+        } else {
+          res.status(500).send({
+            message: "Error updating Directory Production Facility with parent directory name " + childDirectoryProductionFacility.danh_muc_cha
+          });
+        }
+      }
+    } catch (err) {
+      hasError = true;
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
+        });
+      } else {
+        res.status(500).send({
+          message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
+        });
+      }
+    }
+  }
+  if (hasError) {
+    return;
+  }
+  try {
+    await DirectoryProductionFacility.normalizeIdUp(req.body.id);
+    try {
+      await DirectoryProductionFacility.create(new DirectoryProductionFacility({
+        id: req.body.id,
+        danh_muc_cha: parentDirectoryT,
+        ten_danh_muc_cssx: req.body.ten_danh_muc_cssx,
+      }));
+      res.send({ message: "Directory production facility was created successfully!" });
+    } catch (err) {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while creating the Directory production facility."
+      });
+    }
+  } catch (err) {
+    if (err[0].kind === "select_max_error") {
+      res.status(500).send([{
+        message: "Error select Directory Production Facility id max"
+      }, err[1]]);
+    } else if (err[0].kind === "not_found_max") {
+      res.status(404).send([{
+        message: "Not found Directory Production Facility id max"
+      }]);
+    } else if (err[0].kind === "update_loop_error") {
+      res.status(500).send([{
+        message: "Error update Directory Production Facility id in loop"
+      }, err[1]]);
+    } else if (err[0].kind === "not_found") {
+      res.status(404).send([{
+        message: "Not found Directory Production Facility with id"
+      }]);
+    }
+  }
+};
+
+exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
+  let hasError = false;
+  try {
+    const directoryProductionFacility = await DirectoryProductionFacility.findById(req.params.id);
+    try {
+      const childrenDirectoryProductionFacility = await DirectoryProductionFacility.findByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx);
+      try {
+        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx, directoryProductionFacility.danh_muc_cha);
+        try {
+          const data = await DirectoryProductionFacility.remove(req.params.id);
+          try {
+            const data = await DirectoryProductionFacility.normalizeIdDown(req.params.id);
+            res.send({ message: `Directory Production Facility was deleted successfully!` });
+          } catch (err) {
+            if (err[0].kind === "select_max_error") {
+              res.status(500).send([{
+                message: "Error select Directory Production Facility id max"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found_max") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility id max"
+              }]);
+            } else if (err[0].kind === "update_loop_error") {
+              res.status(500).send([{
+                message: "Error update Directory Production Facility id in loop"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility with id"
+              }]);
+            }
+          }
+        } catch (err) {
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `Not found Directory Production Facility with id ${req.params.id}.`
+            });
+          } else {
+            res.status(500).send({
+              message: "Could not delete Directory Production Facility with id " + req.params.id
+            });
+          }
+        }
+      } catch (err) {
+        hasError = true;
+        if (err.kind === "not_found") {
+          res.status(404).send({
+            message: `Not found Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+          });
+        } else {
+          res.status(500).send({
+            message: `Error updating Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+          });
+        }
+      }
+    } catch (err) {
+      if (err.kind !== "not_found") {
+        res.status(500).send({
+          message: `Error retrieving directory production facilitys with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+        });
+      } else {
+        try {
+          const data = await DirectoryProductionFacility.remove(req.params.id);
+          try {
+            await DirectoryProductionFacility.normalizeIdDown(req.params.id);
+            res.send({ message: `Directory Production Facility was deleted successfully!` });
+          } catch (err) {
+            if (err[0].kind === "select_max_error") {
+              res.status(500).send([{
+                message: "Error select Directory Production Facility id max"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found_max") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility id max"
+              }]);
+            } else if (err[0].kind === "update_loop_error") {
+              res.status(500).send([{
+                message: "Error update Directory Production Facility id in loop"
+              }, err[1]]);
+            } else if (err[0].kind === "not_found") {
+              res.status(404).send([{
+                message: "Not found Directory Production Facility with id"
+              }]);
+            }
+          }
+        } catch (err) {
+          if (err.kind === "not_found") {
+            res.status(404).send({
+              message: `Not found Directory Production Facility with id ${req.params.id}.`
+            });
+          } else {
+            res.status(500).send({
+              message: "Could not delete Directory Production Facility with id " + req.params.id
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    hasError = true;
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found Directory Production Facility with id ${req.params.id}.`
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving Directory Production Facility with id " + req.params.id
+      });
+    }
+  }
+};
 
 exports.ProductionFacilityBoard = (req, res) => {
   res.status(200).send("Production Facility Content.");
