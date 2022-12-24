@@ -220,7 +220,7 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
           }]);
         } else {
           res.status(500).send({
-            message: "Error retrieving child directory product with directory id " + req.params.directoryId
+            message: "Error retrieving child directory product with directory id " + id
           });
         }
       }
@@ -234,7 +234,7 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
 };
 
 exports.ModeratorDirectoryProductCreate = async (req, res) => {
-  let parentDirectoryT;
+  let parentDirectoryT = 0;
   let hasError = false;
   try {
     const directoryProduct = await DirectoryProduct.findById(req.params.directoryId);
@@ -500,7 +500,7 @@ exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
 };
 
 exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
-  let parentDirectoryT;
+  let parentDirectoryT = 0;
   let hasError = false;
   try {
     const directoryProductionFacility = await DirectoryProductionFacility.findById(req.params.directoryId);
@@ -764,7 +764,7 @@ exports.ModeratorDirectoryDistributionAgentId = async (req, res) => {
 };
 
 exports.ModeratorDirectoryDistributionAgentCreate = async (req, res) => {
-  let parentDirectoryT;
+  let parentDirectoryT = 0;
   let hasError = false;
   try {
     const directoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.directoryId);
@@ -1030,7 +1030,7 @@ exports.ModeratorDirectoryWarrantyCenterId = async (req, res) => {
 };
 
 exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
-  let parentDirectoryT;
+  let parentDirectoryT = 0;
   let hasError = false;
   try {
     const directoryWarrantyCenter = await DirectoryWarrantyCenter.findById(req.params.directoryId);
