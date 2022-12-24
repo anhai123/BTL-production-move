@@ -245,7 +245,7 @@ exports.ModeratorDirectoryProductCreate = async (req, res) => {
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryProduct.id_danh_muc_cha;
       try {
-        await DirectoryProduct.updateParentDirectoryByParentDirectory(directoryProduct.id_danh_muc_cha, req.body.id);
+        await DirectoryProduct.updateParentDirectoryByParentDirectory(directoryProduct.id_danh_muc_cha, req.body.stt);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
@@ -511,7 +511,7 @@ exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryProductionFacility.id_danh_muc_cha;
       try {
-        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.id_danh_muc_cha, req.body.id);
+        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.id_danh_muc_cha, req.body.stt);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
@@ -775,7 +775,7 @@ exports.ModeratorDirectoryDistributionAgentCreate = async (req, res) => {
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryDistributionAgent.id_danh_muc_cha;
       try {
-        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(directoryDistributionAgent.id_danh_muc_cha, req.body.id);
+        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(directoryDistributionAgent.id_danh_muc_cha, req.body.stt);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
@@ -1041,7 +1041,7 @@ exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryWarrantyCenter.id_danh_muc_cha;
       try {
-        await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(directoryWarrantyCenter.id_danh_muc_cha, req.body.id);
+        await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(directoryWarrantyCenter.id_danh_muc_cha, req.body.stt);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
