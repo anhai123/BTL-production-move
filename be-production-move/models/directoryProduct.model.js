@@ -158,11 +158,11 @@ DirectoryProduct.normalizeOrdinalNumberUp = ordinalNumber => {
   });
 }
 
-DirectoryProduct.normalizeIdDown = ordinalNumber => {
+DirectoryProduct.normalizeOrdinalNumberDown = ordinalNumber => {
   return new Promise(async (resolve, reject) => {
     try {
       const maxOrdinalNumber = await DirectoryProduct.selectMaxOrdinalNumber();
-      if (id + 1 > maxOrdinalNumber) {
+      if (ordinalNumber + 1 > maxOrdinalNumber) {
         return resolve({
           message: "Successfully!",
         });

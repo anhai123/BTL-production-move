@@ -86,14 +86,14 @@ module.exports = function(app) {
 
   // Khi chọn tên danh mục cơ sở sản xuất liên quan
   app.get(
-    "/api/moderator/directory/production-facility/create/:type/:directoryName",
-    [authJwt.verifyToken, authJwt.isModerator],
+    "/api/moderator/directory/production-facility/create/:type/:directoryId",
+    [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryProductionFacilityId
   );
 
   // Khi submit tạo danh mục cơ sở sản xuất
   app.post(
-    "/api/moderator/directory/production-facility/:type/:directoryName",
+    "/api/moderator/directory/production-facility/:type/:directoryId",
     [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryProductionFacilityCreate
   );
@@ -120,14 +120,14 @@ module.exports = function(app) {
 
   // Khi chọn tên danh mục đại lý phân phối liên quan
   app.get(
-    "/api/moderator/directory/distribution-agent/create/:type/:directoryName",
-    [authJwt.verifyToken, authJwt.isModerator],
+    "/api/moderator/directory/distribution-agent/create/:type/:directoryId",
+    [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryDistributionAgentId
   );
 
   // Khi submit tạo danh mục đại lý phân phối
   app.post(
-    "/api/moderator/directory/distribution-agent/:type/:directoryName",
+    "/api/moderator/directory/distribution-agent/:type/:directoryId",
     [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryDistributionAgentCreate
   );
@@ -154,14 +154,14 @@ module.exports = function(app) {
 
   // Khi chọn tên danh mục trung tâm bảo hành liên quan
   app.get(
-    "/api/moderator/directory/warranty-center/create/:type/:directoryName",
-    [authJwt.verifyToken, authJwt.isModerator],
+    "/api/moderator/directory/warranty-center/create/:type/:directoryId",
+    [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryWarrantyCenterId
   );
 
   // Khi submit tạo danh mục trung tâm bảo hành
   app.post(
-    "/api/moderator/directory/warranty-center/:type/:directoryName",
+    "/api/moderator/directory/warranty-center/:type/:directoryId",
     [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryWarrantyCenterCreate
   );

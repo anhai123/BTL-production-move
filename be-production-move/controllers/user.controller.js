@@ -147,7 +147,7 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
     if (req.params.type === "parentDirectory") {
       try {
         const childrenDirectoryProductOrdinalNumber = await DirectoryProduct.findOrdinalNumberByParentDirectoryId(req.params.directoryId);
-        childrenDirectoryProductId.push(childrenDirectoryProductOrdinalNumber[childrenDirectoryProductOrdinalNumber.length - 1] + 1)
+        childrenDirectoryProductOrdinalNumber.push(childrenDirectoryProductOrdinalNumber[childrenDirectoryProductOrdinalNumber.length - 1] + 1)
         res.status(200).send([allDirectoryProducts, {
           ordinalNumbers: childrenDirectoryProductOrdinalNumber
         }]);
@@ -286,21 +286,21 @@ exports.ModeratorDirectoryProductCreate = async (req, res) => {
     }
   } catch (err) {
     if (err.kind === "select_max_error") {
-      res.status(500).send([{
+      res.status(500).send({
         message: "Error select Directory Product ordinal number max"
-      }, err[1]]);
+      });
     } else if (err.kind === "not_found_max") {
-      res.status(404).send([{
+      res.status(404).send({
         message: "Not found Directory Product ordinal number max"
-      }]);
+      });
     } else if (err.kind === "update_loop_error") {
-      res.status(500).send([{
+      res.status(500).send({
         message: "Error update Directory Product ordinal number in loop"
-      }, err[1]]);
+      });
     } else if (err.kind === "not_found") {
-      res.status(404).send([{
+      res.status(404).send({
         message: "Not found Directory Product with ordinal number"
-      }]);
+      });
     }
   }
 };
@@ -350,24 +350,24 @@ exports.ModeratorDirectoryProductDelete = async (req, res) => {
     try {
       await DirectoryProduct.remove(id);
       try {
-        await DirectoryProduct.normalizeIdDown(directoryProduct.stt);
+        await DirectoryProduct.normalizeOrdinalNumberDown(directoryProduct.stt);
         res.send({ message: `Directory Product was deleted successfully!` });
       } catch (err) {
         if (err.kind === "select_max_error") {
           res.status(500).send({
-            message: err.content.message || "Error select Directory Product id max"
+            message: err.content.message || "Error select Directory Product Ordinal Number max"
           });
         } else if (err.kind === "not_found_max") {
           res.status(404).send({
-            message: "Not found Directory Product id max"
+            message: "Not found Directory Product Ordinal Number max"
           });
         } else if (err.kind === "update_loop_error") {
           res.status(500).send({
-            message: err.content.message || "Error update Directory Product id in loop"
+            message: err.content.message || "Error update Directory Product Ordinal Number in loop"
           });
         } else if (err.kind === "not_found") {
           res.status(404).send({
-            message: "Not found Directory Product with id"
+            message: "Not found Directory Product with Ordinal Number"
           });
         }
       }
@@ -412,81 +412,81 @@ exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
     const allDirectoryProductionFacilitys = await DirectoryProductionFacility.getAll();
     if (req.params.type === "parentDirectory") {
       try {
-        const childrenDirectoryProductionFacilityId = await DirectoryProductionFacility.findIdByParentDirectory(req.params.directoryName);
-        childrenDirectoryProductionFacilityId.push(childrenDirectoryProductionFacilityId[childrenDirectoryProductionFacilityId.length - 1] + 1)
+        const childrenDirectoryProductionFacilityOrdinalNumber = await DirectoryProductionFacility.findOrdinalNumberByParentDirectoryId(req.params.directoryId);
+        childrenDirectoryProductionFacilityOrdinalNumber.push(childrenDirectoryProductionFacilityOrdinalNumber[childrenDirectoryProductionFacilityOrdinalNumber.length - 1] + 1)
         res.status(200).send([allDirectoryProductionFacilitys, {
-          ids: childrenDirectoryProductionFacilityId
+          ordinalNumbers: childrenDirectoryProductionFacilityOrdinalNumber
         }]);
       } catch (err) {
         if (err.kind === "not_found") {
           try {
-            const parentDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+            const parentDirectoryProductionFacility = await DirectoryProductionFacility.findById(req.params.directoryId);
             res.status(200).send([allDirectoryProductionFacilitys, {
-              ids: [parentDirectoryProductionFacility.id + 1]
+              ordinalNumbers: [parentDirectoryProductionFacility.stt + 1]
             }]);
           } catch (err) {
             if (err.kind === "not_found") {
-              res.status(404).send({
-                message: `Not found parent directory production facility with directory name ${req.params.directoryName}.`
-              });
+              res.status(200).send([allDirectoryProducts, {
+                ordinalNumbers: [1]
+              }]);
             } else {
               res.status(500).send({
-                message: "Error retrieving parent directory production facility with directory name " + req.params.directoryName
+                message: "Error retrieving parent directory production facility with directory id " + req.params.directoryId
               });
             }
           }
         } else {
           res.status(500).send({
-            message: "Error retrieving children directory production facility with directory name " + req.params.directoryName
+            message: "Error retrieving children directory production facility with directory id " + req.params.directoryId
           });
         }
       }
     } else if (req.params.type === "brotherDirectory") {
       try {
-        const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findById(req.params.directoryId);
         try {
-          const brotherDirectoryProductionFacilityIds = await DirectoryProductionFacility.findIdByParentDirectory(brotherDirectoryProductionFacility.danh_muc_cha);
-          brotherDirectoryProductionFacilityIds.push(brotherDirectoryProductionFacilityIds[brotherDirectoryProductionFacilityIds.length - 1] + 1);
+          const brotherDirectoryProductionFacilityOrdinalNumbers = await DirectoryProductionFacility.findOrdinalNumberByParentDirectoryId(brotherDirectoryProductionFacility.id_danh_muc_cha);
+          brotherDirectoryProductionFacilityOrdinalNumbers.push(brotherDirectoryProductionFacilityOrdinalNumbers[brotherDirectoryProductionFacilityOrdinalNumbers.length - 1] + 1);
           res.status(200).send([allDirectoryProductionFacilitys, {
-            id: brotherDirectoryProductionFacilityIds
+            ordinalNumbers: brotherDirectoryProductionFacilityOrdinalNumbers
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacility.danh_muc_cha
+            message: "Error retrieving brother directory production facilitys with directory id " + brotherDirectoryProductionFacility.id_danh_muc_cha
           });
         }
       } catch (err) {
         if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
-          });
+          res.status(200).send([allDirectoryProductionFacilitys, {
+            ordinalNumbers: [1]
+          }]);
         } else {
           res.status(500).send({
-            message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
+            message: "Error retrieving brother directory production facility with directory id " + req.params.directoryId
           });
         }
       }
     } else {
       try {
-        const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
+        const childDirectoryProductionFacility = await DirectoryProductionFacility.findById(req.params.directoryId);
         try {
-          var brotherDirectoryProductionFacilitys = await DirectoryProductionFacility.findByParentDirectory(childDirectoryProductionFacility.danh_muc_cha);
+          var brotherDirectoryProductionFacilitys = await DirectoryProductionFacility.findByParentDirectory(childDirectoryProductionFacility.id_danh_muc_cha);
           res.status(200).send([allDirectoryProductionFacilitys, {
-            id: [brotherDirectoryProductionFacilitys[0].id]
+            ordinalNumbers: [brotherDirectoryProductionFacilitys[0].stt]
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory production facilitys with directory name " + brotherDirectoryProductionFacilitys.danh_muc_cha
+            message: "Error retrieving brother directory production facilitys with directory id " + brotherDirectoryProductionFacilitys.id_danh_muc_cha
           });
         }
       } catch (err) {
         if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
-          });
+          res.status(200).send([allDirectoryProductionFacilitys, {
+            ordinalNumbers: [1]
+          }]);
         } else {
           res.status(500).send({
-            message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
+            message: "Error retrieving child directory production facility with directory id " + req.params.directoryId
           });
         }
       }
@@ -502,63 +502,42 @@ exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
 exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
   let parentDirectoryT;
   let hasError = false;
-  if (req.params.type === "parentDirectory") {
-    parentDirectoryT = req.params.directoryName;
-  } else if (req.params.type === "brotherDirectory") {
-    try {
-      const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = brotherDirectoryProductionFacility.danh_muc_cha;
-    } catch (err) {
-      hasError = true;
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found brother directory production facility with directory name ${req.params.directoryName}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving brother directory production facility with directory name " + req.params.directoryName
-        });
-      }
-    }
-  } else if (req.params.type === "childDirectory") {
-    try {
-      const childDirectoryProductionFacility = await DirectoryProductionFacility.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = childDirectoryProductionFacility.danh_muc_cha;
+  try {
+    const directoryProductionFacility = await DirectoryProductionFacility.findById(req.params.directoryId);
+    if (req.params.type === "parentDirectory") {
+      parentDirectoryT = req.params.directoryId;
+    } else if (req.params.type === "brotherDirectory") {
+      parentDirectoryT = directoryProductionFacility.id_danh_muc_cha;
+    } else if (req.params.type === "childDirectory") {
+      parentDirectoryT = directoryProductionFacility.id_danh_muc_cha;
       try {
-        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(childDirectoryProductionFacility.danh_muc_cha, req.body.ten_danh_muc_cssx);
+        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.id_danh_muc_cha, req.body.id);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Production Facility with parent directory name ${childDirectoryProductionFacility.danh_muc_cha}.`
+            message: `Not found Directory Production Facility with parent directory id ${directoryProductionFacility.id_danh_muc_cha}.`
           });
         } else {
           res.status(500).send({
-            message: "Error updating Directory Production Facility with parent directory name " + childDirectoryProductionFacility.danh_muc_cha
+            message: "Error updating Directory Production Facility with parent directory id " + directoryProductionFacility.id_danh_muc_cha
           });
         }
       }
-    } catch (err) {
-      hasError = true;
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found child directory production facility with directory name ${req.params.directoryName}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving child directory production facility with directory name " + req.params.directoryName
-        });
-      }
     }
-  }
-  if (hasError) {
-    return;
+    if (hasError) {
+      return;
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: "Error retrieving directory production facility with directory id " + req.params.directoryId
+    });
   }
   try {
-    await DirectoryProductionFacility.normalizeIdUp(req.body.id);
+    await DirectoryProductionFacility.normalizeOrdinalNumberUp(req.body.stt);
     try {
       await DirectoryProductionFacility.create(new DirectoryProductionFacility({
-        id: req.body.id,
+        stt: req.body.stt,
         danh_muc_cha: parentDirectoryT,
         ten_danh_muc_cssx: req.body.ten_danh_muc_cssx,
       }));
@@ -570,22 +549,22 @@ exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
       });
     }
   } catch (err) {
-    if (err[0].kind === "select_max_error") {
-      res.status(500).send([{
-        message: "Error select Directory Production Facility id max"
-      }, err[1]]);
-    } else if (err[0].kind === "not_found_max") {
-      res.status(404).send([{
-        message: "Not found Directory Production Facility id max"
-      }]);
-    } else if (err[0].kind === "update_loop_error") {
-      res.status(500).send([{
-        message: "Error update Directory Production Facility id in loop"
-      }, err[1]]);
-    } else if (err[0].kind === "not_found") {
-      res.status(404).send([{
-        message: "Not found Directory Production Facility with id"
-      }]);
+    if (err.kind === "select_max_error") {
+      res.status(500).send({
+        message: "Error select Directory Production Facility ordinal number max"
+      });
+    } else if (err.kind === "not_found_max") {
+      res.status(404).send({
+        message: "Not found Directory Production Facility ordinal number max"
+      });
+    } else if (err.kind === "update_loop_error") {
+      res.status(500).send({
+        message: "Error update Directory Production Facility ordinal number in loop"
+      });
+    } else if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Not found Directory Production Facility with ordinal number"
+      });
     }
   }
 };
@@ -595,97 +574,26 @@ exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
   try {
     const directoryProductionFacility = await DirectoryProductionFacility.findById(req.params.id);
     try {
-      const childrenDirectoryProductionFacility = await DirectoryProductionFacility.findByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx);
+      await DirectoryProductionFacility.findByParentDirectory(req.params.id);
       try {
-        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.ten_danh_muc_cssx, directoryProductionFacility.danh_muc_cha);
-        try {
-          const data = await DirectoryProductionFacility.remove(req.params.id);
-          try {
-            const data = await DirectoryProductionFacility.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Production Facility was deleted successfully!` });
-          } catch (err) {
-            if (err[0].kind === "select_max_error") {
-              res.status(500).send([{
-                message: "Error select Directory Production Facility id max"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found_max") {
-              res.status(404).send([{
-                message: "Not found Directory Production Facility id max"
-              }]);
-            } else if (err[0].kind === "update_loop_error") {
-              res.status(500).send([{
-                message: "Error update Directory Production Facility id in loop"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found") {
-              res.status(404).send([{
-                message: "Not found Directory Production Facility with id"
-              }]);
-            }
-          }
-        } catch (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Directory Production Facility with id ${req.params.id}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Could not delete Directory Production Facility with id " + req.params.id
-            });
-          }
-        }
+        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(req.params.id, directoryProductionFacility.id_danh_muc_cha);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+            message: `Not found Directory Production Facility with parent directory id ${req.params.id}.`
           });
         } else {
           res.status(500).send({
-            message: `Error updating Directory Production Facility with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+            message: `Error updating Directory Production Facility with parent directory id ${req.params.id}.`
           });
         }
       }
     } catch (err) {
       if (err.kind !== "not_found") {
         res.status(500).send({
-          message: `Error retrieving directory production facilitys with parent directory name ${directoryProductionFacility.ten_danh_muc_cssx}.`
+          message: `Error retrieving directory production facilitys with parent directory id ${req.params.id}.`
         });
-      } else {
-        try {
-          const data = await DirectoryProductionFacility.remove(req.params.id);
-          try {
-            await DirectoryProductionFacility.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Production Facility was deleted successfully!` });
-          } catch (err) {
-            if (err[0].kind === "select_max_error") {
-              res.status(500).send([{
-                message: "Error select Directory Production Facility id max"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found_max") {
-              res.status(404).send([{
-                message: "Not found Directory Production Facility id max"
-              }]);
-            } else if (err[0].kind === "update_loop_error") {
-              res.status(500).send([{
-                message: "Error update Directory Production Facility id in loop"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found") {
-              res.status(404).send([{
-                message: "Not found Directory Production Facility with id"
-              }]);
-            }
-          }
-        } catch (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Directory Production Facility with id ${req.params.id}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Could not delete Directory Production Facility with id " + req.params.id
-            });
-          }
-        }
       }
     }
   } catch (err) {
@@ -697,6 +605,55 @@ exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
     } else {
       res.status(500).send({
         message: "Error retrieving Directory Production Facility with id " + req.params.id
+      });
+    }
+  }
+  try {
+    id = parseInt(req.params.id);
+    const directoryProductionFacility = await DirectoryProductionFacility.findById(id);
+    try {
+      await DirectoryProductionFacility.remove(id);
+      try {
+        await DirectoryProductionFacility.normalizeOrdinalNumberDown(directoryProductionFacility.stt);
+        res.send({ message: `Directory Production Facility was deleted successfully!` });
+      } catch (err) {
+        if (err.kind === "select_max_error") {
+          res.status(500).send({
+            message: "Error select Directory Production Facility Ordinal Number max"
+          });
+        } else if (err.kind === "not_found_max") {
+          res.status(404).send({
+            message: "Not found Directory Production Facility Ordinal Number max"
+          });
+        } else if (err.kind === "update_loop_error") {
+          res.status(500).send({
+            message: "Error update Directory Production Facility Ordinal Number in loop"
+          });
+        } else if (err.kind === "not_found") {
+          res.status(404).send({
+            message: "Not found Directory Production Facility with Ordinal Number"
+          });
+        }
+      }
+    } catch (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found Directory Production Facility with id ${id}.`
+        });
+      } else {
+        res.status(500).send({
+          message: "Could not delete Directory Production Facility with id " + id
+        });
+      }
+    }
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Not found Directory Production Facility with id " + id
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving Directory Production Facility with id " + id
       });
     }
   }
@@ -719,43 +676,43 @@ exports.ModeratorDirectoryDistributionAgentId = async (req, res) => {
     const allDirectoryDistributionAgents = await DirectoryDistributionAgent.getAll();
     if (req.params.type === "parentDirectory") {
       try {
-        const childrenDirectoryDistributionAgentId = await DirectoryDistributionAgent.findIdByParentDirectory(req.params.directoryName);
-        childrenDirectoryDistributionAgentId.push(childrenDirectoryDistributionAgentId[childrenDirectoryDistributionAgentId.length - 1] + 1)
+        const childrenDirectoryDistributionAgentOrdinalNumber = await DirectoryDistributionAgent.findOrdinalNumberByParentDirectoryId(req.params.directoryId);
+        childrenDirectoryDistributionAgentOrdinalNumber.push(childrenDirectoryDistributionAgentOrdinalNumber[childrenDirectoryDistributionAgentOrdinalNumber.length - 1] + 1)
         res.status(200).send([allDirectoryDistributionAgents, {
-          ids: childrenDirectoryDistributionAgentId
+          ordinalNumbers: childrenDirectoryDistributionAgentOrdinalNumber
         }]);
       } catch (err) {
         if (err.kind === "not_found") {
           try {
-            const parentDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
+            const parentDirectoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.directoryId);
             res.status(200).send([allDirectoryDistributionAgents, {
-              ids: [parentDirectoryDistributionAgent.id + 1]
+              ordinalNumbers: [parentDirectoryDistributionAgent.stt + 1]
             }]);
           } catch (err) {
             if (err.kind === "not_found") {
-              res.status(404).send({
-                message: `Not found parent directory distribution agent with directory name ${req.params.directoryName}.`
-              });
+              res.status(200).send([allDirectoryDistributionAgents, {
+                ordinalNumbers: [1]
+              }]);
             } else {
               res.status(500).send({
-                message: "Error retrieving parent directory distribution agent with directory name " + req.params.directoryName
+                message: "Error retrieving parent directory distribution agent with directory id " + req.params.directoryId
               });
             }
           }
         } else {
           res.status(500).send({
-            message: "Error retrieving children directory distribution agent with directory name " + req.params.directoryName
+            message: "Error retrieving children directory distribution agent with directory id " + req.params.directoryId
           });
         }
       }
     } else if (req.params.type === "brotherDirectory") {
       try {
-        const brotherDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
+        const brotherDirectoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.directoryId);
         try {
-          const brotherDirectoryDistributionAgentIds = await DirectoryDistributionAgent.findIdByParentDirectory(brotherDirectoryDistributionAgent.danh_muc_cha);
-          brotherDirectoryDistributionAgentIds.push(brotherDirectoryProductionFacilityIds[brotherDirectoryProductionFacilityIds.length - 1] + 1);
+          const brotherDirectoryDistributionAgentOrdinalNumbers = await DirectoryDistributionAgent.findOrdinalNumberByParentDirectoryId(brotherDirectoryDistributionAgent.id_danh_muc_cha);
+          brotherDirectoryDistributionAgentOrdinalNumbers.push(brotherDirectoryDistributionAgentOrdinalNumbers[brotherDirectoryDistributionAgentOrdinalNumbers.length - 1] + 1);
           res.status(200).send([allDirectoryDistributionAgents, {
-            id: brotherDirectoryDistributionAgentIds
+            ordinalNumbers: brotherDirectoryDistributionAgentOrdinalNumbers
           }]);
         } catch (err) {
           res.status(500).send({
@@ -764,9 +721,9 @@ exports.ModeratorDirectoryDistributionAgentId = async (req, res) => {
         }
       } catch (err) {
         if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found brother directory distribution agent with directory name ${req.params.directoryName}.`
-          });
+          res.status(200).send([allDirectoryDistributionAgents, {
+            ordinalNumbers: [1]
+          }]);
         } else {
           res.status(500).send({
             message: "Error retrieving brother directory distribution agent with directory name " + req.params.directoryName
@@ -775,25 +732,25 @@ exports.ModeratorDirectoryDistributionAgentId = async (req, res) => {
       }
     } else {
       try {
-        const childDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
+        const childDirectoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.directoryId);
         try {
-          var brotherDirectoryDistributionAgents = await DirectoryDistributionAgent.findByParentDirectory(childDirectoryDistributionAgent.danh_muc_cha);
+          var brotherDirectoryDistributionAgents = await DirectoryDistributionAgent.findByParentDirectory(childDirectoryDistributionAgent.id_danh_muc_cha);
           res.status(200).send([allDirectoryDistributionAgents, {
-            id: [brotherDirectoryDistributionAgents[0].id]
+            ordinalNumbers: [brotherDirectoryDistributionAgents[0].stt]
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory distribution agents with directory name " + brotherDirectoryDistributionAgents.danh_muc_cha
+            message: "Error retrieving brother directory distribution agents with directory id " + brotherDirectoryDistributionAgents.id_danh_muc_cha
           });
         }
       } catch (err) {
         if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found child directory distribution agent with directory name ${req.params.directoryName}.`
-          });
+          res.status(200).send([allDirectoryDistributionAgents, {
+            ordinalNumbers: [1]
+          }]);
         } else {
           res.status(500).send({
-            message: "Error retrieving child directory distribution agent with directory name " + req.params.directoryName
+            message: "Error retrieving child directory distribution agent with directory id " + req.params.directoryId
           });
         }
       }
@@ -809,63 +766,44 @@ exports.ModeratorDirectoryDistributionAgentId = async (req, res) => {
 exports.ModeratorDirectoryDistributionAgentCreate = async (req, res) => {
   let parentDirectoryT;
   let hasError = false;
-  if (req.params.type === "parentDirectory") {
-    parentDirectoryT = req.params.directoryName;
-  } else if (req.params.type === "brotherDirectory") {
-    try {
-      const brotherDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = brotherDirectoryDistributionAgent.danh_muc_cha;
-    } catch (err) {
-      hasError = true;
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found brother directory distribution agent with directory name ${req.params.directoryName}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving brother directory distribution agent with directory name " + req.params.directoryName
-        });
-      }
-    }
-  } else if (req.params.type === "childDirectory") {
-    try {
-      const childDirectoryDistributionAgent = await DirectoryDistributionAgent.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = childDirectoryDistributionAgent.danh_muc_cha;
+  try {
+    const directoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.directoryId);
+    if (req.params.type === "parentDirectory") {
+      parentDirectoryT = req.params.directoryId;
+    } else if (req.params.type === "brotherDirectory") {
+      parentDirectoryT = directoryDistributionAgent.id_danh_muc_cha;
+    } else if (req.params.type === "childDirectory") {
+      parentDirectoryT = directoryDistributionAgent.id_danh_muc_cha;
       try {
-        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(childDirectoryDistributionAgent.danh_muc_cha, req.body.ten_danh_muc_dlpp);
+        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(directoryDistributionAgent.id_danh_muc_cha, req.body.id);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Distribution Agent with parent directory name ${childDirectoryDistributionAgent.danh_muc_cha}.`
+            message: `Not found Directory Distribution Agent with parent directory id ${directoryDistributionAgent.id_danh_muc_cha}.`
           });
         } else {
           res.status(500).send({
-            message: "Error updating Directory Distribution Agent with parent directory name " + childDirectoryDistributionAgent.danh_muc_cha
+            message: "Error updating Directory Distribution Agent with parent directory id " + directoryDistributionAgent.id_danh_muc_cha
           });
         }
       }
-    } catch (err) {
-      hasError = true;
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found child directory distribution agent with directory name ${req.params.directoryName}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving child directory distribution agent with directory name " + req.params.directoryName
-        });
-      }
+    }
+    if (hasError) {
+      return;
+    }
+  } catch (err) {
+    if (err.kind !== "not_found") {
+      res.status(500).send({
+        message: "Error retrieving directory distribution agent with directory id " + req.params.directoryId
+      });
     }
   }
-  if (hasError) {
-    return;
-  }
   try {
-    await DirectoryDistributionAgent.normalizeIdUp(req.body.id);
+    await DirectoryDistributionAgent.normalizeOrdinalNumberUp(req.body.stt);
     try {
       await DirectoryDistributionAgent.create(new DirectoryDistributionAgent({
-        id: req.body.id,
+        stt: req.body.stt,
         danh_muc_cha: parentDirectoryT,
         ten_danh_muc_dlpp: req.body.ten_danh_muc_dlpp,
       }));
@@ -877,22 +815,22 @@ exports.ModeratorDirectoryDistributionAgentCreate = async (req, res) => {
       });
     }
   } catch (err) {
-    if (err[0].kind === "select_max_error") {
-      res.status(500).send([{
-        message: "Error select Directory Distribution Agent id max"
-      }, err[1]]);
-    } else if (err[0].kind === "not_found_max") {
-      res.status(404).send([{
-        message: "Not found Directory Distribution Agent id max"
-      }]);
-    } else if (err[0].kind === "update_loop_error") {
-      res.status(500).send([{
-        message: "Error update Directory Distribution Agent id in loop"
-      }, err[1]]);
-    } else if (err[0].kind === "not_found") {
-      res.status(404).send([{
-        message: "Not found Directory Distribution Agent with id"
-      }]);
+    if (err.kind === "select_max_error") {
+      res.status(500).send({
+        message: "Error select Directory Distribution Agent ordinal number max"
+      });
+    } else if (err.kind === "not_found_max") {
+      res.status(404).send({
+        message: "Not found Directory Distribution Agent ordinal number max"
+      });
+    } else if (err.kind === "update_loop_error") {
+      res.status(500).send({
+        message: "Error update Directory Distribution Agent ordinal number in loop"
+      });
+    } else if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Not found Directory Distribution Agent with ordinal number"
+      });
     }
   }
 };
@@ -902,97 +840,26 @@ exports.ModeratorDirectoryDistributionAgentDelete = async (req, res) => {
   try {
     const directoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.id);
     try {
-      const childrenDirectoryDistributionAgent = await DirectoryDistributionAgent.findByParentDirectory(directoryDistributionAgent.ten_danh_muc_dlpp);
+      await DirectoryDistributionAgent.findByParentDirectory(req.params.id);
       try {
-        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(directoryDistributionAgent.ten_danh_muc_dlpp, directoryDistributionAgent.danh_muc_cha);
-        try {
-          const data = await DirectoryDistributionAgent.remove(req.params.id);
-          try {
-            const data = await DirectoryDistributionAgent.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Distribution Agent was deleted successfully!` });
-          } catch (err) {
-            if (err[0].kind === "select_max_error") {
-              res.status(500).send([{
-                message: "Error select Directory Distribution Agent id max"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found_max") {
-              res.status(404).send([{
-                message: "Not found Directory Distribution Agent id max"
-              }]);
-            } else if (err[0].kind === "update_loop_error") {
-              res.status(500).send([{
-                message: "Error update Directory Distribution Agent id in loop"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found") {
-              res.status(404).send([{
-                message: "Not found Directory Distribution Agent with id"
-              }]);
-            }
-          }
-        } catch (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Directory Distribution Agent with id ${req.params.id}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Could not delete Directory Distribution Agent with id " + req.params.id
-            });
-          }
-        }
+        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(req.params.id, directoryDistributionAgent.id_danh_muc_cha);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Distribution Agent with parent directory name ${directoryDistributionAgent.ten_danh_muc_dlpp}.`
+            message: `Not found Directory Distribution Agent with parent directory id ${req.params.id}.`
           });
         } else {
           res.status(500).send({
-            message: `Error updating Directory Distribution Agent with parent directory name ${directoryDistributionAgent.ten_danh_muc_dlpp}.`
+            message: `Error updating Directory Distribution Agent with parent directory id ${req.params.id}.`
           });
         }
       }
     } catch (err) {
       if (err.kind !== "not_found") {
         res.status(500).send({
-          message: `Error retrieving directory distribution agents with parent directory name ${directoryDistributionAgent.ten_danh_muc_dlpp}.`
+          message: `Error retrieving directory distribution agents with parent directory id ${req.params.id}.`
         });
-      } else {
-        try {
-          const data = await DirectoryDistributionAgent.remove(req.params.id);
-          try {
-            await DirectoryDistributionAgent.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Distribution Agent was deleted successfully!` });
-          } catch (err) {
-            if (err[0].kind === "select_max_error") {
-              res.status(500).send([{
-                message: "Error select Directory Distribution Agent id max"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found_max") {
-              res.status(404).send([{
-                message: "Not found Directory Distribution Agent id max"
-              }]);
-            } else if (err[0].kind === "update_loop_error") {
-              res.status(500).send([{
-                message: "Error update Directory Distribution Agent id in loop"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found") {
-              res.status(404).send([{
-                message: "Not found Directory Distribution Agent with id"
-              }]);
-            }
-          }
-        } catch (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Directory Distribution Agent with id ${req.params.id}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Could not delete Directory Distribution Agent with id " + req.params.id
-            });
-          }
-        }
       }
     }
   } catch (err) {
@@ -1004,6 +871,55 @@ exports.ModeratorDirectoryDistributionAgentDelete = async (req, res) => {
     } else {
       res.status(500).send({
         message: "Error retrieving Directory Distribution Agent with id " + req.params.id
+      });
+    }
+  }
+  try {
+    id = parseInt(req.params.id);
+    const directoryDistributionAgent = await DirectoryDistributionAgent.findById(id);
+    try {
+      await DirectoryDistributionAgent.remove(id);
+      try {
+        await DirectoryDistributionAgent.normalizeOrdinalNumberDown(directoryDistributionAgent.stt);
+        res.send({ message: `Directory Distribution Agent was deleted successfully!` });
+      } catch (err) {
+        if (err.kind === "select_max_error") {
+          res.status(500).send({
+            message: "Error select Directory Distribution Agent Ordinal Number max"
+          });
+        } else if (err.kind === "not_found_max") {
+          res.status(404).send({
+            message: "Not found Directory Distribution Agent Ordinal Number max"
+          });
+        } else if (err.kind === "update_loop_error") {
+          res.status(500).send({
+            message: "Error update Directory Distribution Agent Ordinal Number in loop"
+          });
+        } else if (err.kind === "not_found") {
+          res.status(404).send({
+            message: "Not found Directory Distribution Agent with Ordinal Number"
+          });
+        }
+      }
+    } catch (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found Directory Distribution Agent with id ${id}.`
+        });
+      } else {
+        res.status(500).send({
+          message: "Could not delete Directory Distribution Agent with id " + id
+        });
+      }
+    }
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Not found Directory Distribution Agent with id " + id
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving Directory Distribution Agent with id " + id
       });
     }
   }
@@ -1026,81 +942,81 @@ exports.ModeratorDirectoryWarrantyCenterId = async (req, res) => {
     const allDirectoryWarrantyCenters = await DirectoryWarrantyCenter.getAll();
     if (req.params.type === "parentDirectory") {
       try {
-        const childrenDirectoryWarrantyCenterId = await DirectoryWarrantyCenter.findIdByParentDirectory(req.params.directoryName);
-        childrenDirectoryWarrantyCenterId.push(childrenDirectoryWarrantyCenterId[childrenDirectoryWarrantyCenterId.length - 1] + 1)
+        const childrenDirectoryWarrantyCenterOrdinalNumber = await DirectoryWarrantyCenter.findOrdinalNumberByParentDirectoryId(req.params.directoryId);
+        childrenDirectoryWarrantyCenterOrdinalNumber.push(childrenDirectoryWarrantyCenterOrdinalNumber[childrenDirectoryWarrantyCenterOrdinalNumber.length - 1] + 1)
         res.status(200).send([allDirectoryWarrantyCenters, {
-          ids: childrenDirectoryWarrantyCenterId
+          ordinalNumbers: childrenDirectoryWarrantyCenterOrdinalNumber
         }]);
       } catch (err) {
         if (err.kind === "not_found") {
           try {
-            const parentDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findByDirectoryName(req.params.directoryName);
+            const parentDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findById(req.params.directoryId);
             res.status(200).send([allDirectoryWarrantyCenters, {
-              ids: [parentDirectoryWarrantyCenter.id + 1]
+              ordinalNumbers: [parentDirectoryWarrantyCenter.stt + 1]
             }]);
           } catch (err) {
             if (err.kind === "not_found") {
-              res.status(404).send({
-                message: `Not found parent directory warranty center with directory name ${req.params.directoryName}.`
-              });
+              res.status(200).send([allDirectoryWarrantyCenters, {
+                ordinalNumbers: [1]
+              }]);
             } else {
               res.status(500).send({
-                message: "Error retrieving parent directory warranty center with directory name " + req.params.directoryName
+                message: "Error retrieving parent directory warranty center with directory id " + req.params.directoryId
               });
             }
           }
         } else {
           res.status(500).send({
-            message: "Error retrieving children directory warranty center with directory name " + req.params.directoryName
+            message: "Error retrieving children directory warranty center with directory id " + req.params.directoryId
           });
         }
       }
     } else if (req.params.type === "brotherDirectory") {
       try {
-        const brotherDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findByDirectoryName(req.params.directoryName);
+        const brotherDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findById(req.params.directoryId);
         try {
-          const brotherDirectoryWarrantyCenterIds = await DirectoryWarrantyCenter.findIdByParentDirectory(brotherDirectoryWarrantyCenter.danh_muc_cha);
-          brotherDirectoryWarrantyCenterIds.push(brotherDirectoryWarrantyCenterIds[brotherDirectoryWarrantyCenterIds.length - 1] + 1);
+          const brotherDirectoryWarrantyCenterOrdinalNumbers = await DirectoryWarrantyCenter.findOrdinalNumberByParentDirectoryId(brotherDirectoryWarrantyCenter.id_danh_muc_cha);
+          brotherDirectoryWarrantyCenterOrdinalNumbers.push(brotherDirectoryWarrantyCenterOrdinalNumbers[brotherDirectoryWarrantyCenterOrdinalNumbers.length - 1] + 1);
           res.status(200).send([allDirectoryWarrantyCenters, {
-            id: brotherDirectoryWarrantyCenterIds
+            id: brotherDirectoryWarrantyCenterOrdinalNumbers
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory warranty centers with directory name " + brotherDirectoryWarrantyCenter.danh_muc_cha
+            message: "Error retrieving brother directory warranty centers with directory id " + brotherDirectoryWarrantyCenter.id_danh_muc_cha
           });
         }
       } catch (err) {
         if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found brother directory warranty center with directory name ${req.params.directoryName}.`
-          });
+          res.status(200).send([allDirectoryWarrantyCenters, {
+            ordinalNumbers: [1]
+          }]);
         } else {
           res.status(500).send({
-            message: "Error retrieving brother directory warranty center with directory name " + req.params.directoryName
+            message: "Error retrieving brother directory warranty center with directory id " + req.params.directoryId
           });
         }
       }
     } else {
       try {
-        const childDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findByDirectoryName(req.params.directoryName);
+        const childDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findById(req.params.directoryId);
         try {
-          var brotherDirectoryWarrantyCenters = await DirectoryWarrantyCenter.findByParentDirectory(childDirectoryWarrantyCenter.danh_muc_cha);
+          var brotherDirectoryWarrantyCenters = await DirectoryWarrantyCenter.findByParentDirectory(childDirectoryWarrantyCenter.id_danh_muc_cha);
           res.status(200).send([allDirectoryWarrantyCenters, {
-            id: [brotherDirectoryWarrantyCenters[0].id]
+            ordinalNumbers: [brotherDirectoryWarrantyCenters[0].stt]
           }]);
         } catch (err) {
           res.status(500).send({
-            message: "Error retrieving brother directory warranty centers with directory name " + brotherDirectoryWarrantyCenters.danh_muc_cha
+            message: "Error retrieving brother directory warranty centers with directory id " + brotherDirectoryWarrantyCenters.id_danh_muc_cha
           });
         }
       } catch (err) {
         if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found child directory warranty center with directory name ${req.params.directoryName}.`
-          });
+          res.status(200).send([allDirectoryWarrantyCenters, {
+            ordinalNumbers: [1]
+          }]);
         } else {
           res.status(500).send({
-            message: "Error retrieving child directory warranty center with directory name " + req.params.directoryName
+            message: "Error retrieving child directory warranty center with directory id " + req.params.directoryId
           });
         }
       }
@@ -1116,64 +1032,45 @@ exports.ModeratorDirectoryWarrantyCenterId = async (req, res) => {
 exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
   let parentDirectoryT;
   let hasError = false;
-  if (req.params.type === "parentDirectory") {
-    parentDirectoryT = req.params.directoryName;
-  } else if (req.params.type === "brotherDirectory") {
-    try {
-      const brotherDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = brotherDirectoryWarrantyCenter.danh_muc_cha;
-    } catch (err) {
-      hasError = true;
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found brother directory warranty center with directory name ${req.params.directoryName}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving brother directory warranty center with directory name " + req.params.directoryName
-        });
-      }
-    }
-  } else if (req.params.type === "childDirectory") {
-    try {
-      const childDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findByDirectoryName(req.params.directoryName);
-      parentDirectoryT = childDirectoryWarrantyCenter.danh_muc_cha;
+  try {
+    const directoryWarrantyCenter = await DirectoryWarrantyCenter.findById(req.params.directoryId);
+    if (req.params.type === "parentDirectory") {
+      parentDirectoryT = req.params.directoryId;
+    } else if (req.params.type === "brotherDirectory") {
+      parentDirectoryT = directoryWarrantyCenter.id_danh_muc_cha;
+    } else if (req.params.type === "childDirectory") {
+      parentDirectoryT = directoryWarrantyCenter.id_danh_muc_cha;
       try {
-        await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(childDirectoryWarrantyCenter.danh_muc_cha, req.body.ten_danh_muc_ttbh);
+        await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(directoryWarrantyCenter.id_danh_muc_cha, req.body.id);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Warranty Center with parent directory name ${childDirectoryWarrantyCenter.danh_muc_cha}.`
+            message: `Not found Directory Warranty Center with parent directory id ${directoryWarrantyCenter.id_danh_muc_cha}.`
           });
         } else {
           res.status(500).send({
-            message: "Error updating Directory Warranty Center with parent directory name " + childDirectoryWarrantyCenter.danh_muc_cha
+            message: "Error updating Directory Warranty Center with parent directory id " + directoryWarrantyCenter.id_danh_muc_cha
           });
         }
       }
-    } catch (err) {
-      hasError = true;
-      if (err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found child directory warranty center with directory name ${req.params.directoryName}.`
-        });
-      } else {
-        res.status(500).send({
-          message: "Error retrieving child directory warranty center with directory name " + req.params.directoryName
-        });
-      }
+    }
+    if (hasError) {
+      return;
+    }
+  } catch (err) {
+    if (err.kind !== "not_found") {
+      res.status(500).send({
+        message: "Error retrieving directory warranty center with directory id " + req.params.directoryId
+      });
     }
   }
-  if (hasError) {
-    return;
-  }
   try {
-    await DirectoryWarrantyCenter.normalizeIdUp(req.body.id);
+    await DirectoryWarrantyCenter.normalizeOrdinalNumberUp(req.body.stt);
     try {
       await DirectoryWarrantyCenter.create(new DirectoryWarrantyCenter({
-        id: req.body.id,
-        danh_muc_cha: parentDirectoryT,
+        stt: req.body.stt,
+        id_danh_muc_cha: parentDirectoryT,
         ten_danh_muc_ttbh: req.body.ten_danh_muc_ttbh,
       }));
       res.send({ message: "Directory warranty center was created successfully!" });
@@ -1184,22 +1081,22 @@ exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
       });
     }
   } catch (err) {
-    if (err[0].kind === "select_max_error") {
-      res.status(500).send([{
-        message: "Error select Directory Warranty Center id max"
-      }, err[1]]);
-    } else if (err[0].kind === "not_found_max") {
-      res.status(404).send([{
-        message: "Not found Directory Warranty Center id max"
-      }]);
-    } else if (err[0].kind === "update_loop_error") {
-      res.status(500).send([{
-        message: "Error update Directory Warranty Center id in loop"
-      }, err[1]]);
-    } else if (err[0].kind === "not_found") {
-      res.status(404).send([{
-        message: "Not found Directory Warranty Center with id"
-      }]);
+    if (err.kind === "select_max_error") {
+      res.status(500).send({
+        message: "Error select Directory Warranty Center ordinal number max"
+      });
+    } else if (err.kind === "not_found_max") {
+      res.status(404).send({
+        message: "Not found Directory Warranty Center ordinal number max"
+      });
+    } else if (err.kind === "update_loop_error") {
+      res.status(500).send({
+        message: "Error update Directory Warranty Center ordinal number in loop"
+      });
+    } else if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Not found Directory Warranty Center with ordinal number"
+      });
     }
   }
 };
@@ -1209,97 +1106,26 @@ exports.ModeratorDirectoryWarrantyCenterDelete = async (req, res) => {
   try {
     const directoryWarrantyCenter = await DirectoryWarrantyCenter.findById(req.params.id);
     try {
-      const childrenDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findByParentDirectory(directoryWarrantyCenter.ten_danh_muc_ttbh);
+      await DirectoryWarrantyCenter.findByParentDirectory(req.params.id);
       try {
-        await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(directoryWarrantyCenter.ten_danh_muc_ttbh, directoryWarrantyCenter.danh_muc_cha);
-        try {
-          const data = await DirectoryWarrantyCenter.remove(req.params.id);
-          try {
-            const data = await DirectoryWarrantyCenter.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Warranty Center was deleted successfully!` });
-          } catch (err) {
-            if (err[0].kind === "select_max_error") {
-              res.status(500).send([{
-                message: "Error select Directory Warranty Center id max"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found_max") {
-              res.status(404).send([{
-                message: "Not found Directory Warranty Center id max"
-              }]);
-            } else if (err[0].kind === "update_loop_error") {
-              res.status(500).send([{
-                message: "Error update Directory Warranty Center id in loop"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found") {
-              res.status(404).send([{
-                message: "Not found Directory Warranty Center with id"
-              }]);
-            }
-          }
-        } catch (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Directory Warranty Center with id ${req.params.id}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Could not delete Directory Warranty Center with id " + req.params.id
-            });
-          }
-        }
+        await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(req.params.id, directoryWarrantyCenter.id_danh_muc_cha);
       } catch (err) {
         hasError = true;
         if (err.kind === "not_found") {
           res.status(404).send({
-            message: `Not found Directory Warranty Center with parent directory name ${directoryWarrantyCenter.ten_danh_muc_ttbh}.`
+            message: `Not found Directory Warranty Center with parent directory id ${req.params.id}.`
           });
         } else {
           res.status(500).send({
-            message: `Error updating Directory Warranty Center with parent directory name ${directoryWarrantyCenter.ten_danh_muc_ttbh}.`
+            message: `Error updating Directory Warranty Center with parent directory id ${req.params.id}.`
           });
         }
       }
     } catch (err) {
       if (err.kind !== "not_found") {
         res.status(500).send({
-          message: `Error retrieving directory warranty centers with parent directory name ${directoryWarrantyCenter.ten_danh_muc_ttbh}.`
+          message: `Error retrieving directory warranty centers with parent directory id ${req.params.id}.`
         });
-      } else {
-        try {
-          const data = await DirectoryWarrantyCenter.remove(req.params.id);
-          try {
-            await DirectoryWarrantyCenter.normalizeIdDown(req.params.id);
-            res.send({ message: `Directory Warranty Center was deleted successfully!` });
-          } catch (err) {
-            if (err[0].kind === "select_max_error") {
-              res.status(500).send([{
-                message: "Error select Directory Warranty Center id max"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found_max") {
-              res.status(404).send([{
-                message: "Not found Directory Warranty Center id max"
-              }]);
-            } else if (err[0].kind === "update_loop_error") {
-              res.status(500).send([{
-                message: "Error update Directory Warranty Center id in loop"
-              }, err[1]]);
-            } else if (err[0].kind === "not_found") {
-              res.status(404).send([{
-                message: "Not found Directory Warranty Center with id"
-              }]);
-            }
-          }
-        } catch (err) {
-          if (err.kind === "not_found") {
-            res.status(404).send({
-              message: `Not found Directory Warranty Center with id ${req.params.id}.`
-            });
-          } else {
-            res.status(500).send({
-              message: "Could not delete Directory Warranty Center with id " + req.params.id
-            });
-          }
-        }
       }
     }
   } catch (err) {
@@ -1311,6 +1137,90 @@ exports.ModeratorDirectoryWarrantyCenterDelete = async (req, res) => {
     } else {
       res.status(500).send({
         message: "Error retrieving Directory Warranty Center with id " + req.params.id
+      });
+    }
+  }
+  try {
+    const data = await DirectoryWarrantyCenter.remove(req.params.id);
+    try {
+      const data = await DirectoryWarrantyCenter.normalizeIdDown(req.params.id);
+      res.send({ message: `Directory Warranty Center was deleted successfully!` });
+    } catch (err) {
+      if (err[0].kind === "select_max_error") {
+        res.status(500).send([{
+          message: "Error select Directory Warranty Center id max"
+        }, err[1]]);
+      } else if (err[0].kind === "not_found_max") {
+        res.status(404).send([{
+          message: "Not found Directory Warranty Center id max"
+        }]);
+      } else if (err[0].kind === "update_loop_error") {
+        res.status(500).send([{
+          message: "Error update Directory Warranty Center id in loop"
+        }, err[1]]);
+      } else if (err[0].kind === "not_found") {
+        res.status(404).send([{
+          message: "Not found Directory Warranty Center with id"
+        }]);
+      }
+    }
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found Directory Warranty Center with id ${req.params.id}.`
+      });
+    } else {
+      res.status(500).send({
+        message: "Could not delete Directory Warranty Center with id " + req.params.id
+      });
+    }
+  }
+  try {
+    id = parseInt(req.params.id);
+    const directoryWarrantyCenter = await DirectoryWarrantyCenter.findById(id);
+    try {
+      await DirectoryWarrantyCenter.remove(id);
+      try {
+        await DirectoryWarrantyCenter.normalizeOrdinalNumberDown(directoryWarrantyCenter.stt);
+        res.send({ message: `Directory Warranty Center was deleted successfully!` });
+      } catch (err) {
+        if (err.kind === "select_max_error") {
+          res.status(500).send({
+            message: "Error select Directory Warranty Center Ordinal Number max"
+          });
+        } else if (err.kind === "not_found_max") {
+          res.status(404).send({
+            message: "Not found Directory Warranty Center Ordinal Number max"
+          });
+        } else if (err.kind === "update_loop_error") {
+          res.status(500).send({
+            message: "Error update Directory Warranty Center Ordinal Number in loop"
+          });
+        } else if (err.kind === "not_found") {
+          res.status(404).send({
+            message: "Not found Directory Warranty Center with Ordinal Number"
+          });
+        }
+      }
+    } catch (err) {
+      if (err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found Directory Warranty Center with id ${id}.`
+        });
+      } else {
+        res.status(500).send({
+          message: "Could not delete Directory Warranty Center with id " + id
+        });
+      }
+    }
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Not found Directory Warranty Center with id " + id
+      });
+    } else {
+      res.status(500).send({
+        message: "Error retrieving Directory Warranty Center with id " + id
       });
     }
   }

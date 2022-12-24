@@ -2,8 +2,8 @@ const sql = require(".").connection;
 
 // constructor
 const DirectoryWarrantyCenter = function (directoryWarrantyCenter) {
-  this.id = directoryWarrantyCenter.id;
-  this.danh_muc_cha = directoryWarrantyCenter.danh_muc_cha;
+  this.stt = directoryWarrantyCenter.stt;
+  this.id_danh_muc_cha = directoryWarrantyCenter.id_danh_muc_cha;
   this.ten_danh_muc_ttbh = directoryWarrantyCenter.ten_danh_muc_ttbh;
 };
 
@@ -54,28 +54,9 @@ DirectoryWarrantyCenter.findById = id => {
   });
 };
 
-DirectoryWarrantyCenter.findByDirectoryName = directoryName => {
-  return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM danh_muc_ttbh WHERE ten_danh_muc_ttbh = '${directoryName}'`, (err, res) => {
-      if (err) {
-        console.log("error: ", err);
-        return reject(err);
-      }
-
-      if (res.length) {
-        console.log("found directory warranty center: ", res[0]);
-        return resolve(res[0]);
-      }
-
-      // not found Directory Warranty Center with the directory name
-      reject({ kind: "not_found" });
-    });
-  });
-};
-
 DirectoryWarrantyCenter.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_ttbh WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT * FROM danh_muc_ttbh WHERE id_danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -86,15 +67,15 @@ DirectoryWarrantyCenter.findByParentDirectory = parentDirectory => {
         return resolve(res);
       }
 
-      // not found Directory Warranty Center with the parent directory name
+      // not found Directory Warranty Center with the parent directory id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryWarrantyCenter.findIdByParentDirectory = parentDirectory => {
+DirectoryWarrantyCenter.findOrdinalNumberByParentDirectoryId = parentDirectoryId => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT id FROM danh_muc_ttbh WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT stt FROM danh_muc_ttbh WHERE id_danh_muc_cha = ?", parentDirectoryId, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -102,22 +83,22 @@ DirectoryWarrantyCenter.findIdByParentDirectory = parentDirectory => {
 
       if (res.length) {
         console.log("found parent directory warranty centers: ", res);
-        const ids =[];
+        const ordinalNumbers =[];
         for (let i of res) {
-          ids.push(i.id);
+          ordinalNumbers.push(i.stt);
         }
-        return resolve(ids);
+        return resolve(ordinalNumbers);
       }
 
-      // not found Directory Warranty Center Id with the parent directory name
+      // not found Directory Warranty Center Ordinal Number with the parent directory id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryWarrantyCenter.selectMaxId = () => {
+DirectoryWarrantyCenter.selectMaxOrdinalNumber = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT MAX(id) as maxId FROM danh_muc_ttbh", (err, res) => {
+    sql.query("SELECT MAX(stt) as maxOrdinalNumber FROM danh_muc_ttbh", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject({
@@ -127,28 +108,28 @@ DirectoryWarrantyCenter.selectMaxId = () => {
       }
 
       if (res.affectedRows == 0) {
-        // not found max id from directory warranty centers
+        // not found max ordinal number from directory warranty centers
         return reject({ kind: "not_found_max" });
       }
 
-      console.log("max id from directory warranty centers: ", res[0].maxId);
-      resolve(res[0].maxId);
+      console.log("max id from directory warranty centers: ", res[0].maxOrdinalNumber);
+      resolve(res[0].maxOrdinalNumber);
     });
   });
 }
 
-DirectoryWarrantyCenter.normalizeIdUp = id => {
+DirectoryWarrantyCenter.normalizeOrdinalNumberUp = ordinalNumber => {
   return new Promise(async (resolve, reject) => {
     try {
-      const maxId = await DirectoryWarrantyCenter.selectMaxId();
-      if (maxId === null || id > maxId) {
+      const maxOrdinalNumber = await DirectoryWarrantyCenter.selectMaxOrdinalNumber();
+      if (maxOrdinalNumber === null || ordinalNumber > maxOrdinalNumber) {
         return resolve({
           message: "Successfully!",
         });
       }
-      for (var i = maxId; i >= id; i--) {
+      for (var i = maxOrdinalNumber; i >= ordinalNumber; i--) {
         sql.query(
-          "UPDATE danh_muc_ttbh SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_ttbh SET stt = ? WHERE stt = ?",
           [i + 1, i],
           (err, res) => {
             if (err) {
@@ -160,11 +141,11 @@ DirectoryWarrantyCenter.normalizeIdUp = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Warranty Center with the id
+              // not found Directory Warranty Center with the ordinal number
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory warranty center: ", { idOld: i, idNew: i + 1 });
+            console.log("updated directory warranty center: ", { ordinalNumberOld: i, ordinalNumberNew: i + 1 });
             resolve({
               message: "Successfully!",
             });
@@ -177,19 +158,18 @@ DirectoryWarrantyCenter.normalizeIdUp = id => {
   });
 }
 
-DirectoryWarrantyCenter.normalizeIdDown = id => {
+DirectoryWarrantyCenter.normalizeOrdinalNumberDown = ordinalNumber => {
   return new Promise(async (resolve, reject) => {
-    id = parseInt(id);
     try {
-      const maxId = await DirectoryWarrantyCenter.selectMaxId();
-      if (id + 1 > maxId) {
+      const maxOrdinalNumber = await DirectoryWarrantyCenter.selectMaxOrdinalNumber();
+      if (ordinalNumber + 1 > maxOrdinalNumber) {
         return resolve({
           message: "Successfully!",
         });
       }
-      for (var i = id + 1; i <= maxId; i++) {
+      for (var i = ordinalNumber + 1; i <= maxOrdinalNumber; i++) {
         sql.query(
-          "UPDATE danh_muc_ttbh SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_ttbh SET stt = ? WHERE stt = ?",
           [i - 1, i],
           (err, res) => {
             if (err) {
@@ -201,11 +181,11 @@ DirectoryWarrantyCenter.normalizeIdDown = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Warranty Center with the id
+              // not found Directory Warranty Center with the ordinal number
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory warranty center: ", { idOld: i, idNew: i - 1 });
+            console.log("updated directory warranty center: ", { ordinalNumberOld: i, ordinalNumberNew: i - 1 });
             resolve({
               message: "Successfully!",
             });
@@ -277,7 +257,7 @@ DirectoryWarrantyCenter.updateById = (id, directoryWarrantyCenter) => {
 DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE danh_muc_ttbh SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
+      "UPDATE danh_muc_ttbh SET id_danh_muc_cha = ? WHERE id_danh_muc_cha = ?",
       [parentDirectoryNew, parentDirectoryOld],
       (err, res) => {
         if (err) {
