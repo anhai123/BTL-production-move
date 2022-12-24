@@ -5,7 +5,12 @@ import * as Yup from "yup";
 import { Link } from "react-router-dom";
 import { register } from "../slices/auth";
 import { clearMessage } from "../slices/message";
-
+const roles = [
+  { id: 1, ten: "Ban điều hành" },
+  { id: 2, ten: "Cơ sở sản xuất" },
+  { id: 3, ten: "Đại lý phân phối" },
+  { id: 4, ten: "Trung tâm bảo hành" },
+];
 const Register = () => {
   const [successful, setSuccessful] = useState(false);
 
@@ -17,13 +22,20 @@ const Register = () => {
   }, [dispatch]);
 
   const initialValues = {
-    username: "",
+    tai_khoan: "",
     email: "",
-    password: "",
+    mat_khau: "",
+    id_vai_tro: "",
+    ten_co_so: "",
+    dia_chi_cu_the: "",
+    so_dien_thoai: "",
+    phuong: "",
+    quan: "",
+    tinh: "",
   };
 
   const validationSchema = Yup.object().shape({
-    username: Yup.string()
+    tai_khoan: Yup.string()
       .test(
         "len",
         "The username must be between 3 and 20 characters.",
@@ -34,7 +46,7 @@ const Register = () => {
     email: Yup.string()
       .email("This is not a valid email.")
       .required("This field is required!"),
-    password: Yup.string()
+    mat_khau: Yup.string()
       .test(
         "len",
         "The password must be between 6 and 40 characters.",
@@ -42,15 +54,38 @@ const Register = () => {
           val && val.toString().length >= 6 && val.toString().length <= 40
       )
       .required("This field is required!"),
-    role: Yup.string().required("This field is required!"),
   });
 
   const handleRegister = (formValue) => {
-    const { username, email, password, role } = formValue;
+    const {
+      tai_khoan,
+      email,
+      mat_khau,
+      id_vai_tro,
+      ten_co_so,
+      dia_chi_cu_the,
+      so_dien_thoai,
+      phuong,
+      quan,
+      tinh,
+    } = formValue;
     console.log(formValue);
     setSuccessful(false);
 
-    dispatch(register({ username, email, password, role }))
+    dispatch(
+      register({
+        tai_khoan,
+        email,
+        mat_khau,
+        id_vai_tro,
+        ten_co_so,
+        dia_chi_cu_the,
+        so_dien_thoai,
+        phuong,
+        quan,
+        tinh,
+      })
+    )
       .unwrap()
       .then(() => {
         setSuccessful(true);
@@ -94,14 +129,84 @@ const Register = () => {
               {!successful && (
                 <div>
                   <div className="form-group">
-                    <label htmlFor="username">Username</label>
+                    <label htmlFor="tai_khoan">Tài khoản</label>
                     <Field
-                      name="username"
+                      name="tai_khoan"
                       type="text"
                       className="form-control"
                     />
                     <ErrorMessage
-                      name="username"
+                      name="tai_khoan"
+                      component="div"
+                      className="alert alert-danger"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="dia_chi_cu_the">Địa chỉ cụ thể:</label>
+                    <Field
+                      name="dia_chi_cu_the"
+                      type="text"
+                      className="form-control"
+                    />
+                    <ErrorMessage
+                      name="dia_chi_cu_the"
+                      component="div"
+                      className="alert alert-danger"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="ten_co_so">Tên cơ sở:</label>
+                    <Field
+                      name="ten_co_so"
+                      type="text"
+                      className="form-control"
+                    />
+                    <ErrorMessage
+                      name="ten_co_so"
+                      component="div"
+                      className="alert alert-danger"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="so_dien_thoai">Số điện thoại:</label>
+                    <Field
+                      name="so_dien_thoai"
+                      type="text"
+                      className="form-control"
+                    />
+                    <ErrorMessage
+                      name="so_dien_thoai"
+                      component="div"
+                      className="alert alert-danger"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="phuong">Phường:</label>
+                    <Field name="phuong" type="text" className="form-control" />
+                    <ErrorMessage
+                      name="phuong"
+                      component="div"
+                      className="alert alert-danger"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="quan">Quận:</label>
+                    <Field name="quan" type="text" className="form-control" />
+                    <ErrorMessage
+                      name="quan"
+                      component="div"
+                      className="alert alert-danger"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="tinh">Tỉnh:</label>
+                    <Field name="tinh" type="text" className="form-control" />
+                    <ErrorMessage
+                      name="tinh"
                       component="div"
                       className="alert alert-danger"
                     />
@@ -117,31 +222,36 @@ const Register = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="role">Role</label>
-                    <Field as="select" name="role" className="form-control">
-                      <option value="Ban điều hành">Ban điều hành</option>
-                      <option value="Cơ sở sản xuất">Cơ sở sản xuất</option>
-                      <option value="Đại lý phân phối">Đại lý phân phối</option>
-                      <option value="Trung tâm bảo hành">
-                        Trung tâm bảo hành
-                      </option>
+                    <label htmlFor="id_vai_tro">Vai trò</label>
+                    <Field
+                      as="select"
+                      name="id_vai_tro"
+                      className="form-control"
+                    >
+                      {roles.map((role) => {
+                        return (
+                          <option key={role.id} value={role.id}>
+                            {role.ten}
+                          </option>
+                        );
+                      })}
                     </Field>
                     <ErrorMessage
-                      name="email"
+                      name="id_vai_tro"
                       component="div"
                       className="alert alert-danger"
                     />
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="password">Password</label>
+                    <label htmlFor="mat_khau">Mật khẩu</label>
                     <Field
-                      name="password"
+                      name="mat_khau"
                       type="password"
                       className="form-control"
                     />
                     <ErrorMessage
-                      name="password"
+                      name="mat_khau"
                       component="div"
                       className="alert alert-danger"
                     />
