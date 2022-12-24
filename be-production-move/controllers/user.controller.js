@@ -1030,6 +1030,7 @@ exports.ModeratorDirectoryWarrantyCenterId = async (req, res) => {
 };
 
 exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
+  let a =1;
   let parentDirectoryT = 0;
   let hasError = false;
   try {
