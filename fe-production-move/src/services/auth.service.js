@@ -13,8 +13,8 @@ const register = (username, email, password) => {
 const login = (username, password) => {
   return axios
     .post(API_URL + "signin", {
-      username,
-      password,
+      tai_khoan: username,
+      mat_khau: password,
     })
     .then((response) => {
       if (response.data.accessToken) {
