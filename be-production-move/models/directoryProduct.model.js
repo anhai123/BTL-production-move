@@ -2,8 +2,8 @@ const sql = require("./").connection;
 
 // constructor
 const DirectoryProduct = function (directoryProduct) {
-  this.id = directoryProduct.id;
-  this.danh_muc_cha = directoryProduct.danh_muc_cha;
+  this.stt = directoryProduct.stt;
+  this.id_danh_muc_cha = directoryProduct.id_danh_muc_cha;
   this.ten_danh_muc_sp = directoryProduct.ten_danh_muc_sp;
 };
 
@@ -54,28 +54,9 @@ DirectoryProduct.findById = id => {
   });
 };
 
-DirectoryProduct.findByDirectoryName = directoryName => {
-  return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM danh_muc_sp WHERE ten_danh_muc_sp = '${directoryName}'`, (err, res) => {
-      if (err) {
-        console.log("error: ", err);
-        return reject(err);
-      }
-
-      if (res.length) {
-        console.log("found directory product: ", res[0]);
-        return resolve(res[0]);
-      }
-
-      // not found Directory Product with the directory name
-      reject({ kind: "not_found" });
-    });
-  });
-};
-
 DirectoryProduct.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_sp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT * FROM danh_muc_sp WHERE id_danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -86,38 +67,38 @@ DirectoryProduct.findByParentDirectory = parentDirectory => {
         return resolve(res);
       }
 
-      // not found Directory Product with the parent directory name
+      // not found Directory Product with the parent directory id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryProduct.findIdByParentDirectory = parentDirectory => {
+DirectoryProduct.findOrdinalNumberByParentDirectoryId = parentDirectoryId => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT id FROM danh_muc_sp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT stt FROM danh_muc_sp WHERE id_danh_muc_cha = ?", parentDirectoryId, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found parent directory products: ", res);
-        const ids =[];
+        console.log("found directory products: ", res);
+        const ordinalNumbers =[];
         for (let i of res) {
-          ids.push(i.id);
+          ordinalNumbers.push(i.stt);
         }
-        return resolve(ids);
+        return resolve(ordinalNumbers);
       }
 
-      // not found Directory Product Id with the parent directory name
+      // not found Directory Product Ordinal Number with the parent directory id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryProduct.selectMaxId = () => {
+DirectoryProduct.selectMaxOrdinalNumber = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT MAX(id) as maxId FROM danh_muc_sp", (err, res) => {
+    sql.query("SELECT MAX(stt) as maxOrdinalNumber FROM danh_muc_sp", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject({
@@ -127,28 +108,28 @@ DirectoryProduct.selectMaxId = () => {
       }
 
       if (res.affectedRows == 0) {
-        // not found max id from directory products
+        // not found max ordinal number from directory products
         return reject({ kind: "not_found_max" });
       }
 
-      console.log("max id from directory products: ", res[0].maxId);
-      resolve(res[0].maxId);
+      console.log("max ordinal number from directory products: ", res[0].maxOrdinalNumber);
+      resolve(res[0].maxOrdinalNumber);
     });
   });
 }
 
-DirectoryProduct.normalizeIdUp = id => {
+DirectoryProduct.normalizeOrdinalNumberUp = ordinalNumber => {
   return new Promise(async (resolve, reject) => {
     try {
-      const maxId = await DirectoryProduct.selectMaxId();
-      if (maxId === null || id > maxId) {
+      const maxOrdinalNumber = await DirectoryProduct.selectMaxOrdinalNumber();
+      if (maxOrdinalNumber === null || ordinalNumber > maxOrdinalNumber) {
         return resolve({
           message: "Successfully!",
         });
       }
-      for (var i = maxId; i >= id; i--) {
+      for (var i = maxOrdinalNumber; i >= ordinalNumber; i--) {
         sql.query(
-          "UPDATE danh_muc_sp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_sp SET stt = ? WHERE stt = ?",
           [i + 1, i],
           (err, res) => {
             if (err) {
@@ -160,11 +141,11 @@ DirectoryProduct.normalizeIdUp = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Product with the id
+              // not found Directory Product with the ordinal number
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory product: ", { idOld: i, idNew: i + 1 });
+            console.log("updated directory product: ", { ordinalNumberOld: i, ordinalNumberNew: i + 1 });
             resolve({
               message: "Successfully!",
             });
@@ -177,19 +158,18 @@ DirectoryProduct.normalizeIdUp = id => {
   });
 }
 
-DirectoryProduct.normalizeIdDown = id => {
+DirectoryProduct.normalizeIdDown = ordinalNumber => {
   return new Promise(async (resolve, reject) => {
-    id = parseInt(id);
     try {
-      const maxId = await DirectoryProduct.selectMaxId();
-      if (id + 1 > maxId) {
+      const maxOrdinalNumber = await DirectoryProduct.selectMaxOrdinalNumber();
+      if (id + 1 > maxOrdinalNumber) {
         return resolve({
           message: "Successfully!",
         });
       }
-      for (var i = id + 1; i <= maxId; i++) {
+      for (var i = ordinalNumber + 1; i <= maxOrdinalNumber; i++) {
         sql.query(
-          "UPDATE danh_muc_sp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_sp SET stt = ? WHERE stt = ?",
           [i - 1, i],
           (err, res) => {
             if (err) {
@@ -201,11 +181,11 @@ DirectoryProduct.normalizeIdDown = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Product with the id
+              // not found Directory Product with the ordinal number
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory product: ", { idOld: i, idNew: i - 1 });
+            console.log("updated directory product: ", { ordinalNumberOld: i, ordinalNumberNew: i - 1 });
             resolve({
               message: "Successfully!",
             });
@@ -277,7 +257,7 @@ DirectoryProduct.updateById = (id, directoryProduct) => {
 DirectoryProduct.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE danh_muc_sp SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
+      "UPDATE danh_muc_sp SET id_danh_muc_cha = ? WHERE id_danh_muc_cha = ?",
       [parentDirectoryNew, parentDirectoryOld],
       (err, res) => {
         if (err) {

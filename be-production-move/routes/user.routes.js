@@ -52,14 +52,14 @@ module.exports = function(app) {
 
   // Khi chọn tên danh mục sản phẩm liên quan
   app.get(
-    "/api/moderator/directory/product/create/:type/:directoryName",
-    [authJwt.verifyToken, authJwt.isModerator],
+    "/api/moderator/directory/product/create/:type/:directoryId",
+    [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryProductId
   );
 
   // Khi submit tạo danh mục
   app.post(
-    "/api/moderator/directory/product/:type/:directoryName",
+    "/api/moderator/directory/product/:type/:directoryId",
     [authJwt.verifyToken, authJwt.isModerator, validateData.checkTypesExisted],
     controller.ModeratorDirectoryProductCreate
   );
@@ -172,19 +172,19 @@ module.exports = function(app) {
     controller.ModeratorDirectoryWarrantyCenterDelete
   );
 
-  // // Khi bấm vào nút thống kê sản phẩm
-  // app.get(
-  //   "/api/moderator/product",
-  //   [authJwt.verifyToken, authJwt.isModerator],
-  //   controller.ModeratorProductFilterData
-  // );
+  // Khi bấm vào nút thống kê sản phẩm
+  app.get(
+    "/api/moderator/product",
+    [authJwt.verifyToken, authJwt.isModerator],
+    controller.ModeratorProductFilterData
+  );
 
-  // // Khi bấm xem sản phẩm
-  // app.post(
-  //   "/api/moderator/product",
-  //   [authJwt.verifyToken, authJwt.isModerator],
-  //   controller.ModeratorProduct
-  // );
+  // Khi bấm xem sản phẩm
+  app.post(
+    "/api/moderator/product",
+    [authJwt.verifyToken, authJwt.isModerator],
+    controller.ModeratorProduct
+  );
 
   app.get(
     "/api/production-facility",
