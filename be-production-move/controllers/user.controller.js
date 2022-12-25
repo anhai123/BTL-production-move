@@ -232,13 +232,12 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
     });
   }
 };
-// done
+
 exports.ModeratorDirectoryProductCreate = async (req, res) => {
   let parentDirectoryT = 0;
   let hasError = false;
-  let directoryProduct;
   try {
-    directoryProduct = await DirectoryProduct.findById(req.params.directoryId);
+    const directoryProduct = await DirectoryProduct.findById(req.params.directoryId);
     if (req.params.type === "parentDirectory") {
       parentDirectoryT = req.params.directoryId;
     } else if (req.params.type === "brotherDirectory") {
@@ -509,37 +508,37 @@ exports.ModeratorDirectoryProductionFacilityCreate = async (req, res) => {
       parentDirectoryT = directoryProductionFacility.id_danh_muc_cha;
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryProductionFacility.id_danh_muc_cha;
-      try {
-        await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(directoryProductionFacility.id_danh_muc_cha, req.body.stt);
-      } catch (err) {
-        hasError = true;
-        if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found Directory Production Facility with parent directory id ${directoryProductionFacility.id_danh_muc_cha}.`
-          });
-        } else {
-          res.status(500).send({
-            message: "Error updating Directory Production Facility with parent directory id " + directoryProductionFacility.id_danh_muc_cha
-          });
-        }
-      }
     }
     if (hasError) {
       return;
     }
   } catch (err) {
-    res.status(500).send({
-      message: "Error retrieving directory production facility with directory id " + req.params.directoryId
-    });
+    if (err.kind !== "not_found") {
+      res.status(500).send({
+        message: "Error retrieving directory production facility with directory id " + req.params.directoryId
+      });
+    }
   }
   try {
     await DirectoryProductionFacility.normalizeOrdinalNumberUp(req.body.stt);
     try {
-      await DirectoryProductionFacility.create(new DirectoryProductionFacility({
+      const directoryProductionFacilityNew = await DirectoryProductionFacility.create(new DirectoryProductionFacility({
         stt: req.body.stt,
-        danh_muc_cha: parentDirectoryT,
+        id_danh_muc_cha: parentDirectoryT,
         ten_danh_muc_cssx: req.body.ten_danh_muc_cssx,
       }));
+      if (req.params.type === "childDirectory") {
+        try {
+          await DirectoryProductionFacility.updateParentDirectoryByParentDirectory(parentDirectoryT, directoryProductionFacilityNew.id);
+        } catch (err) {
+          hasError = true;
+          if (err.kind !== "not_found") {
+            res.status(500).send({
+              message: "Error updating Directory Production Facility with parent directory id " + parentDirectoryT
+            });
+          }
+        }
+      }
       res.send({ message: "Directory production facility was created successfully!" });
     } catch (err) {
       res.status(500).send({
@@ -773,20 +772,6 @@ exports.ModeratorDirectoryDistributionAgentCreate = async (req, res) => {
       parentDirectoryT = directoryDistributionAgent.id_danh_muc_cha;
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryDistributionAgent.id_danh_muc_cha;
-      try {
-        await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(directoryDistributionAgent.id_danh_muc_cha, req.body.stt);
-      } catch (err) {
-        hasError = true;
-        if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found Directory Distribution Agent with parent directory id ${directoryDistributionAgent.id_danh_muc_cha}.`
-          });
-        } else {
-          res.status(500).send({
-            message: "Error updating Directory Distribution Agent with parent directory id " + directoryDistributionAgent.id_danh_muc_cha
-          });
-        }
-      }
     }
     if (hasError) {
       return;
@@ -801,11 +786,23 @@ exports.ModeratorDirectoryDistributionAgentCreate = async (req, res) => {
   try {
     await DirectoryDistributionAgent.normalizeOrdinalNumberUp(req.body.stt);
     try {
-      await DirectoryDistributionAgent.create(new DirectoryDistributionAgent({
+      const directoryDistributionAgentNew = await DirectoryDistributionAgent.create(new DirectoryDistributionAgent({
         stt: req.body.stt,
-        danh_muc_cha: parentDirectoryT,
+        id_danh_muc_cha: parentDirectoryT,
         ten_danh_muc_dlpp: req.body.ten_danh_muc_dlpp,
       }));
+      if (req.params.type === "childDirectory") {
+        try {
+          await DirectoryDistributionAgent.updateParentDirectoryByParentDirectory(parentDirectoryT, directoryDistributionAgentNew.id);
+        } catch (err) {
+          hasError = true;
+          if (err.kind !== "not_found") {
+            res.status(500).send({
+              message: "Error updating Directory Distribution Agent with parent directory id " + directoryDistributionAgent.id_danh_muc_cha
+            });
+          }
+        }
+      }
       res.send({ message: "Directory distribution agent was created successfully!" });
     } catch (err) {
       res.status(500).send({
@@ -1039,20 +1036,6 @@ exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
       parentDirectoryT = directoryWarrantyCenter.id_danh_muc_cha;
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryWarrantyCenter.id_danh_muc_cha;
-      try {
-        await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(directoryWarrantyCenter.id_danh_muc_cha, req.body.stt);
-      } catch (err) {
-        hasError = true;
-        if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found Directory Warranty Center with parent directory id ${directoryWarrantyCenter.id_danh_muc_cha}.`
-          });
-        } else {
-          res.status(500).send({
-            message: "Error updating Directory Warranty Center with parent directory id " + directoryWarrantyCenter.id_danh_muc_cha
-          });
-        }
-      }
     }
     if (hasError) {
       return;
@@ -1067,11 +1050,23 @@ exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
   try {
     await DirectoryWarrantyCenter.normalizeOrdinalNumberUp(req.body.stt);
     try {
-      await DirectoryWarrantyCenter.create(new DirectoryWarrantyCenter({
+      const directoryWarrantyCenterNew = await DirectoryWarrantyCenter.create(new DirectoryWarrantyCenter({
         stt: req.body.stt,
         id_danh_muc_cha: parentDirectoryT,
         ten_danh_muc_ttbh: req.body.ten_danh_muc_ttbh,
       }));
+      if (req.params.type === "childDirectory") {
+        try {
+          await DirectoryWarrantyCenter.updateParentDirectoryByParentDirectory(parentDirectoryT, directoryWarrantyCenterNew.id);
+        } catch (err) {
+          hasError = true;
+          if (err.kind !== "not_found") {
+            res.status(500).send({
+              message: "Error updating Directory Warranty Center with parent directory id " + parentDirectoryT
+            });
+          }
+        }
+      }
       res.send({ message: "Directory warranty center was created successfully!" });
     } catch (err) {
       res.status(500).send({

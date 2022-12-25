@@ -257,8 +257,8 @@ DirectoryProductionFacility.updateById = (id, directoryProductionFacility) => {
 DirectoryProductionFacility.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE danh_muc_cssx SET id_danh_muc_cha = ? WHERE id_danh_muc_cha = ?",
-      [parentDirectoryNew, parentDirectoryOld],
+      "UPDATE danh_muc_cssx SET id_danh_muc_cha = ? WHERE id_danh_muc_cha = ? AND id != ?",
+      [parentDirectoryNew, parentDirectoryOld, parentDirectoryNew],
       (err, res) => {
         if (err) {
           console.log("error: ", err);
