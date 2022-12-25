@@ -232,32 +232,19 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
     });
   }
 };
-
+// done
 exports.ModeratorDirectoryProductCreate = async (req, res) => {
   let parentDirectoryT = 0;
   let hasError = false;
+  let directoryProduct;
   try {
-    const directoryProduct = await DirectoryProduct.findById(req.params.directoryId);
+    directoryProduct = await DirectoryProduct.findById(req.params.directoryId);
     if (req.params.type === "parentDirectory") {
       parentDirectoryT = req.params.directoryId;
     } else if (req.params.type === "brotherDirectory") {
       parentDirectoryT = directoryProduct.id_danh_muc_cha;
     } else if (req.params.type === "childDirectory") {
       parentDirectoryT = directoryProduct.id_danh_muc_cha;
-      try {
-        await DirectoryProduct.updateParentDirectoryByParentDirectory(directoryProduct.id_danh_muc_cha, req.body.stt);
-      } catch (err) {
-        hasError = true;
-        if (err.kind === "not_found") {
-          res.status(404).send({
-            message: `Not found Directory Product with parent directory id ${directoryProduct.id_danh_muc_cha}.`
-          });
-        } else {
-          res.status(500).send({
-            message: "Error updating Directory Product with parent directory id " + directoryProduct.id_danh_muc_cha
-          });
-        }
-      }
     }
     if (hasError) {
       return;
@@ -272,11 +259,23 @@ exports.ModeratorDirectoryProductCreate = async (req, res) => {
   try {
     await DirectoryProduct.normalizeOrdinalNumberUp(req.body.stt);
     try {
-      await DirectoryProduct.create(new DirectoryProduct({
+      const directoryProductNew = await DirectoryProduct.create(new DirectoryProduct({
         stt: req.body.stt,
         id_danh_muc_cha: parentDirectoryT,
         ten_danh_muc_sp: req.body.ten_danh_muc_sp,
       }));
+      if (req.params.type === "childDirectory") {
+        try {
+          await DirectoryProduct.updateParentDirectoryByParentDirectory(parentDirectoryT, directoryProductNew.id);
+        } catch (err) {
+          hasError = true;
+          if (err.kind !== "not_found") {
+            res.status(500).send({
+              message: "Error updating Directory Product with parent directory id " + parentDirectoryT
+            });
+          }
+        }
+      }
       res.send({ message: "Directory product was created successfully!" });
     } catch (err) {
       res.status(500).send({
@@ -1030,7 +1029,6 @@ exports.ModeratorDirectoryWarrantyCenterId = async (req, res) => {
 };
 
 exports.ModeratorDirectoryWarrantyCenterCreate = async (req, res) => {
-  let a =1;
   let parentDirectoryT = 0;
   let hasError = false;
   try {
