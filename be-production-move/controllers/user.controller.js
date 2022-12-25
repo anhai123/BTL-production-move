@@ -498,7 +498,60 @@ exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
         const brotherDirectoryProductionFacility = await DirectoryProductionFacility.findById(req.params.directoryId);
         try {
           const brotherDirectoryProductionFacilityOrdinalNumbers = await DirectoryProductionFacility.findOrdinalNumberByParentDirectoryId(brotherDirectoryProductionFacility.id_danh_muc_cha);
-          brotherDirectoryProductionFacilityOrdinalNumbers.push(brotherDirectoryProductionFacilityOrdinalNumbers[brotherDirectoryProductionFacilityOrdinalNumbers.length - 1] + 1);
+          try {
+            const parentOfBrotherDirectoryProductionFacility = await DirectoryProductionFacility.findById(brotherDirectoryProductionFacility.id_danh_muc_cha);
+            try {
+              const brotherOfParentOfBrotherDirectoryProductionFacilityOrdinalNumbers = await DirectoryProductionFacility.findOrdinalNumberByParentDirectoryId(parentOfBrotherDirectoryProductionFacility.id_danh_muc_cha);
+              for (let i = 0; i < brotherOfParentOfBrotherDirectoryProductionFacilityOrdinalNumbers.length; i++) {
+                if (i + 1 !== brotherOfParentOfBrotherDirectoryProductionFacilityOrdinalNumbers.length) {
+                  if (parentOfBrotherDirectoryProductionFacility.stt === brotherOfParentOfBrotherDirectoryProductionFacilityOrdinalNumbers[i]) {
+                    brotherDirectoryProductionFacilityOrdinalNumbers.push(brotherOfParentOfBrotherDirectoryProductionFacilityOrdinalNumbers[i + 1]);
+                    break;
+                  }
+                } else {
+                  try {
+                    const maxOrdinalNumber = await DirectoryProductionFacility.selectMaxOrdinalNumber();
+                    brotherDirectoryProductionFacilityOrdinalNumbers.push(maxOrdinalNumber + 1);
+                  } catch (err) {
+                    if (err.kind === "not_found_max") {
+                      res.status(404).send({
+                        message: "Not found Directory Production Facility ordinal number max"
+                      });
+                    } else {
+                      res.status(500).send({
+                        message: "Error select Directory Production Facility ordinal number max"
+                      });
+                    }
+                  }
+                }
+              }
+            } catch (err) {
+              res.status(500).send({
+                message: "Error retrieving brother of parent of brother directory production facilitys with directory id " + parentOfBrotherDirectoryProductionFacility.id_danh_muc_cha
+              });
+            }
+          } catch (err) {
+            if (err.kind === "not_found") {
+              try {
+                const maxOrdinalNumber = await DirectoryProductionFacility.selectMaxOrdinalNumber();
+                brotherDirectoryProductionFacilityOrdinalNumbers.push(maxOrdinalNumber + 1);
+              } catch (err) {
+                if (err.kind === "not_found_max") {
+                  res.status(404).send({
+                    message: "Not found Directory Production Facility ordinal number max"
+                  });
+                } else {
+                  res.status(500).send({
+                    message: "Error select Directory Production Facility ordinal number max"
+                  });
+                }
+              }
+            } else {
+              res.status(500).send({
+                message: "Error retrieving Directory Production Facility with id " + brotherDirectoryProductionFacility.id_danh_muc_cha
+              });
+            }
+          }
           res.status(200).send([allDirectoryProductionFacilitys, {
             ordinalNumbers: brotherDirectoryProductionFacilityOrdinalNumbers
           }]);
@@ -654,6 +707,7 @@ exports.ModeratorDirectoryProductionFacilityDelete = async (req, res) => {
       res.status(404).send({
         message: `Not found Directory Production Facility with id ${req.params.id}.`
       });
+      return;
     } else {
       res.status(500).send({
         message: "Error retrieving Directory Production Facility with id " + req.params.id
@@ -762,7 +816,60 @@ exports.ModeratorDirectoryDistributionAgentId = async (req, res) => {
         const brotherDirectoryDistributionAgent = await DirectoryDistributionAgent.findById(req.params.directoryId);
         try {
           const brotherDirectoryDistributionAgentOrdinalNumbers = await DirectoryDistributionAgent.findOrdinalNumberByParentDirectoryId(brotherDirectoryDistributionAgent.id_danh_muc_cha);
-          brotherDirectoryDistributionAgentOrdinalNumbers.push(brotherDirectoryDistributionAgentOrdinalNumbers[brotherDirectoryDistributionAgentOrdinalNumbers.length - 1] + 1);
+          try {
+            const parentOfBrotherDirectoryDistributionAgent = await DirectoryDistributionAgent.findById(brotherDirectoryDistributionAgent.id_danh_muc_cha);
+            try {
+              const brotherOfParentOfBrotherDirectoryDistributionAgentOrdinalNumbers = await DirectoryDistributionAgent.findOrdinalNumberByParentDirectoryId(parentOfBrotherDirectoryDistributionAgent.id_danh_muc_cha);
+              for (let i = 0; i < brotherOfParentOfBrotherDirectoryDistributionAgentOrdinalNumbers.length; i++) {
+                if (i + 1 !== brotherOfParentOfBrotherDirectoryDistributionAgentOrdinalNumbers.length) {
+                  if (parentOfBrotherDirectoryDistributionAgent.stt === brotherOfParentOfBrotherDirectoryDistributionAgentOrdinalNumbers[i]) {
+                    brotherDirectoryDistributionAgentOrdinalNumbers.push(brotherOfParentOfBrotherDirectoryDistributionAgentOrdinalNumbers[i + 1]);
+                    break;
+                  }
+                } else {
+                  try {
+                    const maxOrdinalNumber = await DirectoryDistributionAgent.selectMaxOrdinalNumber();
+                    brotherDirectoryDistributionAgentOrdinalNumbers.push(maxOrdinalNumber + 1);
+                  } catch (err) {
+                    if (err.kind === "not_found_max") {
+                      res.status(404).send({
+                        message: "Not found Directory Distribution Agent ordinal number max"
+                      });
+                    } else {
+                      res.status(500).send({
+                        message: "Error select Directory Distribution Agent ordinal number max"
+                      });
+                    }
+                  }
+                }
+              }
+            } catch (err) {
+              res.status(500).send({
+                message: "Error retrieving brother of parent of brother directory distribution agents with directory id " + parentOfBrotherDirectoryDistributionAgent.id_danh_muc_cha
+              });
+            }
+          } catch (err) {
+            if (err.kind === "not_found") {
+              try {
+                const maxOrdinalNumber = await DirectoryDistributionAgent.selectMaxOrdinalNumber();
+                brotherDirectoryDistributionAgentOrdinalNumbers.push(maxOrdinalNumber + 1);
+              } catch (err) {
+                if (err.kind === "not_found_max") {
+                  res.status(404).send({
+                    message: "Not found Directory Distribution Agent ordinal number max"
+                  });
+                } else {
+                  res.status(500).send({
+                    message: "Error select Directory Distribution Agent ordinal number max"
+                  });
+                }
+              }
+            } else {
+              res.status(500).send({
+                message: "Error retrieving Directory Distribution Agent with id " + brotherDirectoryDistributionAgent.id_danh_muc_cha
+              });
+            }
+          }
           res.status(200).send([allDirectoryDistributionAgents, {
             ordinalNumbers: brotherDirectoryDistributionAgentOrdinalNumbers
           }]);
@@ -918,6 +1025,7 @@ exports.ModeratorDirectoryDistributionAgentDelete = async (req, res) => {
       res.status(404).send({
         message: `Not found Directory Distribution Agent with id ${req.params.id}.`
       });
+      return;
     } else {
       res.status(500).send({
         message: "Error retrieving Directory Distribution Agent with id " + req.params.id
@@ -1026,9 +1134,62 @@ exports.ModeratorDirectoryWarrantyCenterId = async (req, res) => {
         const brotherDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findById(req.params.directoryId);
         try {
           const brotherDirectoryWarrantyCenterOrdinalNumbers = await DirectoryWarrantyCenter.findOrdinalNumberByParentDirectoryId(brotherDirectoryWarrantyCenter.id_danh_muc_cha);
-          brotherDirectoryWarrantyCenterOrdinalNumbers.push(brotherDirectoryWarrantyCenterOrdinalNumbers[brotherDirectoryWarrantyCenterOrdinalNumbers.length - 1] + 1);
+          try {
+            const parentOfBrotherDirectoryWarrantyCenter = await DirectoryWarrantyCenter.findById(brotherDirectoryWarrantyCenter.id_danh_muc_cha);
+            try {
+              const brotherOfParentOfBrotherDirectoryWarrantyCenterOrdinalNumbers = await DirectoryWarrantyCenter.findOrdinalNumberByParentDirectoryId(parentOfBrotherDirectoryWarrantyCenter.id_danh_muc_cha);
+              for (let i = 0; i < brotherOfParentOfBrotherDirectoryWarrantyCenterOrdinalNumbers.length; i++) {
+                if (i + 1 !== brotherOfParentOfBrotherDirectoryWarrantyCenterOrdinalNumbers.length) {
+                  if (parentOfBrotherDirectoryWarrantyCenter.stt === brotherOfParentOfBrotherDirectoryWarrantyCenterOrdinalNumbers[i]) {
+                    brotherDirectoryWarrantyCenterOrdinalNumbers.push(brotherOfParentOfBrotherDirectoryWarrantyCenterOrdinalNumbers[i + 1]);
+                    break;
+                  }
+                } else {
+                  try {
+                    const maxOrdinalNumber = await DirectoryWarrantyCenter.selectMaxOrdinalNumber();
+                    brotherDirectoryWarrantyCenterOrdinalNumbers.push(maxOrdinalNumber + 1);
+                  } catch (err) {
+                    if (err.kind === "not_found_max") {
+                      res.status(404).send({
+                        message: "Not found Directory Warranty Center ordinal number max"
+                      });
+                    } else {
+                      res.status(500).send({
+                        message: "Error select Directory Warranty Center ordinal number max"
+                      });
+                    }
+                  }
+                }
+              }
+            } catch (err) {
+              res.status(500).send({
+                message: "Error retrieving brother of parent of brother directory warranty centers with directory id " + parentOfBrotherDirectoryWarrantyCenter.id_danh_muc_cha
+              });
+            }
+          } catch (err) {
+            if (err.kind === "not_found") {
+              try {
+                const maxOrdinalNumber = await DirectoryWarrantyCenter.selectMaxOrdinalNumber();
+                brotherDirectoryWarrantyCenterOrdinalNumbers.push(maxOrdinalNumber + 1);
+              } catch (err) {
+                if (err.kind === "not_found_max") {
+                  res.status(404).send({
+                    message: "Not found Directory Warranty Center ordinal number max"
+                  });
+                } else {
+                  res.status(500).send({
+                    message: "Error select Directory Warranty Center ordinal number max"
+                  });
+                }
+              }
+            } else {
+              res.status(500).send({
+                message: "Error retrieving Directory Warranty Center with id " + brotherDirectoryWarrantyCenter.id_danh_muc_cha
+              });
+            }
+          }
           res.status(200).send([allDirectoryWarrantyCenters, {
-            id: brotherDirectoryWarrantyCenterOrdinalNumbers
+            ordinalNumbers: brotherDirectoryWarrantyCenterOrdinalNumbers
           }]);
         } catch (err) {
           res.status(500).send({
@@ -1182,6 +1343,7 @@ exports.ModeratorDirectoryWarrantyCenterDelete = async (req, res) => {
       res.status(404).send({
         message: `Not found Directory Warranty Center with id ${req.params.id}.`
       });
+      return;
     } else {
       res.status(500).send({
         message: "Error retrieving Directory Warranty Center with id " + req.params.id
