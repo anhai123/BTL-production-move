@@ -1189,7 +1189,7 @@ exports.ModeratorDirectoryWarrantyCenterId = async (req, res) => {
             }
           }
           res.status(200).send([allDirectoryWarrantyCenters, {
-            id: brotherDirectoryWarrantyCenterOrdinalNumbers
+            ordinalNumbers: brotherDirectoryWarrantyCenterOrdinalNumbers
           }]);
         } catch (err) {
           res.status(500).send({
