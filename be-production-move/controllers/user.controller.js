@@ -180,7 +180,60 @@ exports.ModeratorDirectoryProductId = async (req, res) => {
         const brotherDirectoryProduct = await DirectoryProduct.findById(req.params.directoryId);
         try {
           const brotherDirectoryProductOrdinalNumbers = await DirectoryProduct.findOrdinalNumberByParentDirectoryId(brotherDirectoryProduct.id_danh_muc_cha);
-          brotherDirectoryProductOrdinalNumbers.push(brotherDirectoryProductOrdinalNumbers[brotherDirectoryProductOrdinalNumbers.length - 1] + 1);
+          try {
+            const parentOfBrotherDirectoryProduct = await DirectoryProduct.findById(brotherDirectoryProduct.id_danh_muc_cha);
+            try {
+              const brotherOfParentOfBrotherDirectoryProductOrdinalNumbers = await DirectoryProduct.findOrdinalNumberByParentDirectoryId(parentOfBrotherDirectoryProduct.id_danh_muc_cha);
+              for (let i = 0; i < brotherOfParentOfBrotherDirectoryProductOrdinalNumbers.length; i++) {
+                if (i + 1 !== brotherOfParentOfBrotherDirectoryProductOrdinalNumbers.length) {
+                  if (parentOfBrotherDirectoryProduct.stt === brotherOfParentOfBrotherDirectoryProductOrdinalNumbers[i]) {
+                    brotherDirectoryProductOrdinalNumbers.push(brotherOfParentOfBrotherDirectoryProductOrdinalNumbers[i + 1]);
+                    break;
+                  }
+                } else {
+                  try {
+                    const maxOrdinalNumber = await DirectoryProduct.selectMaxOrdinalNumber();
+                    brotherDirectoryProductOrdinalNumbers.push(maxOrdinalNumber + 1);
+                  } catch (err) {
+                    if (err.kind === "not_found_max") {
+                      res.status(404).send({
+                        message: "Not found Directory Product ordinal number max"
+                      });
+                    } else {
+                      res.status(500).send({
+                        message: "Error select Directory Product ordinal number max"
+                      });
+                    }
+                  }
+                }
+              }
+            } catch (err) {
+              res.status(500).send({
+                message: "Error retrieving brother of parent of brother directory products with directory id " + parentOfBrotherDirectoryProduct.id_danh_muc_cha
+              });
+            }
+          } catch (err) {
+            if (err.kind === "not_found") {
+              try {
+                const maxOrdinalNumber = await DirectoryProduct.selectMaxOrdinalNumber();
+                brotherDirectoryProductOrdinalNumbers.push(maxOrdinalNumber + 1);
+              } catch (err) {
+                if (err.kind === "not_found_max") {
+                  res.status(404).send({
+                    message: "Not found Directory Product ordinal number max"
+                  });
+                } else {
+                  res.status(500).send({
+                    message: "Error select Directory Product ordinal number max"
+                  });
+                }
+              }
+            } else {
+              res.status(500).send({
+                message: "Error retrieving Directory Product with id " + brotherDirectoryProduct.id_danh_muc_cha
+              });
+            }
+          }
           res.status(200).send([allDirectoryProducts, {
             ordinalNumbers: brotherDirectoryProductOrdinalNumbers
           }]);
@@ -336,6 +389,7 @@ exports.ModeratorDirectoryProductDelete = async (req, res) => {
       res.status(404).send({
         message: `Not found Directory Product with id ${req.params.id}.`
       });
+      return;
     } else {
       res.status(500).send({
         message: "Error retrieving Directory Product with id " + req.params.id
