@@ -1460,7 +1460,10 @@ exports.ModeratorProductFilterData = async (req, res) => {
 
 exports.ModeratorProduct = async (req, res) => {
   try {
-    const productIds = await Warranty.getProductIdFromWarrantyCenterId(req.body.id_trung_tam_bh);
+    let productIds;
+    if (req.body.id_trung_tam_bh) {
+      productIds = await Warranty.getProductIdFromWarrantyCenterId(req.body.id_trung_tam_bh);
+    }
     const products = await Product.getAll(req.body.id_trang_thai, req.body.id_co_so_sx, req.body.id_dai_ly, productIds);
     res.status(200).send(products);
   } catch (err) {
