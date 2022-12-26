@@ -64,4 +64,31 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids) => {
     });
 };
 
+Product.updateStatusByIds = ids => {
+    return new Promise((resolve, reject) => {
+        let query = "UPDATE san_pham SET id_trang_thai = 3 WHERE id IN (";
+        for (let i = 0; i < ids.length; i++) {
+            if (i == ids.length - 1) {
+                query += `${ids[i]})`;
+            } else {
+                query += `${ids[i]}, `;
+            }
+        }
+
+        sql.query(query, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                return reject(err);
+            }
+
+            if (res.affectedRows == 0) {
+                // not found Product with the id
+                return reject({ kind: "not_found" });
+            }
+
+            resolve();
+        });
+    });
+};
+
 module.exports = Product;

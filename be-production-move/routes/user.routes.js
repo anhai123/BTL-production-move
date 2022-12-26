@@ -199,6 +199,18 @@ module.exports = function(app) {
   );
 
   app.get(
+    "/api/distribution-agent/product",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProduct
+  );
+
+  app.put(
+    "/api/distribution-agent/product",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductStatusUpdate
+  );
+
+  app.get(
     "/api/warranty-center",
     [authJwt.verifyToken, authJwt.isWarrantyCenter],
     controller.WarrantyCenterBoard

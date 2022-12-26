@@ -478,7 +478,7 @@ exports.ModeratorDirectoryProductionFacilityId = async (req, res) => {
             }]);
           } catch (err) {
             if (err.kind === "not_found") {
-              res.status(200).send([allDirectoryProducts, {
+              res.status(200).send([allDirectoryProductionFacilitys, {
                 ordinalNumbers: [1]
               }]);
             } else {
@@ -1351,41 +1351,6 @@ exports.ModeratorDirectoryWarrantyCenterDelete = async (req, res) => {
     }
   }
   try {
-    const data = await DirectoryWarrantyCenter.remove(req.params.id);
-    try {
-      const data = await DirectoryWarrantyCenter.normalizeIdDown(req.params.id);
-      res.send({ message: `Directory Warranty Center was deleted successfully!` });
-    } catch (err) {
-      if (err[0].kind === "select_max_error") {
-        res.status(500).send([{
-          message: "Error select Directory Warranty Center id max"
-        }, err[1]]);
-      } else if (err[0].kind === "not_found_max") {
-        res.status(404).send([{
-          message: "Not found Directory Warranty Center id max"
-        }]);
-      } else if (err[0].kind === "update_loop_error") {
-        res.status(500).send([{
-          message: "Error update Directory Warranty Center id in loop"
-        }, err[1]]);
-      } else if (err[0].kind === "not_found") {
-        res.status(404).send([{
-          message: "Not found Directory Warranty Center with id"
-        }]);
-      }
-    }
-  } catch (err) {
-    if (err.kind === "not_found") {
-      res.status(404).send({
-        message: `Not found Directory Warranty Center with id ${req.params.id}.`
-      });
-    } else {
-      res.status(500).send({
-        message: "Could not delete Directory Warranty Center with id " + req.params.id
-      });
-    }
-  }
-  try {
     id = parseInt(req.params.id);
     const directoryWarrantyCenter = await DirectoryWarrantyCenter.findById(id);
     try {
@@ -1485,6 +1450,42 @@ exports.ProductionFacilityBoard = (req, res) => {
 
 exports.DistributionAgentBoard = (req, res) => {
   res.status(200).send("Distribution Agent Content.");
+};
+
+exports.DistributionAgentProduct = async (req, res) => {
+  try {
+    const products = await Product.getAll(2, null, req.id_dai_ly);
+    res.status(200).send(products);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm!`
+      });
+    } else {
+      res.status(500).send({
+        message: "Lỗi khi lấy sản phẩm!"
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductStatusUpdate = async (req, res) => {
+  try {
+    await Product.updateStatusByIds(req.body.ids);
+    res.status(200).send({
+      message: 'Cập nhật trạng thái thành công!'
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy sản phẩm!`
+      });
+    } else {
+      res.status(500).send({
+        message: "Lỗi khi cập nhật trạng thái sản phẩm!"
+      });
+    }
+  }
 };
 
 exports.WarrantyCenterBoard = (req, res) => {
