@@ -76,6 +76,7 @@ isDistributionAgent = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     if (user.id_dai_ly) {
+      req.id_dai_ly = user.id_dai_ly;
       next();
       return;
     }
