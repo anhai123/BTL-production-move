@@ -203,4 +203,27 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isWarrantyCenter],
     controller.WarrantyCenterBoard
   );
+
+  // nhập sản phẩm
+  app.post("/api/facility/:id/product/create", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductCreate);
+
+  // tất cả sản phẩm có thể xuất đi đại lý
+  app.get("/api/facility/:id/product-new", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductNew);
+
+  // xác nhận chuyển sản phẩm cho đại lý
+  app.post("/api/facility/:id/product/deliver", controller.FacilityProductDeliver);
+
+  
+  // xem sản phẩm lỗi đang chuyển về cơ sở sản xuất
+  app.get("/api/facility/:id/product/faulty/all", controller.FacilityProductFaulty);
+
+  // bấm vào button xác nhận sản phẩm  loi đã đến cơ sở sản xuất
+  app.put("/api/facility/:id/product/faulty/receiv", controller.FacilityProductFaultyReceive);
+
+  // khi bấm thống kê sản phẩm
+  app.post("/api/facility/:id/product", controller.FacilityProduct);
+
+  // khi bấm xem sản phẩm đã bán
+  app.post("/api/facility/:id/product/sold", controller.FacilityProductSold);
+  
 };

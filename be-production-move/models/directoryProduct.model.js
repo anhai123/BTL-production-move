@@ -19,7 +19,7 @@ DirectoryProduct.create = newDirectoryProduct => {
       resolve({ id: res.insertId, ...newDirectoryProduct });
     });
   });
-};
+};  
 
 DirectoryProduct.getAll = () => {
   return new Promise((resolve, reject) => {
