@@ -9,6 +9,142 @@ const ProductionFacility = require("../models/productionFacility.model");
 const DistributionAgent = require("../models/distributionAgent.model");
 const WarrantyCenter = require("../models/warrantyCenter.model");
 const Product = require("../models/product.model");
+const Dates = require("../models/date.model");
+require('dotenv').config();
+
+
+
+
+exports.FacilityProductCreate = async (req, res) => {
+  try {
+    let Date_ = await Dates.create( new Dates({
+      nam_tai_kho_cssx: new Date
+    }))
+    let id_ngay_ = await Dates.slectIdMax();
+    for (let i = 0; i< req.body.so_luong; i++) {
+      await Product.create( new Product({
+        ten_san_pham: req.body.ten_san_pham,
+        thoi_han_bao_hanh: req.body.thoi_han_bao_hanh,
+        ngay_san_xuat: req.body.ngay_san_xuat,
+        id_dong_san_pham: req.body.id_dong_san_pham,
+        id_thong_so: req.body.id_thong_so,
+        id_trang_thai: 1,
+        id_ngay: id_ngay_
+      }));  
+    }
+    res.status(200).send({ message: "Thêm sản phẩm mới thành công" })
+  } catch(err) {
+      res.status(500).send({
+      message: "Thêm mới sản phẩm không thành công"
+      });
+
+  }
+
+};
+
+exports.FacilityProductNew = async(req, res) => {
+  try {
+      const products = await Product.getAllProductNew(process.env.NAM_TAI_KHO_CO_SO_SAN_XUAT, req.params.id);
+      res.status(200).send(products);
+  } catch(err) {
+     if(err.kind === "not_found") {
+      res.status(404).send({
+        message: "Không có sản phẩm nào mới sản xuất"
+      })
+     } else {
+      res.status(500).send ({
+        message: "Lỗi khi truy xuất sản phẩm mới sản xuất"
+      })
+     }
+  }
+}
+
+exports.FacilityProductDeliver = async(req, res) => {
+    try {
+        let ids = req.body.ids;
+        await Product.Deliver(process.env.DANG_CHUYEN_DEN_CHO_DAI_LY, ids, req.body.id_dai_ly, req.params.id);
+        res.status(200).send({
+          message: "Gửi sản phẩm cho đại lý thành công"
+        })
+    } catch(err) {
+      if(err.kind === "not_found") {
+        res.status(404).send({
+          message: `Not found data`
+        })} else {
+          res.status(500).send({
+            message: "Lỗi, xác nhận sản phẩm chuyển đi đại lý"
+          })
+        }
+    }
+}
+
+
+exports.FacilityProduct = async (req, res) => {
+  try {
+    const products = await Product.getAll(req.body.id_trang_thai, req.params.id, null, null, req.body.month, req.body.quarter, req.body.year);
+    res.status(200).send(products);
+  } catch(err) {
+    if(err.kind === "not_found") {
+      res.status(404).send({
+        message: "Thống kê sản phẩm, không có sản phẩm trong data"
+      })
+  } else {
+    res.status(500).send({
+      message: "Lỗi khi thống kê sản phẩm"
+    })
+  }
+  }
+}
+
+
+exports.FacilityProductFaulty = async(req, res) => {
+  try {
+      const products = await Product.getAllProductFaulty(process.env.DANG_CHUYEN_DEN_CO_SO_SAN_XUAT);
+      res.status(200).send(products);
+  } catch(err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Không có sản phẩm lỗi đang chuyển về."
+      });
+    } else {
+      res.status(500).send({
+        message: "Lỗi khi truy vấn sp lỗi đang về cssx"
+      })
+    }
+  }
+}
+
+exports.FacilityProductFaultyReceive = async (req, res) => {
+  try {
+    await Product.updateStatusId(process.env.SAN_PHAM_LOI_NAM_TAI_KHO_CO_SO_SX, process.env.DANG_CHUYEN_DEN_CO_SO_SAN_XUAT, req.params.id);
+    res.status(200).send({
+      message: "xác nhận sản phẩm lỗi đã về đến cssx thành công"
+    })
+  } catch(err) {
+    res.status(500).send({
+      message: "Lỗi không thể update ID trạng thái cho sản phẩm"
+  })
+  }
+
+}
+
+exports.FacilityProductSold = async (req, res) => {
+  try {
+    const products = await Product.getAll( process.env.DA_BAN, req.params.id, null, null, null, req.body.month, req.body.quarter, req.body.year);
+    res.status(200).send(products);
+  } catch(err) {
+     if(err.kind === "not_found") {
+      res.status(404).send({
+        message: "Không có sản phẩm đã bán trên data"
+      })} else {
+        res.status(500).send({
+          message: "Xảy ra lỗi khi truy xuất sản phẩm đã bán"
+        })
+      }
+  }
+}
+
+
 const Warranty = require("../models/warranty.model");
 
 exports.allAccess = (req, res) => {
