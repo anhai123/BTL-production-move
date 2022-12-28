@@ -2,8 +2,8 @@ const sql = require(".").connection;
 
 // constructor
 const DirectoryDistributionAgent = function (directoryDistributionAgent) {
-  this.id = directoryDistributionAgent.id;
-  this.danh_muc_cha = directoryDistributionAgent.danh_muc_cha;
+  this.stt = directoryDistributionAgent.stt;
+  this.id_danh_muc_cha = directoryDistributionAgent.id_danh_muc_cha;
   this.ten_danh_muc_dlpp = directoryDistributionAgent.ten_danh_muc_dlpp;
 };
 
@@ -54,28 +54,9 @@ DirectoryDistributionAgent.findById = id => {
   });
 };
 
-DirectoryDistributionAgent.findByDirectoryName = directoryName => {
-  return new Promise((resolve, reject) => {
-    sql.query(`SELECT * FROM danh_muc_dlpp WHERE ten_danh_muc_dlpp = '${directoryName}'`, (err, res) => {
-      if (err) {
-        console.log("error: ", err);
-        return reject(err);
-      }
-
-      if (res.length) {
-        console.log("found directory distribution agent: ", res[0]);
-        return resolve(res[0]);
-      }
-
-      // not found Directory Distribution Agent with the directory name
-      reject({ kind: "not_found" });
-    });
-  });
-};
-
 DirectoryDistributionAgent.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_dlpp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT * FROM danh_muc_dlpp WHERE id_danh_muc_cha = ?", parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
@@ -86,38 +67,38 @@ DirectoryDistributionAgent.findByParentDirectory = parentDirectory => {
         return resolve(res);
       }
 
-      // not found Directory Distribution Agent with the parent directory name
+      // not found Directory Distribution Agent with the parent directory id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryDistributionAgent.findIdByParentDirectory = parentDirectory => {
+DirectoryDistributionAgent.findOrdinalNumberByParentDirectoryId = parentDirectoryId => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT id FROM danh_muc_dlpp WHERE danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query("SELECT stt FROM danh_muc_dlpp WHERE id_danh_muc_cha = ?", parentDirectoryId, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);
       }
 
       if (res.length) {
-        console.log("found parent directory distribution agents: ", res);
-        const ids =[];
+        console.log("found directory distribution agents: ", res);
+        const ordinalNumbers =[];
         for (let i of res) {
-          ids.push(i.id);
+          ordinalNumbers.push(i.stt);
         }
-        return resolve(ids);
+        return resolve(ordinalNumbers);
       }
 
-      // not found Directory Distribution Agent Id with the parent directory name
+      // not found Directory Distribution Agent Ordinal Number with the parent directory id
       reject({ kind: "not_found" });
     });
   });
 };
 
-DirectoryDistributionAgent.selectMaxId = () => {
+DirectoryDistributionAgent.selectMaxOrdinalNumber = () => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT MAX(id) as maxId FROM danh_muc_dlpp", (err, res) => {
+    sql.query("SELECT MAX(stt) as maxOrdinalNumber FROM danh_muc_dlpp", (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject({
@@ -127,28 +108,28 @@ DirectoryDistributionAgent.selectMaxId = () => {
       }
 
       if (res.affectedRows == 0) {
-        // not found max id from directory distribution agents
+        // not found max ordinal number from directory distribution agents
         return reject({ kind: "not_found_max" });
       }
 
-      console.log("max id from directory distribution agents: ", res[0].maxId);
-      resolve(res[0].maxId);
+      console.log("max ordinal number from directory distribution agents: ", res[0].maxOrdinalNumber);
+      resolve(res[0].maxOrdinalNumber);
     });
   });
 }
 
-DirectoryDistributionAgent.normalizeIdUp = id => {
+DirectoryDistributionAgent.normalizeOrdinalNumberUp = ordinalNumber => {
   return new Promise(async (resolve, reject) => {
     try {
-      const maxId = await DirectoryDistributionAgent.selectMaxId();
-      if (maxId === null || id > maxId) {
+      const maxOrdinalNumber = await DirectoryDistributionAgent.selectMaxOrdinalNumber();
+      if (maxOrdinalNumber === null || ordinalNumber > maxOrdinalNumber) {
         return resolve({
           message: "Successfully!",
         });
       }
-      for (var i = maxId; i >= id; i--) {
+      for (var i = maxOrdinalNumber; i >= ordinalNumber; i--) {
         sql.query(
-          "UPDATE danh_muc_dlpp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_dlpp SET stt = ? WHERE stt = ?",
           [i + 1, i],
           (err, res) => {
             if (err) {
@@ -160,11 +141,11 @@ DirectoryDistributionAgent.normalizeIdUp = id => {
             }
 
             if (res.affectedRows == 0) {
-              // not found Directory Distribution Agent with the id
+              // not found Directory Distribution Agent with the ordinal number
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory distribution agent: ", { idOld: i, idNew: i + 1 });
+            console.log("updated directory distribution agent: ", { ordinalNumberOld: i, ordinalNumberNew: i + 1 });
             resolve({
               message: "Successfully!",
             });
@@ -177,19 +158,18 @@ DirectoryDistributionAgent.normalizeIdUp = id => {
   });
 }
 
-DirectoryDistributionAgent.normalizeIdDown = id => {
+DirectoryDistributionAgent.normalizeOrdinalNumberDown = ordinalNumber => {
   return new Promise(async (resolve, reject) => {
-    id = parseInt(id);
     try {
-      const maxId = await DirectoryDistributionAgent.selectMaxId();
-      if (id + 1 > maxId) {
+      const maxOrdinalNumber = await DirectoryDistributionAgent.selectMaxOrdinalNumber();
+      if (ordinalNumber + 1 > maxOrdinalNumber) {
         return resolve({
           message: "Successfully!",
         });
       }
-      for (var i = id + 1; i <= maxId; i++) {
+      for (var i = ordinalNumber + 1; i <= maxOrdinalNumber; i++) {
         sql.query(
-          "UPDATE danh_muc_dlpp SET id = ? WHERE id = ?",
+          "UPDATE danh_muc_dlpp SET stt = ? WHERE stt = ?",
           [i - 1, i],
           (err, res) => {
             if (err) {
@@ -205,7 +185,7 @@ DirectoryDistributionAgent.normalizeIdDown = id => {
               return reject({ kind: "not_found" });
             }
             // test
-            console.log("updated directory distribution agent: ", { idOld: i, idNew: i - 1 });
+            console.log("updated directory distribution agent: ", { ordinalNumberOld: i, ordinalNumberNew: i - 1 });
             resolve({
               message: "Successfully!",
             });
@@ -277,8 +257,8 @@ DirectoryDistributionAgent.updateById = (id, directoryDistributionAgent) => {
 DirectoryDistributionAgent.updateParentDirectoryByParentDirectory = (parentDirectoryOld, parentDirectoryNew) => {
   return new Promise((resolve, reject) => {
     sql.query(
-      "UPDATE danh_muc_dlpp SET danh_muc_cha = ? WHERE danh_muc_cha = ?",
-      [parentDirectoryNew, parentDirectoryOld],
+      "UPDATE danh_muc_dlpp SET id_danh_muc_cha = ? WHERE id_danh_muc_cha = ? AND id != ?",
+      [parentDirectoryNew, parentDirectoryOld, parentDirectoryNew],
       (err, res) => {
         if (err) {
           console.log("error: ", err);

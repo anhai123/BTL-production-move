@@ -17,7 +17,7 @@ exports.signup = async (req, res) => {
     } else if (req.body.id_vai_tro === 3) {
       facilities = await DistributionAgent.create(new DistributionAgent(req.body));
       id_dai_ly = facilities.id;
-    } else {
+    } else if (req.body.id_vai_tro === 4) {
       facilities = await WarrantyCenter.create(new WarrantyCenter(req.body));
       id_trung_tam_bh = facilities.id;
     }
