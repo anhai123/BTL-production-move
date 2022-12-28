@@ -62,7 +62,7 @@ exports.FacilityProductNew = async(req, res) => {
 exports.FacilityProductDeliver = async(req, res) => {
     try {
         let ids = req.body.ids;
-        await Product.Deliver(process.env.DANG_CHUYEN_DEN_CHO_DAI_LY, ids);
+        await Product.Deliver(process.env.DANG_CHUYEN_DEN_CHO_DAI_LY, ids, req.body.id_dai_ly, req.params.id);
         res.status(200).send({
           message: "Gửi sản phẩm cho đại lý thành công"
         })

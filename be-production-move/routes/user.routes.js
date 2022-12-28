@@ -222,7 +222,7 @@ module.exports = function(app) {
 
   // khi bấm thống kê sản phẩm
   app.post("/api/facility/:id/product", controller.FacilityProduct);
-
+    
   // khi bấm xem sản phẩm đã bán
   app.post("/api/facility/:id/product/sold", controller.FacilityProductSold);
   

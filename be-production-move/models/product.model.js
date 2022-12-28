@@ -58,9 +58,9 @@ Product.updateStatusId = (id_trang_thai, id_trang_thai_, id_co_so_sx) => {
     })
 }
 
-Product.Deliver = (id_trang_thai, id_san_pham) => {
+Product.Deliver = (id_trang_thai, ids, id_dai_ly, id_co_so_sx) => {
     return new Promise((resolve, reject) => {
-        sql.query(`update san_pham set id_trang_thai = ? where id in (${id_san_pham})`, [id_trang_thai], (err, res) => {
+        sql.query(`update san_pham set id_trang_thai = ?, id_dai_ly = ? where id in (${ids}) and id_co_so_sx = ${id_co_so_sx}`, [id_trang_thai, id_dai_ly], (err, res) => {
             if(err) {
                 console.log("error:", err);
                 return reject(err);
