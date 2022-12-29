@@ -70,6 +70,13 @@ module.exports = function(app) {
     controller.ModeratorDirectoryProductDelete
   );
 
+  // Triệu hồi sản phẩm theo danh mục
+  app.put(
+    "/api/moderator/directory/product/summon/:id",
+    [authJwt.verifyToken, authJwt.isModerator],
+    controller.ModeratorDirectoryProductSummon
+  );
+
   // Xem tất cả danh mục cơ sở sản xuất
   app.get(
     "/api/moderator/directory/production-facility",
@@ -208,6 +215,125 @@ module.exports = function(app) {
     "/api/distribution-agent/product",
     [authJwt.verifyToken, authJwt.isDistributionAgent],
     controller.DistributionAgentProductStatusUpdate
+  );
+
+  // Khi tìm thông tin khách hàng
+  app.get(
+    "/api/distribution-agent/customer/:name/:dateOfBirth",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentCustomer
+  );
+
+  // Cập nhật trạng thái sau khi bán sản phẩm
+  app.put(
+    "/api/distribution-agent/product/sell",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductSell
+  );
+
+  // Khi nhận lại sản phẩm cần bảo hành
+  app.put(
+    "/api/distribution-agent/product/error/:id",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductError
+  );
+
+  // Xem các sản phẩm cần đem đi bảo hành
+  app.get(
+    "/api/distribution-agent/product/warranty",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductWarrantyGetAll
+  );
+
+  // Khi chọn trung tâm bảo hành
+  app.get(
+    "/api/distribution-agent/warranty-center-pick",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentWarrantyCenterPick
+  );
+
+  // Cập nhật trạng thái đang đến trung tâm bảo hành
+  app.put(
+    "/api/distribution-agent/product/shipping-to-warranty-center",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductShippingToWarrantyCenter
+  );
+
+  // Khi nhận được sản phẩm bảo hành xong hoặc lỗi, không thể sửa chữa (hiện ra thông tin các sản phẩm đang gửi về)
+  app.get(
+    "/api/distribution-agent/product/warranty/complete",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductWarrantyComplete
+  );
+
+  // Cập nhật trạng thái của các sản phẩm sau khi bảo hành xong hoặc lỗi, không thể sửa chữa và đã về đến đại lý
+  app.put(
+    "/api/distribution-agent/product/warranty/complete/arrived",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductWarrantyCompleteArrived
+  );
+
+  // Xem các sản phẩm cần trả lại cho khách hàng
+  app.get(
+    "/api/distribution-agent/product/warranty/complete/arrived",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductWarrantyCompleteArrivedGetAll
+  );
+
+  // Cập nhật trạng thái của sản phẩm khi trả lại cho khách hàng
+  app.put(
+    "/api/distribution-agent/product/return/:id",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductReturn
+  );
+
+  // Xem các sản phẩm cần chuyển về cơ sở sản xuất
+  app.get(
+    "/api/distribution-agent/product/err",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductErrGetAll
+  );
+
+  // Cập nhật trạng thái của sản phẩm khi chuyển về cơ sở sản xuất
+  app.put(
+    "/api/distribution-agent/product/move-to-production-facility",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductMoveToProductionFacility
+  );
+
+  // Xem các khách hàng cần bàn giao lại sản phẩm mới thay thế
+  app.get(
+    "/api/distribution-agent/customer/new-replacement-product",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentCustomerNewReplacementProduct
+  );
+
+  // Cập nhật trạng thái của sản phẩm khi bàn giao lại sản phẩm mới thay thế
+  app.put(
+    "/api/distribution-agent/product/new-replacement-product",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductNewReplacementProduct
+  );
+
+  // Xem các sản phẩm cần triệu hồi
+  app.get(
+    "/api/distribution-agent/product/summon",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductSummon
+  );
+
+  // Thống kê số liệu sản phẩm theo từng loại
+  app.get(
+    "/api/distribution-agent/product/statistical/status/:statusId/:month/:quarter/:year",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductStatisticalStatus
+  );
+
+  // Thống kê số lượng sản phẩm bán ra
+  app.get(
+    "/api/distribution-agent/product/statistical/sell/:type/:year",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductStatisticalSell
   );
 
   app.get(

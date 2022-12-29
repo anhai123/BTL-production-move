@@ -10,8 +10,21 @@ const bcrypt = require("bcryptjs");
 exports.signup = async (req, res) => {
   // Save User to Database
   try {
-    let id_co_so_sx, id_dai_ly, id_trung_tam_bh, facilities;
-    if (req.body.id_vai_tro === 2) {
+    let id_co_so_sx, id_dai_ly, id_trung_tam_bh, facilities, hop_le = 0;
+    if (req.body.id_vai_tro === 1) {
+      try {
+        await User.getAllByAccepted(1);
+      } catch (err) {
+        if (err.kind === "not_found") {
+          hop_le = 1;
+        } else {
+          res.status(500).send({
+            message: `Lỗi khi đăng ký!`,
+          });
+          return;
+        }
+      }
+    } else if (req.body.id_vai_tro === 2) {
       facilities = await ProductionFacility.create(new ProductionFacility(req.body));
       id_co_so_sx = facilities.id;
     } else if (req.body.id_vai_tro === 3) {
@@ -25,7 +38,7 @@ exports.signup = async (req, res) => {
       tai_khoan: req.body.tai_khoan,
       email: req.body.email,
       mat_khau: bcrypt.hashSync(req.body.mat_khau, 8),
-      hop_le: 0,
+      hop_le: hop_le,
       id_co_so_sx: id_co_so_sx,
       id_dai_ly: id_dai_ly,
       id_trung_tam_bh: id_trung_tam_bh,
