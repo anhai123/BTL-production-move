@@ -1,6 +1,6 @@
 module.exports = {
   HOST: "localhost",
   USER: "root",
-  DB: "bigcorp",
+  DB: "bigcorptest",
   PORT: 3306
 };
