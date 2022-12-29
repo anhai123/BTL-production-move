@@ -217,7 +217,7 @@ module.exports = function(app) {
   );
 
   // nhập sản phẩm
-  app.post("/api/facility/:id/product/create", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductCreate);
+  app.post("/api/facility/:id/product/create",  controller.FacilityProductCreate);
 
   // tất cả sản phẩm có thể xuất đi đại lý
   app.get("/api/facility/:id/product-new", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductNew);
@@ -232,10 +232,33 @@ module.exports = function(app) {
   // bấm vào button xác nhận sản phẩm  loi đã đến cơ sở sản xuất
   app.put("/api/facility/:id/product/faulty/receiv", controller.FacilityProductFaultyReceive);
 
-  // khi bấm thống kê sản phẩm
-  app.post("/api/facility/:id/product", controller.FacilityProduct);
-    
-  // khi bấm xem sản phẩm đã bán
-  app.post("/api/facility/:id/product/sold", controller.FacilityProductSold);
+
+
+
+  // sản phẩm cần bảo hành
+  app.get("/api/warranty-center/:id/products", controller.WarrantyCenterProducts);
+
+  // Khi bấm vào nút nhận bảo hành sản phẩm 
+  app.put("/api/warranty-center/:id/products/receiv", controller.WarrantyCenterProductReceiv);
+
+  // sản phẩm đang bảo hành
+  app.get("/api/warranty-center/:id/products/under", controller.WarrantyCenterProductUnder);
+
+  // search theo id sản phẩm
+  app.get("/api/warranty-center/:id/product", controller.WarrantyCenterProductFilter);
+
+  // xác nhận sản phẩm bảo hành xong or lỗi
+  app.post("/api/warranty-center/:id/product/finnish", controller.WarrantyCenterUpdateStatus);
+
+  // sản phẩm đã bảo hành xong
+  app.get("/api/warranty-center/:id/products-finnish", controller.WarrantyCenterProductsFinnish);
+  
+  // sản phẩm lỗi
+  app.get("/api/warranty-center/:id/products-faulty", controller.WarrantyCenterProductFaulty);
+
+  // chuyển sản phẩm đến đại lý
+  app.post("/api/warranty-center/:id/products/deliver", controller.WarrantyCenterProductDeliver);
+
+
   
 };

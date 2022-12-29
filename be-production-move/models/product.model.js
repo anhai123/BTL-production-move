@@ -1,5 +1,4 @@
 
-const { Model } = require("sequelize");
 
 const sql = require("./").connection;
 
@@ -8,7 +7,7 @@ const Product = function (product) {
     this.ten_san_pham = product.ten_san_pham;
     this.thoi_han_bao_hanh = product.thoi_han_bao_hanh;
     this.ngay_san_xuat = product.ngay_san_xuat;
-    this.id_dong_san_pham = product.id_dong_san_pham;
+    this.id_danh_muc_sp = product.id_dong_san_pham;
     this.id_co_so_sx = product.id_co_so_sx;
     this.id_thong_so = product.id_thong_so;
     this.id_trang_thai = product.id_trang_thai;
@@ -30,10 +29,22 @@ Product.create = newProduct => {
     
 }
 
+Product.getProduct =(id, id_trang_thai)=> {
+    return new Promise((resolve, reject) => {
+        sql.query(`select * from san_pham where id = ${id} and id_trang_thai = ${id_trang_thai}`, (err, res) => {
+            if(err) {
+                console.log("error:", err);
+                return reject({kind: "not_found"});
+            }
+            resolve(res);
+        })
+    })
+}
+
 // truy vấn các sản phẩm mới sản xuất
 Product.getAllProductNew = (id_trang_thai, id_co_so_sx) => {
     return new Promise((resolve, reject) => {
-        sql.query(`select * from san_pham where id_khach_hang is null and id_trang_thai = ${id_trang_thai} and id_co_so_sx = ${id_co_so_sx}`, (err, res) => {
+        sql.query(`select * from san_pham where id_khach_hang is null and id_trang_thai = ${id_trang_thai} and id_co_so_sx = ${id_co_so_sx} and id_dai_ly is null`, (err, res) => {
             if(err) {
                 console.log("error:", err);
                 return reject(err);
@@ -45,19 +56,6 @@ Product.getAllProductNew = (id_trang_thai, id_co_so_sx) => {
     })
 }
 
-// update trạng thái sản phẩm
-Product.updateStatusId = (id_trang_thai, id_trang_thai_, id_co_so_sx) => {
-    return new Promise((resolve, reject) => {
-        sql.query(`update san_pham set id_trang_thai = ? where id_trang_thai = ${id_trang_thai_} and id_co_so_sx = ${id_co_so_sx}`, [id_trang_thai], (err, res) => {
-            if(err) {
-                console.log("error:", err);
-                return reject(err);
-            }
-            console.log("product: successful update");
-            resolve(res);
-        })
-    })
-}
 
 Product.Deliver = (id_trang_thai, ids, id_dai_ly, id_co_so_sx) => {
     return new Promise((resolve, reject) => {
@@ -73,9 +71,9 @@ Product.Deliver = (id_trang_thai, ids, id_dai_ly, id_co_so_sx) => {
 }
 
 // truy vấn các sản phẩm lỗi đang chuyển về cơ sở sản xuất
-Product.getAllProductFaulty = (id_trang_thai) => {
+Product.getAllProductFaulty = (id_trang_thai, id_co_so_sx) => {
     return new Promise((resolve, reject) => {
-        sql.query(`select * from san_pham where id_trang_thai = ${id_trang_thai}`, (err, res) => {
+        sql.query(`select * from san_pham where id_trang_thai = ${id_trang_thai} and id_co_so_sx = ${id_co_so_sx}`, (err, res) => {
             if(err) {
                 console.log("error:", err);
                 return reject({kind: "not_found"});
@@ -85,113 +83,25 @@ Product.getAllProductFaulty = (id_trang_thai) => {
     })
 }
 
-
-Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, month, quarter, year) => {
-    let status;
-    switch(id_trang_thai) {
-        case "1": 
-            status = 'nam_tai_kho_cssx';
-            break;
-        case "2":
-            status = 'chuyen_cho_dai_ly';
-            break;
-        case "3":
-            status = 'nam_tai_kho_dai_ly';
-            break;
-        case "4": 
-            status = 'ngay_ban_cho_kh';
-            break;
-        case "5":
-            status = 'ngay_chuyen_ve_cssx';
-            break;
-        case "6":
-            status = 'ngay_den_cssx';
-            break;
-        case "7":
-            status = 'ngay_huy_sp';
-            break;
-        case "8":
-            status = 'ngay_ban_giao_sp_moi';
-            break;
-        default:
-            status = 'a';
-    }
-
-const sql = require("./").connection;
-
-// constructor
-const Product = function (product) {
-    this.name = role.name;
-};
-
-Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids) => {
-
+// update trạng thái sản phẩm
+Product.updateStatusId = (id_trang_thai, id) => {
     return new Promise((resolve, reject) => {
-        let query = "SELECT * FROM san_pham", count = 0;
-
-        if (id_trang_thai || id_co_so_sx || id_dai_ly || ids) {
-            query += ` WHERE `;
-        }
-
-       
-        if(year && quarter) {
-            if(quarter == 1) {
-                query += 'id_ngay in (select id from ngay where ' + status + ` between \'${year}-1-1\' and \'${year}-3-31\') and `; 
+        sql.query(`update san_pham set id_trang_thai = ? where id = ${id}`, [id_trang_thai], (err, res) => {
+            if(err) {
+                console.log("error:", err);
+                return reject(err);
             }
-            if(quarter == 2) {
-                query += 'id_ngay in (select id from ngay where ' + status + ` between \'${year}-4-1\' and \'${year}-6-30\') and `; 
-            }
-            if(quarter == 3) {
-                query += 'id_ngay in (select id from ngay where ' + status + ` between \'${year}-7-1\' and \'${year}-9-30\') and `; 
-            }
-            if(quarter == 4) {
-                query += 'id_ngay in (select id from ngay where ' + status + ` between \'${year}-10-1\' and \'${year}-12-31\') and `; 
-            }
-        } else
-        if(month) {     
-            query += 'id_ngay in (select id from ngay where month(' + status + `) = \'${month}\' and year(` + status + `) = \'${year}\') and `; 
-        }
-        if (id_trang_thai && !year) {
-            count++;
-            query += `id_trang_thai = ${id_trang_thai}`;
-        } else
-
-        if (id_trang_thai) {
-            count++;
-            query += `id_trang_thai = ${id_trang_thai}`;
-        }
-
-        if (id_co_so_sx) {
-            count++;
-            if (count > 1) {
-                query += " AND ";
-            }
-            query += `id_co_so_sx = ${id_co_so_sx}`;
-        }
-        if (id_dai_ly) {
-            count++;
-            if (count > 1) {
-                query += " AND ";
-            }
-            query += `id_dai_ly = ${id_dai_ly}`;
-        }
-        if (ids) {
-            count++;
-            if (count > 1) {
-                query += " AND ";
-            }
-            query += `id IN (`;
-            for (let i = 0; i < ids.length; i++) {
-                if (i == ids.length - 1) {
-                    query += `${ids[i].id_san_pham}`;
-                } else {
-                    query += `${ids[i].id_san_pham}, `;
-                }
-            }
-            query += `)`;
-        }
+            console.log("product: successful update");
+            resolve(res);
+        })
+    })
+}
 
 
+
+Product.getAllWarranted = (id_trang_thai, id_trung_tam_bh) => {
+    return new Promise((resolve, reject) => {
+        let query = `select * from san_pham where id_trang_thai = ${id_trang_thai} and id in (select id_san_pham from bao_hanh where id_trung_tam_bh = ${id_trung_tam_bh})`;
         sql.query(query, (err, res) => {
             if (err) {
                 console.log("error: ", err);
@@ -203,13 +113,29 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids) => {
                 return resolve(res);
             }
 
-            // không tìm thấy các sản phẩm
-            reject({ kind: "not_found" });
-        });
-    });
-};
+             // không tìm thấy các sản phẩm
+             reject({ kind: "not_found" });
+        })
 
-module.exports = Product;
+    })
+}
+
+
+
+Product.UpdateStatus = (id_trang_thai, id_trang_thai_, id_trung_tam_bh) => {
+    return new Promise((resolve, reject) => {
+        sql.query(`update san_pham set id_trang_thai = ${id_trang_thai} where id_trang_thai = ${id_trang_thai_} and id in (select id_san_pham from bao_hanh where id_trung_tam_bh = ${id_trung_tam_bh})`, (err, res) => {
+                if(err) {
+                    console.log("error:", err);
+                    return reject(err);
+                }
+                console.log("product: successful update");
+                resolve(res);
+            })
+
+    })
+}
+
   
 
 Product.updateStatusByIds = ids => {
