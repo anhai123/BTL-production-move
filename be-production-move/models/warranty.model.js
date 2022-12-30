@@ -165,6 +165,26 @@ Warranty.findByProductIds = idProducts => {
     });
 };
 
+Warranty.findErrProductIds = () => {
+    return new Promise((resolve, reject) => {
+        let query = `SELECT * FROM bao_hanh group by id_san_pham`;
+        sql.query(query, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                return reject(err);
+            }
+
+            if (res.length) {
+                console.log("Các kết quả: ", res);
+                return resolve(res);
+            }
+
+            // không tìm thấy kết quả
+            reject({ kind: "not_found" });
+        });
+    });
+};
+
 Warranty.findByPropertyAndMonth = (dOWPropertyName, dOWId, propertyName, month, year) => {
     return new Promise((resolve, reject) => {
         let query = `SELECT * FROM bao_hanh where `;
