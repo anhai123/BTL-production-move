@@ -2,11 +2,11 @@ const sql = require("./").connection;
 const MyDate = require("../models/myDate.model");
 
 // constructor
-const Warranty = async function (warranty) {
+const Warranty = function (warranty) {
     this.id_san_pham = warranty.id_san_pham;
     this.id_dai_ly = warranty.id_dai_ly;
     this.lan_bao_hanh = 1;
-    this.ngay_loi_can_bao_hanh = await MyDate.getNow();
+    this.ngay_loi_can_bao_hanh = new Date;
 };
 
 Warranty.create = newWarranty => {
