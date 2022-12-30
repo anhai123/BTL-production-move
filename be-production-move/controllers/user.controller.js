@@ -2591,6 +2591,11 @@ exports.DistributionAgentProductStatisticalStatusShow = async (req, res) => {
 exports.DistributionAgentProductStatisticalStatus = async (req, res) => {
   try {
     let products;
+    req.params.statusId = parseInt(req.params.statusId);
+    req.params.month = parseInt(req.params.month);
+    req.params.quarter = parseInt(req.params.quarter);
+    req.params.year = parseInt(req.params.year);
+    console.log("hehehe " + req.params.month);
     if (req.params.month) {
       if (req.params.statusId === 2) {
         const dates = await MyDate.findByPropertyAndMonth(`chuyen_cho_dai_ly`, req.params.month, req.params.year);
