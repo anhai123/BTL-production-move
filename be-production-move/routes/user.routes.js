@@ -385,29 +385,57 @@ module.exports = function (app) {
   // khi bấm xem sản phẩm đã bán
   app.get("/api/facility/product/statistical/sold/:type/:year", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductSold);
 
+  // Khi chọn danh mục sp, cssx và dlpp để thống kê tỉ lệ
+  app.get(
+    "/api/facility/product/statistical/err/show",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductStatisticalErrShow
+  );
 
+  // Thống kê tỉ lệ sản phẩm bị lỗi
+  app.get(
+    "/api/facility/product/statistical/err/:directoryProductId/:productionFacilityId/:distributionAgentId",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductStatisticalErr
+  );
+
+  
 
   // sản phẩm cần bảo hành
-  app.get("/api/warranty-center/:id/products", controller.WarrantyCenterProducts);
+  app.get("/api/warranty-center/products", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProducts);
 
   // Khi bấm vào nút nhận bảo hành sản phẩm 
-  app.put("/api/warranty-center/:id/products/receiv", controller.WarrantyCenterProductReceiv);
+  app.put("/api/warranty-center/products/receiv", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductReceiv);
 
   // sản phẩm đang bảo hành
-  app.get("/api/warranty-center/:id/products/under", controller.WarrantyCenterProductUnder);
+  app.get("/api/warranty-center/products/under", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductUnder);
 
   // search theo id sản phẩm
-  app.get("/api/warranty-center/:id/product", controller.WarrantyCenterProductFilter);
+  app.get("/api/warranty-center/product/:id", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductFilter);
 
   // xác nhận sản phẩm bảo hành xong or lỗi
-  app.post("/api/warranty-center/:id/product/finnish", controller.WarrantyCenterUpdateStatus);
+  app.post("/api/warranty-center/product/finnish", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterUpdateStatus);
 
   // sản phẩm đã bảo hành xong
-  app.get("/api/warranty-center/:id/products-finnish", controller.WarrantyCenterProductsFinnish);
+  app.get("/api/warranty-center/products-finnish", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductsFinnish);
 
   // sản phẩm lỗi
-  app.get("/api/warranty-center/:id/products-faulty", controller.WarrantyCenterProductFaulty);
+  app.get("/api/warranty-center/products-faulty", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductFaulty);
 
   // chuyển sản phẩm đến đại lý
-  app.post("/api/warranty-center/:id/products/deliver", controller.WarrantyCenterProductDeliver);
+  app.post("/api/warranty-center/products/deliver", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductDeliver);
+
+  // Khi chọn trạng thái để thống kê
+  app.get(
+    "/api/warranty-center/product/statistical/status/show",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProductStatisticalStatusShow
+  );
+
+  // Thống kê số liệu sản phẩm theo từng loại
+  app.get(
+    "/api/warranty-center/product/statistical/status/:statusId/:month/:quarter/:year",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProductStatisticalStatus
+  );
 };

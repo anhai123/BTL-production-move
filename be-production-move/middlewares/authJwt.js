@@ -103,6 +103,7 @@ isWarrantyCenter = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     if (user.id_trung_tam_bh) {
+      req.id_trung_tam_bh = user.id_trung_tam_bh;
       next();
       return;
     }

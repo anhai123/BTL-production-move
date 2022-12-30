@@ -82,11 +82,11 @@ Product.getAllProductFaulty = (id_trang_thai, id_co_so_sx) => {
 }
 
 
-Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds) => {
+Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds, id_danh_muc_sp) => {
     return new Promise((resolve, reject) => {
         let query = "SELECT * FROM san_pham", count = 0;
 
-        if (id_trang_thai || id_co_so_sx || id_dai_ly || ids || id_ngay || oIds) {
+        if (id_trang_thai || id_co_so_sx || id_dai_ly || ids || id_ngay || oIds || id_danh_muc_sp) {
             query += ` WHERE `;
         }
         if (oIds) {
@@ -133,7 +133,7 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds) => 
             }
             query += `id_ngay IN (`;
             for (let i = 0; i < id_ngay.length; i++) {
-                if (i === ids.length - 1) {
+                if (i === id_ngay.length - 1) {
                     query += `${id_ngay[i]}`;
                 } else {
                     query += `${id_ngay[i]}, `;
@@ -156,7 +156,14 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds) => 
             }
             query += `)`;
         }
-
+        
+        if (id_danh_muc_sp) {
+            count++;
+            if (count > 1) {
+                query += " AND ";
+            }
+            query += `id_danh_muc_sp = ${id_danh_muc_sp}`;
+        }
 
         sql.query(query, (err, res) => {
             if (err) {
