@@ -27,10 +27,22 @@ Product.create = newProduct => {
     
 }
 
+Product.getProduct =(id, id_trang_thai)=> {
+    return new Promise((resolve, reject) => {
+        sql.query(`select * from san_pham where id = ${id} and id_trang_thai = ${id_trang_thai}`, (err, res) => {
+            if(err) {
+                console.log("error:", err);
+                return reject({kind: "not_found"});
+            }
+            resolve(res);
+        })
+    })
+}
+
 // truy vấn các sản phẩm mới sản xuất
 Product.getAllProductNew = (id_trang_thai, id_co_so_sx) => {
     return new Promise((resolve, reject) => {
-        sql.query(`select * from san_pham where id_khach_hang is null and id_trang_thai = ${id_trang_thai} and id_co_so_sx = ${id_co_so_sx}`, (err, res) => {
+        sql.query(`select * from san_pham where id_khach_hang is null and id_trang_thai = ${id_trang_thai} and id_co_so_sx = ${id_co_so_sx} and id_dai_ly is null`, (err, res) => {
             if(err) {
                 console.log("error:", err);
                 return reject(err);
@@ -42,19 +54,6 @@ Product.getAllProductNew = (id_trang_thai, id_co_so_sx) => {
     })
 }
 
-// update trạng thái sản phẩm
-Product.updateStatusId = (id_trang_thai, id_trang_thai_, id_co_so_sx) => {
-    return new Promise((resolve, reject) => {
-        sql.query(`update san_pham set id_trang_thai = ? where id_trang_thai = ${id_trang_thai_} and id_co_so_sx = ${id_co_so_sx}`, [id_trang_thai], (err, res) => {
-            if(err) {
-                console.log("error:", err);
-                return reject(err);
-            }
-            console.log("product: successful update");
-            resolve(res);
-        })
-    })
-}
 
 Product.Deliver = (id_trang_thai, ids, id_dai_ly, id_co_so_sx) => {
     return new Promise((resolve, reject) => {
@@ -70,9 +69,9 @@ Product.Deliver = (id_trang_thai, ids, id_dai_ly, id_co_so_sx) => {
 }
 
 // truy vấn các sản phẩm lỗi đang chuyển về cơ sở sản xuất
-Product.getAllProductFaulty = (id_trang_thai) => {
+Product.getAllProductFaulty = (id_trang_thai, id_co_so_sx) => {
     return new Promise((resolve, reject) => {
-        sql.query(`select * from san_pham where id_trang_thai = ${id_trang_thai}`, (err, res) => {
+        sql.query(`select * from san_pham where id_trang_thai = ${id_trang_thai} and id_co_so_sx = ${id_co_so_sx}`, (err, res) => {
             if(err) {
                 console.log("error:", err);
                 return reject({kind: "not_found"});
@@ -81,6 +80,7 @@ Product.getAllProductFaulty = (id_trang_thai) => {
         })
     })
 }
+
 
 Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds) => {
     return new Promise((resolve, reject) => {
@@ -174,6 +174,59 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds) => 
         });
     });
 };
+
+// update trạng thái sản phẩm
+Product.updateStatusId = (id_trang_thai, id) => {
+    return new Promise((resolve, reject) => {
+        sql.query(`update san_pham set id_trang_thai = ? where id = ${id}`, [id_trang_thai], (err, res) => {
+            if(err) {
+                console.log("error:", err);
+                return reject(err);
+            }
+            console.log("product: successful update");
+            resolve(res);
+        })
+    })
+}
+
+
+
+Product.getAllWarranted = (id_trang_thai, id_trung_tam_bh) => {
+    return new Promise((resolve, reject) => {
+        let query = `select * from san_pham where id_trang_thai = ${id_trang_thai} and id in (select id_san_pham from bao_hanh where id_trung_tam_bh = ${id_trung_tam_bh})`;
+        sql.query(query, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                return reject(err);
+            }
+
+            if (res.length) {
+                console.log("Các sản phẩm: ", res);
+                return resolve(res);
+            }
+
+             // không tìm thấy các sản phẩm
+             reject({ kind: "not_found" });
+        })
+
+    })
+}
+
+
+
+Product.UpdateStatus = (id_trang_thai, id_trang_thai_, id_trung_tam_bh) => {
+    return new Promise((resolve, reject) => {
+        sql.query(`update san_pham set id_trang_thai = ${id_trang_thai} where id_trang_thai = ${id_trang_thai_} and id in (select id_san_pham from bao_hanh where id_trung_tam_bh = ${id_trung_tam_bh})`, (err, res) => {
+                if(err) {
+                    console.log("error:", err);
+                    return reject(err);
+                }
+                console.log("product: successful update");
+                resolve(res);
+            })
+
+    })
+}
 
 Product.findByDirectoryProductId = ids => {
     return new Promise((resolve, reject) => {

@@ -74,4 +74,18 @@ Dates.getAll= ( status, month, quarter, year) => {
 
     })
 }
+
+Dates.Update = (id) => {
+    return new Promise((resolve, reject) => {
+        sql.query(`update ngay set ngay_loi_khong_the_sua_chua = (current_timestamp()) where id = (select id_ngay from san_pham where id = ${id})`,
+            (err, res) => {
+                if(err) {
+                    console.log("error:", err);
+                    return reject(err);
+                }
+                console.log("product: successful update");
+                resolve(res);
+            });
+    })
+}
 module.exports = Dates;

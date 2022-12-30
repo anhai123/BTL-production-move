@@ -264,4 +264,22 @@ Warranty.updateByIds = (newWarranty, ids) => {
     });
 };
 
+Warranty.UpdateDates = (column, ids) =>{
+
+    return new Promise((resolve, reject) => {
+        let query = `update bao_hanh set `;
+        query += column + ` = (current_timestamp()) where id_san_pham in (${ids})`
+        
+        sql.query(query, (err, res) => {
+            console.log(query)
+            if(err) {
+                console.log("error:", err);
+                return reject(err);
+            }
+            console.log("e");
+            resolve(res);
+        });
+        
+    });
+}
 module.exports = Warranty;

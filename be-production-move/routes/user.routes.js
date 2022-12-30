@@ -379,4 +379,29 @@ module.exports = function (app) {
   // khi bấm xem sản phẩm đã bán
   app.get("/api/facility/product/statistical/sold/:type/:year", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductSold);
 
+
+
+  // sản phẩm cần bảo hành
+  app.get("/api/warranty-center/:id/products", controller.WarrantyCenterProducts);
+
+  // Khi bấm vào nút nhận bảo hành sản phẩm 
+  app.put("/api/warranty-center/:id/products/receiv", controller.WarrantyCenterProductReceiv);
+
+  // sản phẩm đang bảo hành
+  app.get("/api/warranty-center/:id/products/under", controller.WarrantyCenterProductUnder);
+
+  // search theo id sản phẩm
+  app.get("/api/warranty-center/:id/product", controller.WarrantyCenterProductFilter);
+
+  // xác nhận sản phẩm bảo hành xong or lỗi
+  app.post("/api/warranty-center/:id/product/finnish", controller.WarrantyCenterUpdateStatus);
+
+  // sản phẩm đã bảo hành xong
+  app.get("/api/warranty-center/:id/products-finnish", controller.WarrantyCenterProductsFinnish);
+  
+  // sản phẩm lỗi
+  app.get("/api/warranty-center/:id/products-faulty", controller.WarrantyCenterProductFaulty);
+
+  // chuyển sản phẩm đến đại lý
+  app.post("/api/warranty-center/:id/products/deliver", controller.WarrantyCenterProductDeliver);
 };
