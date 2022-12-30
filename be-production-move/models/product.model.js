@@ -270,7 +270,7 @@ Product.getProductNeedNewReplacementProduct = (idsOject, dateIdsOject) => {
         let query = "SELECT * FROM san_pham where id_khach_hang is not null AND id IN (";
 
         for (let i = 0; i < idsOject.length; i++) {
-            if (i === ids.length - 1) {
+            if (i === idsOject.length - 1) {
                 query += `${idsOject[i].id_san_pham}) AND id_ngay IN (`;
             } else {
                 query += `${idsOject[i].id_san_pham}, `;
