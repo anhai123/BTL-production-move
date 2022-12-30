@@ -2187,19 +2187,26 @@ exports.DistributionAgentProductError = async (req, res) => {
     }, [req.params.id]);
     try {
       const warranty = await Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId(req.params.id);
-      console.log("heheee"+ warranty.id);
-      if (warranty.ngay_dang_bao_hanh_tai_trung_tam) {
-        await Warranty.create({
+      if (warranty.id) {
+        if (warranty.ngay_dang_bao_hanh_tai_trung_tam) {
+          await Warranty.create({
+            id_san_pham: req.params.id,
+            id_dai_ly: req.id_dai_ly,
+            lan_bao_hanh: warranty.lan_bao_hanh + 1,
+            ngay_loi_can_bao_hanh: await MyDate.getNow(),
+          });
+        } else {
+          await Warranty.updateByIds({
+            id_dai_ly: req.id_dai_ly,
+            ngay_loi_can_bao_hanh: await MyDate.getNow(),
+          }, [warranty.id]);
+        }
+      } else {
+        await Warranty.create(new Warranty({
           id_san_pham: req.params.id,
           id_dai_ly: req.id_dai_ly,
-          lan_bao_hanh: warranty.lan_bao_hanh + 1,
-          ngay_loi_can_bao_hanh: await MyDate.getNow(),
-        });
-      } else {
-        await Warranty.updateByIds({
-          id_dai_ly: req.id_dai_ly,
-          ngay_loi_can_bao_hanh: await MyDate.getNow(),
-        }, [warranty.id]);
+        }));
+        console.log("hehehê");
       }
     } catch (err) {
       if (err.kind === "not_found") {
