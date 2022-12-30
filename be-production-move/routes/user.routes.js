@@ -410,9 +410,6 @@ module.exports = function (app) {
   // sản phẩm đang bảo hành
   app.get("/api/warranty-center/products/under", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductUnder);
 
-  // search theo id sản phẩm
-  app.get("/api/warranty-center/product/:id", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductFilter);
-
   // xác nhận sản phẩm bảo hành xong or lỗi
   app.post("/api/warranty-center/product/finnish", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterUpdateStatus);
 

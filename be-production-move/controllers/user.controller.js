@@ -466,8 +466,10 @@ exports.FacilityProductSold = async (req, res) => {
 
 exports.WarrantyCenterProductReceiv = async (req, res) => {
   try {
-    await Product.updateStatusId(6, req.body.id);
-    await Warranty.UpdateDates("ngay_dang_bao_hanh_tai_trung_tam", req.body.id);
+    await Product.updateByIds({
+      id_trang_thai: 6,
+    }, req.body.ids);
+    await Warranty.UpdateDates("ngay_dang_bao_hanh_tai_trung_tam", req.body.ids);
     res.status(200).send({
       message: "thanh cong"
     })
@@ -483,23 +485,6 @@ exports.WarrantyCenterProductUnder = async (req, res) => {
   try {
     const products = await Product.getAllWarranted(6, req.id_trung_tam_bh);
     res.status(200).send(products);
-  } catch (err) {
-    if (err.kind === "not_found") {
-      res.status(404).send({
-        message: "không có data sản phẩm đang bảo hành"
-      })
-    } else {
-      res.status(500).send({
-        message: "Xảy ra lỗi khi truy vấn sản phẩm đang bảo hành"
-      })
-    }
-  }
-}
-// search sản phẩm đang bảo hành theo id
-exports.WarrantyCenterProductFilter = async (req, res) => {
-  try {
-    let product = await Product.getProduct(req.params.id, 6);
-    res.status(200).send(product);
   } catch (err) {
     if (err.kind === "not_found") {
       res.status(404).send({
@@ -554,7 +539,7 @@ exports.WarrantyCenterProductsFinnish = async (req, res) => {
 exports.WarrantyCenterProductDeliver = async (req, res) => {
   try {
     await Product.UpdateStatus(2, req.body.id_trang_thai_, req.id_trung_tam_bh);
-    await Warranty.UpdateDates("ngay_dang_tra_ve_dai_ly", req.body.id);
+    await Warranty.UpdateDates("ngay_dang_tra_ve_dai_ly", req.body.ids);
     res.status(200).send({
       message: "gui den dai ly thanh cong"
     })
