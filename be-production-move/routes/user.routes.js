@@ -352,8 +352,14 @@ module.exports = function (app) {
   // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
   app.get("/api/facility/directory/product", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityDirectoryProduct);
 
+  // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
+  app.get("/api/facility/directory/product", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityDirectoryProduct);
+
   // nhập sản phẩm
   app.post("/api/facility/product/create", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductCreate);
+
+  // lấy list đại lý
+  app.get("/api/distribution-agent/directory", [authJwt.verifyToken, authJwt.isProductionFacility], controller.GetAllAgent);
 
   // tất cả sản phẩm có thể xuất đi đại lý
   app.get("/api/facility/product-new", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductNew);
@@ -398,7 +404,7 @@ module.exports = function (app) {
 
   // sản phẩm đã bảo hành xong
   app.get("/api/warranty-center/:id/products-finnish", controller.WarrantyCenterProductsFinnish);
-  
+
   // sản phẩm lỗi
   app.get("/api/warranty-center/:id/products-faulty", controller.WarrantyCenterProductFaulty);
 
