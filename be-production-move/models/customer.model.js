@@ -62,7 +62,7 @@ Customer.getAll = ids => {
 
 Customer.findByNameAndDateOfBirth = (name, dateOfBirth) => {
     return new Promise((resolve, reject) => {
-        sql.query(`SELECT * FROM khach_hang WHERE ho_ten = ${name} AND ngay_sinh = '${dateOfBirth}'`, (err, res) => {
+        sql.query(`SELECT * FROM khach_hang WHERE ho_ten = '${name}' AND ngay_sinh = '${dateOfBirth}'`, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 return reject(err);
