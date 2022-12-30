@@ -2475,17 +2475,24 @@ exports.DistributionAgentProductMoveToProductionFacility = async (req, res) => {
 exports.DistributionAgentCustomerNewReplacementProduct = async (req, res) => {
   try {
     const warrantys = await Warranty.getFinalWarrantyAtDistributionAgentProductId(req.id_dai_ly);
-    const dates = await MyDate.getErrAndAtDistributionAgentDate();
-    const products = await Product.getProductNeedNewReplacementProduct(warrantys, dates);
-    let customerIds = [];
-    for (let i = 0; i < products.length; i++) {
-      customerIds.push(products[i].id_khach_hang);
+    if (warrantys[0].id_san_pham) {
+      console.log("hehehêh");
+      const dates = await MyDate.getErrAndAtDistributionAgentDate();
+      const products = await Product.getProductNeedNewReplacementProduct(warrantys, dates);
+      let customerIds = [];
+      for (let i = 0; i < products.length; i++) {
+        customerIds.push(products[i].id_khach_hang);
+      }
+      const allCustomer = await Customer.getAll(customerIds);
+      res.status(200).send({
+        allProduct: products,
+        allCustomer: allCustomer,
+      });
+    } else {
+      res.status(404).send({
+        message: `Không có sản phẩm cần thay mới cho khách hàng!`
+      });
     }
-    const allCustomer = await Customer.getAll(customerIds);
-    res.status(200).send({
-      allProduct: products,
-      allCustomer: allCustomer,
-    });
   } catch (err) {
     if (err.kind === "not_found") {
       res.status(404).send({
