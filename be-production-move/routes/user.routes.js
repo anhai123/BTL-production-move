@@ -352,8 +352,8 @@ module.exports = function (app) {
   // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
   app.get("/api/facility/directory/product", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityDirectoryProduct);
 
-  // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
-  app.get("/api/facility/directory/product", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityDirectoryProduct);
+  // Khi bấm chọn id danh mục sp thì sẽ có thông số gửi lên, ko có thì phải thêm mới thông số
+  app.get("/api/facility/specifications/:id", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilitySpecifications);
 
   // nhập sản phẩm
   app.post("/api/facility/product/create", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductCreate);

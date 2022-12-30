@@ -15,7 +15,13 @@ require('dotenv').config();
 
 exports.FacilityProductCreate = async (req, res) => {
   try {
-    const specifications = await Specifications.create(new Specifications(req.body));
+    let id_thong_so;
+    if (req.body.id_thong_so) {
+      id_thong_so = req.body.id_thong_so;
+    } else {
+      const specifications = await Specifications.create(new Specifications(req.body));
+      id_thong_so = specifications.id;
+    }
     for (let i = 0; i < req.body.so_luong; i++) {
       let Date_ = await Dates.create(new Dates({
         nam_tai_kho_cssx: new Date
@@ -27,7 +33,7 @@ exports.FacilityProductCreate = async (req, res) => {
         thoi_han_bao_hanh: req.body.thoi_han_bao_hanh,
         ngay_san_xuat: new Date,
         id_danh_muc_sp: req.body.id_danh_muc_sp,
-        id_thong_so: specifications.id,
+        id_thong_so: id_thong_so,
         id_trang_thai: 1,
         id_ngay: id_ngay_,
         id_co_so_sx: req.id_co_so_sx,
@@ -2975,6 +2981,23 @@ exports.GetAllAgent = async (req, res) => {
     } else {
       res.status(500).send({
         message: "lỗi khi truy vấn danh sách đại lý"
+      })
+    }
+  }
+};
+
+exports.FacilitySpecifications = async (req, res) => {
+  try {
+    const products = await Product.findByDirectoryProductId([req.params.id]);
+    res.status(200).send(products[0].id_thong_so);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: "Không có id thông số!"
+      })
+    } else {
+      res.status(500).send({
+        message: "lỗi khi tìm id thông số!"
       })
     }
   }
