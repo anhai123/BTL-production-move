@@ -1,7 +1,7 @@
 const sql = require("./").connection;
 
 // constructor
-const DistributionAgent = function(distributionAgent) {
+const DistributionAgent = function (distributionAgent) {
   this.ten_dai_ly = distributionAgent.ten_co_so;
   this.dia_chi = distributionAgent.dia_chi_cu_the;
   this.so_dien_thoai = distributionAgent.so_dien_thoai;
@@ -32,12 +32,12 @@ DistributionAgent.getAll = () => {
         console.log("error: ", err);
         return reject(err);
       }
-  
+
       if (res.length) {
         console.log("found distribution agents: ", res);
         return resolve(res);
       }
-  
+
       // not found distribution agents
       reject({ kind: "not_found" });
     });
@@ -51,12 +51,12 @@ DistributionAgent.findById = id => {
         console.log("error: ", err);
         return reject(err);
       }
-  
+
       if (res.length) {
         console.log("found distribution agent: ", res[0]);
         return resolve(res[0]);
       }
-  
+
       // not found distribution agent with the id
       reject({ kind: "not_found" });
     });
