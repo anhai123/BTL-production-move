@@ -1,8 +1,8 @@
 const { authJwt, validateData } = require("../middlewares");
 const controller = require("../controllers/user.controller");
 
-module.exports = function(app) {
-  app.use(function(req, res, next) {
+module.exports = function (app) {
+  app.use(function (req, res, next) {
     res.header(
       "Access-Control-Allow-Headers",
       "x-access-token, Origin, Content-Type, Accept"
@@ -322,6 +322,13 @@ module.exports = function(app) {
     controller.DistributionAgentProductSummon
   );
 
+  // Khi chọn trạng thái để thống kê
+  app.get(
+    "/api/distribution-agent/product/statistical/status/show",
+    [authJwt.verifyToken, authJwt.isDistributionAgent],
+    controller.DistributionAgentProductStatisticalStatusShow
+  );
+
   // Thống kê số liệu sản phẩm theo từng loại
   app.get(
     "/api/distribution-agent/product/statistical/status/:statusId/:month/:quarter/:year",
@@ -341,4 +348,35 @@ module.exports = function(app) {
     [authJwt.verifyToken, authJwt.isWarrantyCenter],
     controller.WarrantyCenterBoard
   );
+
+  // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
+  app.get("/api/facility/directory/product", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityDirectoryProduct);
+
+  // nhập sản phẩm
+  app.post("/api/facility/product/create", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductCreate);
+
+  // tất cả sản phẩm có thể xuất đi đại lý
+  app.get("/api/facility/product-new", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductNew);
+
+  // xác nhận chuyển sản phẩm cho đại lý
+  app.post("/api/facility/product/deliver", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductDeliver);
+
+  // xem sản phẩm lỗi đang chuyển về cơ sở sản xuất
+  app.get("/api/facility/product/faulty/all", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductFaulty);
+
+  // bấm vào button xác nhận sản phẩm loi đã đến cơ sở sản xuất
+  app.put("/api/facility/product/faulty/receiv", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductFaultyReceive);
+
+  // Khi chọn trạng thái để thống kê
+  app.get(
+    "/api/facility/product/statistical/status/show",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductStatisticalStatusShow
+  );
+  // khi bấm thống kê sản phẩm
+  app.get("/api/facility/product/statistical/status/:statusId/:month/:quarter/:year", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProduct);
+
+  // khi bấm xem sản phẩm đã bán
+  app.get("/api/facility/product/statistical/sold/:type/:year", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductSold);
+
 };

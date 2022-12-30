@@ -19,7 +19,7 @@ DirectoryProduct.create = newDirectoryProduct => {
       resolve({ id: res.insertId, ...newDirectoryProduct });
     });
   });
-};
+};  
 
 DirectoryProduct.getAll = () => {
   return new Promise((resolve, reject) => {
@@ -56,7 +56,7 @@ DirectoryProduct.findById = id => {
 
 DirectoryProduct.findByParentDirectory = parentDirectory => {
   return new Promise((resolve, reject) => {
-    sql.query("SELECT * FROM danh_muc_sp WHERE id_danh_muc_cha = ?", parentDirectory, (err, res) => {
+    sql.query(`SELECT * FROM danh_muc_sp WHERE id_danh_muc_cha = ?`, parentDirectory, (err, res) => {
       if (err) {
         console.log("error: ", err);
         return reject(err);

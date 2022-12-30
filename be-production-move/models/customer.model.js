@@ -33,7 +33,7 @@ Customer.getAll = ids => {
         if (ids) {
             query += `id IN (`;
             for (let i = 0; i < ids.length; i++) {
-                if (i == ids.length - 1) {
+                if (i === ids.length - 1) {
                     query += `${ids[i]}`;
                 } else {
                     query += `${ids[i]}, `;

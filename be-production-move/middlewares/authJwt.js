@@ -51,6 +51,7 @@ isProductionFacility = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     if (user.id_co_so_sx) {
+      req.id_co_so_sx = user.id_co_so_sx;
       next();
       return;
     }

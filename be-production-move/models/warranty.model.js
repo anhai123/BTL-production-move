@@ -167,7 +167,36 @@ Warranty.findByProductIds = idProducts => {
 
 Warranty.findByPropertyAndMonth = (dOWPropertyName, dOWId, propertyName, month, year) => {
     return new Promise((resolve, reject) => {
-        sql.query(`SELECT * FROM bao_hanh where ${dOWPropertyName} = ${dOWId} AND EXTRACT(YEAR FROM ${propertyName}) = ${year} AND EXTRACT(MONTH FROM ${propertyName}) = ${month} group by id_san_pham`, (err, res) => {
+        let query = `SELECT * FROM bao_hanh where `;
+        if (dOWPropertyName) {
+            query += `${dOWPropertyName} = ${dOWId} AND `;
+        }
+        query += `EXTRACT(YEAR FROM ${propertyName}) = ${year} AND EXTRACT(MONTH FROM ${propertyName}) = ${month} group by id_san_pham`;
+        sql.query(query, (err, res) => {
+            if (err) {
+                console.log("error: ", err);
+                return reject(err);
+            }
+
+            if (res.length) {
+                console.log("Các kết quả: ", res);
+                return resolve(res);
+            }
+
+            // không tìm thấy kết quả
+            reject({ kind: "not_found" });
+        });
+    });
+};
+
+Warranty.findByPropertyAndQuarter = (dOWPropertyName, dOWId, propertyName, quarter, year) => {
+    return new Promise((resolve, reject) => {
+        let query = `SELECT * FROM bao_hanh where `;
+        if (dOWPropertyName) {
+            query += `${dOWPropertyName} = ${dOWId} AND `;
+        }
+        query += `EXTRACT(YEAR FROM ${propertyName}) = ${year} AND EXTRACT(QUARTER FROM ${propertyName}) = ${quarter} group by id_san_pham`;
+        sql.query(query, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 return reject(err);
@@ -186,7 +215,12 @@ Warranty.findByPropertyAndMonth = (dOWPropertyName, dOWId, propertyName, month, 
 
 Warranty.findByPropertyAndYear = (dOWPropertyName, dOWId, propertyName, year) => {
     return new Promise((resolve, reject) => {
-        sql.query(`SELECT * FROM bao_hanh where ${dOWPropertyName} = ${dOWId} AND EXTRACT(YEAR FROM ${propertyName}) = ${year} group by id_san_pham`, (err, res) => {
+        let query = `SELECT * FROM bao_hanh where `;
+        if (dOWPropertyName) {
+            query += `${dOWPropertyName} = ${dOWId} AND `;
+        }
+        query += `EXTRACT(YEAR FROM ${propertyName}) = ${year} group by id_san_pham`;
+        sql.query(query, (err, res) => {
             if (err) {
                 console.log("error: ", err);
                 return reject(err);
@@ -207,7 +241,7 @@ Warranty.updateByIds = (newWarranty, ids) => {
     return new Promise((resolve, reject) => {
         let query = `UPDATE bao_hanh SET ? WHERE id IN (`;
         for (let i = 0; i < ids.length; i++) {
-            if (i == ids.length - 1) {
+            if (i === ids.length - 1) {
                 query += `${ids[i]})`;
             } else {
                 query += `${ids[i]}, `;
