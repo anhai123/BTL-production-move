@@ -2187,6 +2187,7 @@ exports.DistributionAgentProductError = async (req, res) => {
     }, [req.params.id]);
     try {
       const warranty = await Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId(req.params.id);
+      console.log("heheee"+ warranty.id);
       if (warranty.ngay_dang_bao_hanh_tai_trung_tam) {
         await Warranty.create({
           id_san_pham: req.params.id,
@@ -2210,6 +2211,7 @@ exports.DistributionAgentProductError = async (req, res) => {
         res.status(500).send({
           message: `Lỗi khi cập nhật trạng thái sản phẩm với id = ${req.params.id}!`
         });
+        return;
       }
     }
     res.status(200).send({

@@ -52,7 +52,7 @@ Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId = id_san_pham => {
 
             if (res.length) {
                 console.log("Id bảo hành: ", res[0]);
-                return resolve(res);
+                return resolve(res[0]);
             }
 
             // không tìm thấy id bảo hành
