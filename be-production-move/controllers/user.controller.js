@@ -2181,6 +2181,7 @@ exports.DistributionAgentProductSell = async (req, res) => {
 
 exports.DistributionAgentProductError = async (req, res) => {
   try {
+    req.params.id = parseInt(req.params.id);
     await Product.updateByIds({
       id_trang_thai: 9,
     }, [req.params.id]);
