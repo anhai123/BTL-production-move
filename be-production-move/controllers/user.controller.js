@@ -1,5 +1,4 @@
 const User = require("../models/user.model.js");
-const Role = require("../models/role.model.js");
 const DirectoryProduct = require("../models/directoryProduct.model");
 const DirectoryProductionFacility = require("../models/directoryProductionFacility.model");
 const DirectoryDistributionAgent = require("../models/directoryDistributionAgent.model");
@@ -10,86 +9,327 @@ const DistributionAgent = require("../models/distributionAgent.model");
 const WarrantyCenter = require("../models/warrantyCenter.model");
 const Product = require("../models/product.model");
 const Dates = require("../models/date.model");
+const Specifications = require("../models/specifications.model");
 const Warranty = require("../models/warranty.model");
 require('dotenv').config();
 
-
-
-
 exports.FacilityProductCreate = async (req, res) => {
   try {
-    let id_ngay_;
-    for (let i = 0; i< req.body.so_luong; i++) {
-      await Dates.create( new Dates({
+    const specifications = await Specifications.create(new Specifications(req.body));
+    for (let i = 0; i < req.body.so_luong; i++) {
+      let Date_ = await Dates.create(new Dates({
         nam_tai_kho_cssx: new Date
       }));
-      id_ngay_ = await Dates.slectIdMax();
-      await Product.create( new Product({
+      let id_ngay_ = await Dates.slectIdMax();
+      await Product.create(new Product({
         ten_san_pham: req.body.ten_san_pham,
+        hinh_anh: req.body.hinh_anh,
         thoi_han_bao_hanh: req.body.thoi_han_bao_hanh,
-        ngay_san_xuat: req.body.ngay_san_xuat,
+        ngay_san_xuat: new Date,
         id_danh_muc_sp: req.body.id_danh_muc_sp,
-        id_co_so_sx: req.params.id,
-        id_thong_so: req.body.id_thong_so,
+        id_thong_so: specifications.id,
         id_trang_thai: 1,
-        id_ngay: id_ngay_
-      }));  
+        id_ngay: id_ngay_,
+        id_co_so_sx: req.id_co_so_sx,
+      }));
     }
     res.status(200).send({ message: "Thêm sản phẩm mới thành công" })
-  } catch(err) {
-      res.status(500).send({
+  } catch (err) {
+    res.status(500).send({
       message: "Thêm mới sản phẩm không thành công"
-      });
-
+    });
   }
-
 };
 
-exports.FacilityProductNew = async(req, res) => {
+exports.FacilityProductNew = async (req, res) => {
   try {
-      const products = await Product.getAllProductNew(req.body.id_trang_thai, req.params.id);
-      res.status(200).send(products);
-  } catch(err) {
-     if(err.kind === "not_found") {
+    const products = await Product.getAllProductNew(process.env.NAM_TAI_KHO_CO_SO_SAN_XUAT, req.id_co_so_sx);
+    res.status(200).send(products);
+  } catch (err) {
+    if (err.kind === "not_found") {
       res.status(404).send({
         message: "Không có sản phẩm nào mới sản xuất"
       })
-     } else {
-      res.status(500).send ({
+    } else {
+      res.status(500).send({
         message: "Lỗi khi truy xuất sản phẩm mới sản xuất"
       })
-     }
+    }
   }
 }
 
-exports.FacilityProductDeliver = async(req, res) => {
-    try {
-        let ids = req.body.ids;
-        await Product.Deliver(req.body.id_trang_thai, ids, req.body.id_dai_ly, req.params.id);
-        res.status(200).send({
-          message: "Gửi sản phẩm cho đại lý thành công"
-        })
-    } catch(err) {
-      if(err.kind === "not_found") {
-        res.status(404).send({
-          message: `Not found data`
-        })} else {
-          res.status(500).send({
-            message: "Lỗi, xác nhận sản phẩm chuyển đi đại lý"
-          })
-        }
+exports.FacilityProductDeliver = async (req, res) => {
+  try {
+    let ids = req.body.ids;
+    await Product.Deliver(process.env.DANG_CHUYEN_DEN_CHO_DAI_LY, ids, req.body.id_dai_ly, req.id_co_so_sx);
+    const products = await Product.getAll(null, null, null, ids);
+    let dateIds = [];
+    for (let i = 0; i < products.length; i++) {
+      dateIds.push(products[i].id_ngay);
     }
+    await MyDate.updateByIds({
+      chuyen_cho_dai_ly: new Date,
+    }, dateIds);
+    res.status(200).send({
+      message: "Gửi sản phẩm cho đại lý thành công"
+    })
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Not found data`
+      })
+    } else {
+      res.status(500).send({
+        message: "Lỗi, xác nhận sản phẩm chuyển đi đại lý"
+      })
+    }
+  }
 }
 
 
-
-
-
-exports.FacilityProductFaulty = async(req, res) => {
+exports.FacilityProduct = async (req, res) => {
   try {
-      const products = await Product.getAllProductFaulty(req.body.id_trang_thai, req.params.id);
-      res.status(200).send(products);
-  } catch(err) {
+    let products;
+    if (req.params.month) {
+      if (req.params.statusId === 1) {
+        const dates = await MyDate.findByPropertyAndMonth(`nam_tai_kho_cssx`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      }
+      if (req.params.statusId === 2) {
+        const dates = await MyDate.findByPropertyAndMonth(`chuyen_cho_dai_ly`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 5) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_chuyen_ve_cssx`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 7) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_ban_cho_kh`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 8) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_huy_sp`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 9) {
+        const warrantys = await Warranty.findByPropertyAndMonth(null, null, `ngay_loi_can_bao_hanh`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, productIds);
+      } else if (req.params.statusId === 13) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_loi_khong_the_sua_chua`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 15) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_ban_giao_sp_moi`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 16) {
+        const warrantys = await Warranty.findByPropertyAndMonth(null, null, `ngay_loi_can_trieu_hoi`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, productIds);
+      } else if (req.params.statusId === 17) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_den_cssx`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      }
+    } else if (req.params.quarter) {
+      if (req.params.statusId === 1) {
+        const dates = await MyDate.findByPropertyAndQuarter(`nam_tai_kho_cssx`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      }
+      if (req.params.statusId === 2) {
+        const dates = await MyDate.findByPropertyAndQuarter(`chuyen_cho_dai_ly`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 5) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_chuyen_ve_cssx`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 7) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_ban_cho_kh`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 8) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_huy_sp`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 9) {
+        const warrantys = await Warranty.findByPropertyAndQuarter(null, null, `ngay_loi_can_bao_hanh`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, productIds);
+      } else if (req.params.statusId === 13) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_loi_khong_the_sua_chua`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 15) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_ban_giao_sp_moi`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 16) {
+        const warrantys = await Warranty.findByPropertyAndQuarter(null, null, `ngay_loi_can_trieu_hoi`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, productIds);
+      } else if (req.params.statusId === 17) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_den_cssx`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      }
+    } else {
+      if (req.params.statusId === 1) {
+        const dates = await MyDate.findByPropertyAndYear(`nam_tai_kho_cssx`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      }
+      if (req.params.statusId === 2) {
+        const dates = await MyDate.findByPropertyAndYear(`chuyen_cho_dai_ly`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 5) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_chuyen_ve_cssx`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 7) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_ban_cho_kh`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 8) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_huy_sp`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 9) {
+        const warrantys = await Warranty.findByPropertyAndYear(null, null, `ngay_loi_can_bao_hanh`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, productIds);
+      } else if (req.params.statusId === 13) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_loi_khong_the_sua_chua`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 15) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_ban_giao_sp_moi`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      } else if (req.params.statusId === 16) {
+        const warrantys = await Warranty.findByPropertyAndYear(null, null, `ngay_loi_can_trieu_hoi`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, productIds);
+      } else if (req.params.statusId === 17) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_den_cssx`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+      }
+    }
+    res.status(200).send(products);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+}
+
+
+exports.FacilityProductFaulty = async (req, res) => {
+  try {
+    const products = await Product.getAllProductFaulty(process.env.DANG_CHUYEN_DEN_CO_SO_SAN_XUAT, req.id_co_so_sx);
+    res.status(200).send(products);
+  } catch (err) {
     if (err.kind === "not_found") {
       res.status(404).send({
         message: "Không có sản phẩm lỗi đang chuyển về."
@@ -104,14 +344,22 @@ exports.FacilityProductFaulty = async(req, res) => {
 
 exports.FacilityProductFaultyReceive = async (req, res) => {
   try {
-    await Product.updateStatusId(req.body.id_trang_thai, req.body.id);
+    await Product.updateStatusId(process.env.SAN_PHAM_LOI_NAM_TAI_KHO_CO_SO_SX, req.body.id);
+    const products = await Product.getAll(process.env.SAN_PHAM_LOI_NAM_TAI_KHO_CO_SO_SX, req.id_co_so_sx);
+    let dateIds = [];
+    for (let i = 0; i < products.length; i++) {
+      dateIds.push(products[i].id_ngay);
+    }
+    await MyDate.updateByIds({
+      ngay_den_cssx: new Date,
+    }, dateIds);
     res.status(200).send({
       message: "xác nhận sản phẩm lỗi đã về đến cssx thành công"
     })
-  } catch(err) {
+  } catch (err) {
     res.status(500).send({
       message: "Lỗi không thể update ID trạng thái cho sản phẩm"
-  })
+    })
   }
 
 }
@@ -135,6 +383,59 @@ exports.WarrantyCenterProducts = async (req, res) => {
        }
     }
 }
+
+exports.FacilityProductSold = async(req, res) => {
+  try {
+    let results = [];
+    if (req.params.type === `month`) {
+      for (let i = 1; i <= 12; i++) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_ban_cho_kh`, i, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+        results.push(products.length);
+      }
+    }
+    if (req.params.type === `quarter`) {
+      for (let i = req.params.year - 2; i <= req.params.year; i++) {
+        for (let j = 1; j <= 4; j++) {
+          const dates = await MyDate.findByPropertyAndQuarter(`ngay_ban_cho_kh`, j, i);
+          let dateIds = [];
+          for (let i = 0; i < dates.length; i++) {
+            dateIds.push(dates[i].id);
+          }
+          const products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+          results.push(products.length);
+        }
+      }
+    }
+    if (req.params.type === `year`) {
+      for (let i = req.params.year - 11; i <= req.params.year; i++) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_ban_cho_kh`, i);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const products = await Product.getAll(null, req.id_co_so_sx, null, null, dateIds);
+        results.push(products.length);
+      }
+    }
+    res.status(200).send(results);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+}
+
 exports.WarrantyCenterProductReceiv = async(req, res) => {
   try {
       await Product.UpdateStatusId(req.body.id_trang_thai, req.body.id);
@@ -254,6 +555,9 @@ exports.WarrantyCenterProductFaulty = async(req, res) => {
   }
 }
 
+const Warranty = require("../models/warranty.model");
+const Customer = require("../models/customer.model.js");
+const MyDate = require("../models/myDate.model");
 
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
@@ -689,6 +993,64 @@ exports.ModeratorDirectoryProductDelete = async (req, res) => {
       });
     }
   }
+};
+
+exports.ModeratorDirectoryProductSummon = async (req, res) => {
+  let children = [], allId = [];
+  children.push({
+    id: req.params.id,
+  })
+  while (children.length) {
+    let child = children.pop();
+    allId.push(child.id);
+    try {
+      let childrenDirectory = await DirectoryProduct.findByParentDirectory(child.id);
+      for (let i = 0; i < childrenDirectory.length; i++) {
+        children.push(childrenDirectory[i]);
+      }
+    } catch (err) {
+      if (err.kind !== "not_found") {
+        res.status(500).send({
+          message: `Lỗi khi tìm các id danh mục sản phẩm!`,
+        });
+        return;
+      }
+    }
+  }
+  const products = await Product.findByDirectoryProductId(allId);
+  let productIds = [];
+  for (let i = 0; i < products.length; i++) {
+    productIds.push(products[i].id);
+  }
+  await Product.updateByIds({
+    id_trang_thai: 16,
+  }, productIds);
+  for (let i = 0; i < productIds.length; i++) {
+    try {
+      const warranty = await Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId(productIds[i]);
+      await Warranty.create({
+        id_san_pham: productIds[i],
+        lan_bao_hanh: warranty.lan_bao_hanh + 1,
+        ngay_loi_can_trieu_hoi: await MyDate.getNow(),
+      });
+    } catch (err) {
+      if (err.kind === "not_found") {
+        await Warranty.create({
+          id_san_pham: productIds[i],
+          lan_bao_hanh: 1,
+          ngay_loi_can_trieu_hoi: await MyDate.getNow(),
+        });
+      } else {
+        res.status(500).send({
+          message: `Lỗi khi triệu hồi sản phẩm!`
+        });
+        return;
+      }
+    }
+  }
+  res.status(200).send({
+    message: `Triệu hồi sản phẩm thành công!`,
+  });
 };
 
 exports.ModeratorDirectoryProductionFacility = async (req, res) => {
@@ -1671,7 +2033,11 @@ exports.ModeratorProduct = async (req, res) => {
   try {
     let productIds;
     if (req.body.id_trung_tam_bh) {
-      productIds = await Warranty.getProductIdFromWarrantyCenterId(req.body.id_trung_tam_bh);
+      const data = await Warranty.getProductIdFromWarrantyCenterId(req.body.id_trung_tam_bh);
+      productIds = [];
+      for (let i = 0; i < data.length; i++) {
+        productIds.push(data[i].id_san_pham);
+      }
     }
     const products = await Product.getAll(req.body.id_trang_thai, req.body.id_co_so_sx, req.body.id_dai_ly, productIds);
     res.status(200).send(products);
@@ -1715,7 +2081,18 @@ exports.DistributionAgentProduct = async (req, res) => {
 
 exports.DistributionAgentProductStatusUpdate = async (req, res) => {
   try {
-    await Product.updateStatusByIds(req.body.ids);
+    const products = await Product.getAll(null, null, null, req.body.ids);
+    let dateIds = [];
+    for (let i = 0; i < products.length; i++) {
+      dateIds.push(products[i].id_ngay);
+    }
+    const now = await MyDate.getNow();
+    await MyDate.updateByIds({
+      nam_tai_kho_dai_ly: now,
+    }, dateIds);
+    await Product.updateByIds({
+      id_trang_thai: 3,
+    }, req.body.ids);
     res.status(200).send({
       message: 'Cập nhật trạng thái thành công!'
     });
@@ -1727,6 +2104,860 @@ exports.DistributionAgentProductStatusUpdate = async (req, res) => {
     } else {
       res.status(500).send({
         message: "Lỗi khi cập nhật trạng thái sản phẩm!"
+      });
+    }
+  }
+};
+
+exports.DistributionAgentCustomer = async (req, res) => {
+  try {
+    const customers = await Customer.findByNameAndDateOfBirth(req.params.name, req.params.dateOfBirth);
+    res.status(200).send(customers);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy khách hàng với tên là ${req.params.name} và ngày sinh là ${req.params.dateOfBirth}!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi tìm kiếm khách hàng với tên là ${req.params.name} và ngày sinh là ${req.params.dateOfBirth}!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductSell = async (req, res) => {
+  let id;
+  if (req.body.ho_ten) {
+    try {
+      const newCustomer = await Customer.create(new Customer(req.body));
+      id = newCustomer.id;
+    } catch (err) {
+      res.status(500).send({
+        message: `Lỗi khi tạo khách hàng!`
+      });
+    }
+  } else {
+    id = req.body.id_khach_hang;
+  }
+  try {
+    const products = await Product.getAll(null, null, null, [req.body.id]);
+    let dateIds = [];
+    for (let i = 0; i < products.length; i++) {
+      dateIds.push(products[i].id_ngay);
+    }
+    const now = await MyDate.getNow();
+    await MyDate.updateByIds({
+      ngay_ban_cho_kh: now,
+    }, dateIds);
+    await Product.updateByIds({
+      id_trang_thai: 7,
+      id_khach_hang: id,
+    }, [req.body.id]);
+    res.status(200).send({
+      message: 'Cập nhật thành công!'
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy sản phẩm với id ${req.body.id}!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi cập nhật trạng thái sản phẩm với id ${req.body.id}!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductError = async (req, res) => {
+  try {
+    await Product.updateByIds({
+      id_trang_thai: 9,
+    }, [req.params.id]);
+    try {
+      const warranty = await Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId(req.params.id);
+      if (warranty.ngay_dang_bao_hanh_tai_trung_tam) {
+        await Warranty.create({
+          id_san_pham: req.params.id,
+          id_dai_ly: req.id_dai_ly,
+          lan_bao_hanh: warranty.lan_bao_hanh + 1,
+          ngay_loi_can_bao_hanh: await MyDate.getNow(),
+        });
+      } else {
+        await Warranty.updateByIds({
+          id_dai_ly: req.id_dai_ly,
+          ngay_loi_can_bao_hanh: await MyDate.getNow(),
+        }, [warranty.id]);
+      }
+    } catch (err) {
+      if (err.kind === "not_found") {
+        await Warranty.create(new Warranty({
+          id_san_pham: req.params.id,
+          id_dai_ly: req.id_dai_ly,
+        }));
+      } else {
+        res.status(500).send({
+          message: `Lỗi khi cập nhật trạng thái sản phẩm với id = ${req.params.id}!`
+        });
+      }
+    }
+    res.status(200).send({
+      message: 'Cập nhật trạng thái thành công!',
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy sản phẩm với id = ${req.params.id}!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi cập nhật trạng thái sản phẩm với id = ${req.params.id}!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductWarrantyGetAll = async (req, res) => {
+  try {
+    const products = await Product.getAll(9);
+    res.status(200).send(products);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm cần bảo hành!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi đang tìm kiếm sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentWarrantyCenterPick = async (req, res) => {
+  try {
+    const allWWarrantyCenter = await WarrantyCenter.getAll();
+    res.status(200).send(allWWarrantyCenter);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy trung tâm bảo hành!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi tìm kiếm trung tâm bảo hành!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductShippingToWarrantyCenter = async (req, res) => {
+  try {
+    await Product.updateByIds({
+      id_trang_thai: 4,
+    }, req.body.ids);
+    let warrantyIds = [];
+    for (let i = 0; i < req.body.ids.length; i++) {
+      let warranty = await Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId(req.body.ids[i]);
+      warrantyIds.push(warranty.id);
+    }
+    await Warranty.updateByIds({
+      id_trung_tam_bh: req.body.id_trung_tam_bh,
+      ngay_dang_den_trung_tam_bh: await MyDate.getNow(),
+    }, warrantyIds);
+    res.status(200).send({
+      message: `Cập nhật trạng thái thành công!`,
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi đang cập nhật trạng thái!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductWarrantyComplete = async (req, res) => {
+  try {
+    const warrantys = await Warranty.getWarrantyCompletedAndShippingProductId(req.id_dai_ly);
+    let ids = [];
+    for (let i = 0; i < warrantys.length; i++) {
+      ids.push(warrantys[i].id_san_pham);
+    }
+    const products = await Product.getAll(null, null, null, ids);
+    res.status(200).send(products);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi đang tìm kiếm sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductWarrantyCompleteArrived = async (req, res) => {
+  try {
+    const products = await Product.getAll(null, null, null, req.body.ids);
+    let completeProductIds = [], errProductIds = [], dateIds = [], completeWarrantyIds = [], errDateIds = [];
+    for (let product of products) {
+      dateIds.push(product.id_ngay);
+    }
+    const dates = await MyDate.getAll(dateIds);
+    for (let i = 0; i < dates.length; i++) {
+      if (dates[i].ngay_loi_khong_the_sua_chua) {
+        errProductIds.push(req.body.ids[i]);
+        errDateIds.push(products[i].id_ngay);
+      } else {
+        completeProductIds.push(req.body.ids[i]);
+        let warranty = await Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId(req.body.ids[i]);
+        completeWarrantyIds.push(warranty.id);
+      }
+    }
+    await Promise.all([
+      Product.updateByIds({
+        id_trang_thai: 10,
+      }, completeProductIds),
+      Product.updateByIds({
+        id_trang_thai: 14,
+      }, errProductIds),
+      Warranty.updateByIds({
+        ngay_den_dai_ly: await MyDate.getNow(),
+      }, completeWarrantyIds),
+      MyDate.updateByIds({
+        ngay_loi_khong_the_sua_chua_o_dai_ly: await MyDate.getNow(),
+      }, errDateIds),
+    ]);
+    res.status(200).send({
+      message: `Cập nhật trạng thái thành công!`
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi đang cập nhật sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductWarrantyCompleteArrivedGetAll = async (req, res) => {
+  try {
+    const products = await Warranty.getWarrantyCompletedAndArrivedProductId(req.id_dai_ly);
+    let productIds = [];
+    for (let i = 0; i < products.length; i++) {
+      productIds.push(products[i].id_san_pham);
+    }
+    const allProduct = await Product.getAll(null, null, null, productIds);
+    let customerIds = [];
+    for (let i = 0; i < allProduct.length; i++) {
+      customerIds.push(allProduct[i].id_khach_hang);
+    }
+    const allCustomer = await Customer.getAll(customerIds);
+    res.status(200).send({
+      allProduct: allProduct,
+      allCustomer: allCustomer,
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm cần trả cho khách hàng!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductReturn = async (req, res) => {
+  try {
+    await Product.updateByIds({
+      id_trang_thai: 11,
+    }, [req.params.id]);
+    let warranty = await Warranty.getWarrantyIdByMaxWarrantyTimeAndProductId(req.params.id);
+    await Warranty.updateByIds({
+      ngay_tra_lai_kh: await MyDate.getNow(),
+    }, [warranty.id]);
+    res.status(200).send({
+      message: `Cập nhật trạng thái thành công!`
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy sản phẩm với id = ${req.params.id}!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi cập nhật trạng thái sản phẩm với id = ${req.params.id}!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductErrGetAll = async (req, res) => {
+  try {
+    const products = await Product.getAll(14);
+    res.status(200).send(products);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm cần chuyển về cơ sở sản xuất!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductMoveToProductionFacility = async (req, res) => {
+  try {
+    await Product.updateByIds({
+      id_trang_thai: 5,
+    }, req.body.ids);
+    const products = await Product.getAll(null, null, null, req.body.ids);
+    let dateIds = [];
+    for (let i = 0; i < products.length; i++) {
+      dateIds.push(products[i].id_ngay);
+    }
+    await MyDate.updateByIds({
+      ngay_chuyen_ve_cssx: await MyDate.getNow(),
+    }, dateIds);
+    res.status(200).send({
+      message: `Cập nhật trạng thái thành công!`
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi cập nhật trạng thái sản phẩm với id yêu cầu!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentCustomerNewReplacementProduct = async (req, res) => {
+  try {
+    const warrantys = await Warranty.getFinalWarrantyAtDistributionAgentProductId(req.id_dai_ly);
+    const dates = await MyDate.getErrAndAtDistributionAgentDate();
+    const products = await Product.getProductNeedNewReplacementProduct(warrantys, dates);
+    let customerIds = [];
+    for (let i = 0; i < products.length; i++) {
+      customerIds.push(products[i].id_khach_hang);
+    }
+    const allCustomer = await Customer.getAll(customerIds);
+    res.status(200).send({
+      allProduct: products,
+      allCustomer: allCustomer,
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm cần thay mới cho khách hàng!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductNewReplacementProduct = async (req, res) => {
+  try {
+    await Product.updateByIds({
+      id_khach_hang: null,
+    }, [req.body.id_cu]);
+    await Product.updateByIds({
+      id_trang_thai: 15,
+      id_khach_hang: req.body.id_khach_hang,
+    }, [req.body.id_moi]);
+    const products = await Product.getAll(null, null, null, [req.body.id_moi]);
+    await MyDate.updateByIds({
+      ngay_ban_giao_sp_moi: await MyDate.getNow(),
+    }, [products[0].id_ngay]);
+    res.status(200).send({
+      message: `Bàn giao sản phẩm mới thành công!`
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không tìm thấy!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi bàn giao sản phẩm mới!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductSummon = async (req, res) => {
+  try {
+    const warrantys = await Warranty.getSummonProductId();
+    let productIds = [];
+    for (let i = 0; i < warrantys.length; i++) {
+      productIds.push(warrantys[i].id_san_pham);
+    }
+    const products = await Product.getAll(null, null, req.id_dai_ly, productIds);
+    let customerIds = [], allProductHasCustomer = [], allProductHasNoCustomer = [];
+    for (let i = 0; i < products.length; i++) {
+      if (products[i].id_khach_hang) {
+        allProductHasCustomer.push(products[i]);
+        customerIds.push(products[i].id_khach_hang);
+      } else {
+        allProductHasNoCustomer.push(products[i]);
+      }
+    }
+    const allCustomer = await Customer.getAll(customerIds);
+    res.status(200).send({
+      allProductHasCustomer: allProductHasCustomer,
+      allProductHasNoCustomer: allProductHasNoCustomer,
+      allCustomer: allCustomer,
+    });
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm cần triệu hồi!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductStatisticalStatusShow = async (req, res) => {
+  try {
+    const status = await Status.getAll([2, 3, 4, 5, 7, 9, 10, 11, 14, 15, 16]);
+    res.status(200).send(status);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có trạng thái!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy trạng thái!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductStatisticalStatus = async (req, res) => {
+  try {
+    let products;
+    if (req.params.month) {
+      if (req.params.statusId === 2) {
+        const dates = await MyDate.findByPropertyAndMonth(`chuyen_cho_dai_ly`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const warrantys = await Warranty.findByPropertyAndMonth(`id_dai_ly`, req.id_dai_ly, `ngay_dang_tra_ve_dai_ly`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds, productIds);
+      } else if (req.params.statusId === 3) {
+        const dates = await MyDate.findByPropertyAndMonth(`nam_tai_kho_dai_ly`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 4) {
+        const warrantys = await Warranty.findByPropertyAndMonth(`id_dai_ly`, req.id_dai_ly, `ngay_dang_den_trung_tam_bh`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 5) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_chuyen_ve_cssx`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 7) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_ban_cho_kh`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 9) {
+        const warrantys = await Warranty.findByPropertyAndMonth(`id_dai_ly`, req.id_dai_ly, `ngay_loi_can_bao_hanh`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 10) {
+        const warrantys = await Warranty.findByPropertyAndMonth(`id_dai_ly`, req.id_dai_ly, `ngay_den_dai_ly`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 11) {
+        const warrantys = await Warranty.findByPropertyAndMonth(`id_dai_ly`, req.id_dai_ly, `ngay_tra_lai_kh`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 14) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_loi_khong_the_sua_chua_o_dai_ly`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const allProduct = await Product.getAll(null, null, null, null, dateIds);
+        let productIds = [];
+        for (let i = 0; i < allProduct.length; i++) {
+          productIds.push(allProduct[i].id);
+        }
+        const warrantys = await Warranty.findByProductIds(productIds);
+        let productIdsFromWarrantys = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          if (warrantys[i].id_dai_ly === req.id_dai_ly) {
+            productIdsFromWarrantys.push(warrantys[i].id_san_pham);
+          }
+        }
+        products = await Product.getAll(null, null, null, productIdsFromWarrantys);
+      } else if (req.params.statusId === 15) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_ban_giao_sp_moi`, req.params.month, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 16) {
+        const warrantys = await Warranty.findByPropertyAndMonth(`id_dai_ly`, req.id_dai_ly, `ngay_loi_can_trieu_hoi`, req.params.month, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      }
+    } else if (req.params.quarter) {
+      if (req.params.statusId === 2) {
+        const dates = await MyDate.findByPropertyAndQuarter(`chuyen_cho_dai_ly`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const warrantys = await Warranty.findByPropertyAndQuarter(`id_dai_ly`, req.id_dai_ly, `ngay_dang_tra_ve_dai_ly`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds, productIds);
+      } else if (req.params.statusId === 3) {
+        const dates = await MyDate.findByPropertyAndQuarter(`nam_tai_kho_dai_ly`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 4) {
+        const warrantys = await Warranty.findByPropertyAndQuarter(`id_dai_ly`, req.id_dai_ly, `ngay_dang_den_trung_tam_bh`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 5) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_chuyen_ve_cssx`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 7) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_ban_cho_kh`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 9) {
+        const warrantys = await Warranty.findByPropertyAndQuarter(`id_dai_ly`, req.id_dai_ly, `ngay_loi_can_bao_hanh`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 10) {
+        const warrantys = await Warranty.findByPropertyAndQuarter(`id_dai_ly`, req.id_dai_ly, `ngay_den_dai_ly`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 11) {
+        const warrantys = await Warranty.findByPropertyAndQuarter(`id_dai_ly`, req.id_dai_ly, `ngay_tra_lai_kh`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 14) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_loi_khong_the_sua_chua_o_dai_ly`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const allProduct = await Product.getAll(null, null, null, null, dateIds);
+        let productIds = [];
+        for (let i = 0; i < allProduct.length; i++) {
+          productIds.push(allProduct[i].id);
+        }
+        const warrantys = await Warranty.findByProductIds(productIds);
+        let productIdsFromWarrantys = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          if (warrantys[i].id_dai_ly === req.id_dai_ly) {
+            productIdsFromWarrantys.push(warrantys[i].id_san_pham);
+          }
+        }
+        products = await Product.getAll(null, null, null, productIdsFromWarrantys);
+      } else if (req.params.statusId === 15) {
+        const dates = await MyDate.findByPropertyAndQuarter(`ngay_ban_giao_sp_moi`, req.params.quarter, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 16) {
+        const warrantys = await Warranty.findByPropertyAndQuarter(`id_dai_ly`, req.id_dai_ly, `ngay_loi_can_trieu_hoi`, req.params.quarter, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      }
+    } else {
+      if (req.params.statusId === 2) {
+        const dates = await MyDate.findByPropertyAndYear(`chuyen_cho_dai_ly`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const warrantys = await Warranty.findByPropertyAndYear(`id_dai_ly`, req.id_dai_ly, `ngay_dang_tra_ve_dai_ly`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds, productIds);
+      } else if (req.params.statusId === 3) {
+        const dates = await MyDate.findByPropertyAndYear(`nam_tai_kho_dai_ly`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 4) {
+        const warrantys = await Warranty.findByPropertyAndYear(`id_dai_ly`, req.id_dai_ly, `ngay_dang_den_trung_tam_bh`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 5) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_chuyen_ve_cssx`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 7) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_ban_cho_kh`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 9) {
+        const warrantys = await Warranty.findByPropertyAndYear(`id_dai_ly`, req.id_dai_ly, `ngay_loi_can_bao_hanh`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 10) {
+        const warrantys = await Warranty.findByPropertyAndYear(`id_dai_ly`, req.id_dai_ly, `ngay_den_dai_ly`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 11) {
+        const warrantys = await Warranty.findByPropertyAndYear(`id_dai_ly`, req.id_dai_ly, `ngay_tra_lai_kh`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      } else if (req.params.statusId === 14) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_loi_khong_the_sua_chua_o_dai_ly`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const allProduct = await Product.getAll(null, null, null, null, dateIds);
+        let productIds = [];
+        for (let i = 0; i < allProduct.length; i++) {
+          productIds.push(allProduct[i].id);
+        }
+        const warrantys = await Warranty.findByProductIds(productIds);
+        let productIdsFromWarrantys = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          if (warrantys[i].id_dai_ly === req.id_dai_ly) {
+            productIdsFromWarrantys.push(warrantys[i].id_san_pham);
+          }
+        }
+        products = await Product.getAll(null, null, null, productIdsFromWarrantys);
+      } else if (req.params.statusId === 15) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_ban_giao_sp_moi`, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+      } else if (req.params.statusId === 16) {
+        const warrantys = await Warranty.findByPropertyAndYear(`id_dai_ly`, req.id_dai_ly, `ngay_loi_can_trieu_hoi`, req.params.year);
+        let productIds = [];
+        for (let i = 0; i < warrantys.length; i++) {
+          productIds.push(warrantys[i].id_san_pham);
+        }
+        products = await Product.getAll(null, null, null, productIds);
+      }
+    }
+    res.status(200).send(products);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.DistributionAgentProductStatisticalSell = async (req, res) => {
+  try {
+    let results = [];
+    if (req.params.type === `month`) {
+      for (let i = 1; i <= 12; i++) {
+        const dates = await MyDate.findByPropertyAndMonth(`ngay_ban_cho_kh`, i, req.params.year);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+        results.push(products.length);
+      }
+    }
+    if (req.params.type === `quarter`) {
+      for (let i = req.params.year - 2; i <= req.params.year; i++) {
+        for (let j = 1; j <= 4; j++) {
+          const dates = await MyDate.findByPropertyAndQuarter(`ngay_ban_cho_kh`, j, i);
+          let dateIds = [];
+          for (let i = 0; i < dates.length; i++) {
+            dateIds.push(dates[i].id);
+          }
+          const products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+          results.push(products.length);
+        }
+      }
+    }
+    if (req.params.type === `year`) {
+      for (let i = req.params.year; i <= req.params.year + 11; i++) {
+        const dates = await MyDate.findByPropertyAndYear(`ngay_ban_cho_kh`, i);
+        let dateIds = [];
+        for (let i = 0; i < dates.length; i++) {
+          dateIds.push(dates[i].id);
+        }
+        const products = await Product.getAll(null, null, req.id_dai_ly, null, dateIds);
+        results.push(products.length);
+      }
+    }
+    res.status(200).send(results);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có sản phẩm!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy sản phẩm!`
+      });
+    }
+  }
+};
+
+exports.FacilityDirectoryProduct = async (req, res) => {
+  let children = [], hasNoChild = [];
+  children.push({
+    id: 0,
+  })
+  while (children.length) {
+    let child = children.pop();
+    try {
+      let childrenDirectory = await DirectoryProduct.findByParentDirectory(child.id);
+      for (let i = 0; i < childrenDirectory.length; i++) {
+        children.push(childrenDirectory[i]);
+      }
+    } catch (err) {
+      if (err.kind === "not_found") {
+        hasNoChild.push(child);
+      } else {
+        res.status(500).send({
+          message: `Lỗi khi tìm các id danh mục sản phẩm!`,
+        });
+        return;
+      }
+    }
+  }
+  res.status(200).send(hasNoChild);
+};
+
+exports.FacilityProductStatisticalStatusShow = async (req, res) => {
+  try {
+    const status = await Status.getAll([1, 2, 5, 7, 8, 9, 13, 15, 16, 17]);
+    res.status(200).send(status);
+  } catch (err) {
+    if (err.kind === "not_found") {
+      res.status(404).send({
+        message: `Không có trạng thái!`
+      });
+    } else {
+      res.status(500).send({
+        message: `Lỗi khi lấy trạng thái!`
       });
     }
   }

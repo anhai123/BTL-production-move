@@ -22,8 +22,7 @@ Dates.create = newDates => {
               }
             resolve({ id: res.insertId, ...newDates });
         })
-    })
-
+    });
 }
 
 Dates.slectIdMax = () => {
