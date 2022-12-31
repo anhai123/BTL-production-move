@@ -542,7 +542,9 @@ exports.WarrantyCenterProductsFinnish = async (req, res) => {
 // Gửi đến đại lý sp đã bảo hành xong
 exports.WarrantyCenterProductDeliver = async (req, res) => {
   try {
-    await Product.UpdateStatus(2, req.body.id_trang_thai_, req.id_trung_tam_bh);
+    await Product.updateByIds({
+      id_trang_thai: 2,
+    }, [req.body.id]);
     await Warranty.UpdateDates("ngay_dang_tra_ve_dai_ly", [req.body.id]);
     res.status(200).send({
       message: "gui den dai ly thanh cong"
