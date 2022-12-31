@@ -2595,7 +2595,6 @@ exports.DistributionAgentProductStatisticalStatus = async (req, res) => {
     req.params.month = parseInt(req.params.month);
     req.params.quarter = parseInt(req.params.quarter);
     req.params.year = parseInt(req.params.year);
-    console.log("hehehe " + req.params.month);
     if (req.params.month) {
       if (req.params.statusId === 2) {
         const dates = await MyDate.findByPropertyAndMonth(`chuyen_cho_dai_ly`, req.params.month, req.params.year);
@@ -2918,6 +2917,7 @@ exports.DistributionAgentProductStatisticalSell = async (req, res) => {
           res.status(500).send({
             message: `Lỗi khi lấy sản phẩm!`
           });
+          return;
         }
       }
     }
@@ -2940,6 +2940,7 @@ exports.DistributionAgentProductStatisticalSell = async (req, res) => {
             res.status(500).send({
               message: `Lỗi khi lấy sản phẩm!`
             });
+            return;
           }
         }
       }
@@ -2962,6 +2963,7 @@ exports.DistributionAgentProductStatisticalSell = async (req, res) => {
           res.status(500).send({
             message: `Lỗi khi lấy sản phẩm!`
           });
+          return;
         }
       }
     }
@@ -3211,20 +3213,21 @@ exports.WarrantyCenterProductStatisticalStatus = async (req, res) => {
 
 exports.FacilityProductStatisticalErr = async (req, res) => {
   try {
+    let errProducts = [];
     const products = await Product.getAll(null, req.params.productionFacilityId, req.params.distributionAgentId, null, null, null, req.params.directoryProductId);
     const warrantys = await Warranty.findErrProductIds();
     let productIds = [];
     for (let i = 0; i < warrantys.length; i++) {
       productIds.push(warrantys[i].id_san_pham);
     }
-    const errProducts = await Product.getAll(null, req.params.productionFacilityId, req.params.distributionAgentId, productIds, null, null, req.params.directoryProductId);
+    errProducts = await Product.getAll(null, req.params.productionFacilityId, req.params.distributionAgentId, productIds, null, null, req.params.directoryProductId);
     res.status(200).send({
       result: (errProducts.length / products.length) * 100 + `%`,
     });
   } catch (err) {
     if (err.kind === "not_found") {
-      res.status(404).send({
-        message: `Không có sản phẩm!`
+      res.status(200).send({
+        result: `0%`,
       });
     } else {
       res.status(500).send({
