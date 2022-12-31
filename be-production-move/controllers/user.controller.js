@@ -543,7 +543,7 @@ exports.WarrantyCenterProductsFinnish = async (req, res) => {
 exports.WarrantyCenterProductDeliver = async (req, res) => {
   try {
     await Product.UpdateStatus(2, req.body.id_trang_thai_, req.id_trung_tam_bh);
-    await Warranty.UpdateDates("ngay_dang_tra_ve_dai_ly", req.body.ids);
+    await Warranty.UpdateDates("ngay_dang_tra_ve_dai_ly", [req.body.id]);
     res.status(200).send({
       message: "gui den dai ly thanh cong"
     })
