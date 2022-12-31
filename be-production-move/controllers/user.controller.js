@@ -98,6 +98,10 @@ exports.FacilityProductDeliver = async (req, res) => {
 exports.FacilityProduct = async (req, res) => {
   try {
     let products;
+    req.params.statusId = parseInt(req.params.statusId);
+    req.params.month = parseInt(req.params.month);
+    req.params.quarter = parseInt(req.params.quarter);
+    req.params.year = parseInt(req.params.year);
     if (req.params.month) {
       if (req.params.statusId === 1) {
         const dates = await MyDate.findByPropertyAndMonth(`nam_tai_kho_cssx`, req.params.month, req.params.year);
@@ -3070,6 +3074,10 @@ exports.WarrantyCenterProductStatisticalStatusShow = async (req, res) => {
 exports.WarrantyCenterProductStatisticalStatus = async (req, res) => {
   try {
     let products;
+    req.params.statusId = parseInt(req.params.statusId);
+    req.params.month = parseInt(req.params.month);
+    req.params.quarter = parseInt(req.params.quarter);
+    req.params.year = parseInt(req.params.year);
     if (req.params.month) {
       if (req.params.statusId === 4) {
         const warrantys = await Warranty.findByPropertyAndMonth(`id_trung_tam_bh`, req.id_trung_tam_bh, `ngay_dang_den_trung_tam_bh`, req.params.month, req.params.year);
