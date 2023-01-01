@@ -350,28 +350,95 @@ module.exports = function (app) {
   );
 
   // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
-  app.get("/api/facility/directory/product", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityDirectoryProduct);
+  app.get(
+    "/api/facility/directory/product",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityDirectoryProduct
+  );
+
+  // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
+  app.get(
+    "/api/facility/directory/product",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityDirectoryProduct
+  );
+
+  // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
+  app.get(
+    "/api/facility/directory/product",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityDirectoryProduct
+  );
+  app.get(
+    "/api/facility/directory/product",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityDirectoryProduct
+  );
+
+  // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
+  app.get(
+    "/api/facility/directory/product",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityDirectoryProduct
+  );
+
+  // Dữ liệu để chọn danh mục sp trong khi nhập sản phẩm vào kho cssx
+  app.get(
+    "/api/facility/directory/product",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityDirectoryProduct
+  );
 
   // Khi bấm chọn id danh mục sp thì sẽ có thông số gửi lên, ko có thì phải thêm mới thông số
-  app.get("/api/facility/specifications/:id", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilitySpecifications);
+  app.get(
+    "/api/facility/specifications/:id",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilitySpecifications
+  );
 
+  //Lấy danh sách đại lý tồn tại
+  app.get("/api/distribution-agent/directory", controller.GetAllAgent);
   // nhập sản phẩm
-  app.post("/api/facility/product/create", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductCreate);
+  app.post(
+    "/api/facility/product/create",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductCreate
+  );
 
   // lấy list đại lý
-  app.get("/api/distribution-agent/directory", [authJwt.verifyToken, authJwt.isProductionFacility], controller.GetAllAgent);
+  app.get(
+    "/api/distribution-agent/directory",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.GetAllAgent
+  );
 
   // tất cả sản phẩm có thể xuất đi đại lý
-  app.get("/api/facility/product-new", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductNew);
+  app.get(
+    "/api/facility/product-new",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductNew
+  );
 
   // xác nhận chuyển sản phẩm cho đại lý
-  app.post("/api/facility/product/deliver", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductDeliver);
+  app.post(
+    "/api/facility/product/deliver",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductDeliver
+  );
 
   // xem sản phẩm lỗi đang chuyển về cơ sở sản xuất
-  app.get("/api/facility/product/faulty/all", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductFaulty);
+  app.get(
+    "/api/facility/product/faulty/all",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductFaulty
+  );
 
   // bấm vào button xác nhận sản phẩm loi đã đến cơ sở sản xuất
-  app.put("/api/facility/product/faulty/receiv", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductFaultyReceive);
+  app.put(
+    "/api/facility/product/faulty/receiv",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductFaultyReceive
+  );
 
   // Khi chọn trạng thái để thống kê
   app.get(
@@ -380,10 +447,24 @@ module.exports = function (app) {
     controller.FacilityProductStatisticalStatusShow
   );
   // khi bấm thống kê sản phẩm
-  app.get("/api/facility/product/statistical/status/:statusId/:month/:quarter/:year", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProduct);
+  app.get(
+    "/api/facility/product/statistical/status/:statusId/:month/:quarter/:year",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProduct
+  );
 
+  //danh mục sp tất cả
+  app.get(
+    "/api/facility/directory/product",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityDirectoryProduct
+  );
   // khi bấm xem sản phẩm đã bán
-  app.get("/api/facility/product/statistical/sold/:type/:year", [authJwt.verifyToken, authJwt.isProductionFacility], controller.FacilityProductSold);
+  app.get(
+    "/api/facility/product/statistical/sold/:type/:year",
+    [authJwt.verifyToken, authJwt.isProductionFacility],
+    controller.FacilityProductSold
+  );
 
   // Khi chọn danh mục sp, cssx và dlpp để thống kê tỉ lệ
   app.get(
@@ -399,28 +480,54 @@ module.exports = function (app) {
     controller.FacilityProductStatisticalErr
   );
 
-  
-
   // sản phẩm cần bảo hành
-  app.get("/api/warranty-center/products", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProducts);
+  app.get(
+    "/api/warranty-center/products",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProducts
+  );
 
-  // Khi bấm vào nút nhận bảo hành sản phẩm 
-  app.put("/api/warranty-center/products/receiv", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductReceiv);
+  // Khi bấm vào nút nhận bảo hành sản phẩm
+  app.put(
+    "/api/warranty-center/products/receiv",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProductReceiv
+  );
 
   // sản phẩm đang bảo hành
-  app.get("/api/warranty-center/products/under", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductUnder);
+  app.get(
+    "/api/warranty-center/products/under",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProductUnder
+  );
 
   // xác nhận sản phẩm bảo hành xong or lỗi
-  app.post("/api/warranty-center/product/finnish", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterUpdateStatus);
+  app.post(
+    "/api/warranty-center/product/finnish",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterUpdateStatus
+  );
 
   // sản phẩm đã bảo hành xong
-  app.get("/api/warranty-center/products-finnish", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductsFinnish);
+  app.get(
+    "/api/warranty-center/products-finnish",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProductsFinnish
+  );
 
   // sản phẩm lỗi
-  app.get("/api/warranty-center/products-faulty", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductFaulty);
+  app.get(
+    "/api/warranty-center/products-faulty",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProductFaulty
+  );
 
   // chuyển sản phẩm đến đại lý
-  app.post("/api/warranty-center/products/deliver", [authJwt.verifyToken, authJwt.isWarrantyCenter], controller.WarrantyCenterProductDeliver);
+  app.post(
+    "/api/warranty-center/products/deliver",
+    [authJwt.verifyToken, authJwt.isWarrantyCenter],
+    controller.WarrantyCenterProductDeliver
+  );
 
   // Khi chọn trạng thái để thống kê
   app.get(
