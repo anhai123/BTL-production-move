@@ -304,28 +304,32 @@ Product.getProductNeedNewReplacementProduct = (idsOject, dateIdsOject) => {
 
 Product.updateByIds = (newProduct, ids) => {
     return new Promise((resolve, reject) => {
-        let query = `UPDATE san_pham SET ? WHERE id IN (`;
-        for (let i = 0; i < ids.length; i++) {
-            if (i === ids.length - 1) {
-                query += `${ids[i]})`;
-            } else {
-                query += `${ids[i]}, `;
+        if (ids.length) {
+            let query = `UPDATE san_pham SET ? WHERE id IN (`;
+            for (let i = 0; i < ids.length; i++) {
+                if (i === ids.length - 1) {
+                    query += `${ids[i]})`;
+                } else {
+                    query += `${ids[i]}, `;
+                }
             }
-        }
-
-        sql.query(query, newProduct, (err, res) => {
-            if (err) {
-                console.log("error: ", err);
-                return reject(err);
-            }
-
-            if (res.affectedRows == 0) {
-                // not found Product with the id
-                return reject({ kind: "not_found" });
-            }
-
+    
+            sql.query(query, newProduct, (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    return reject(err);
+                }
+    
+                if (res.affectedRows == 0) {
+                    // not found Product with the id
+                    return reject({ kind: "not_found" });
+                }
+    
+                resolve();
+            });
+        } else {
             resolve();
-        });
+        }
     });
 };
 
