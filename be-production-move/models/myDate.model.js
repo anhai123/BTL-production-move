@@ -137,28 +137,32 @@ MyDate.getErrAndAtDistributionAgentDate = () => {
 
 MyDate.updateByIds = (newDate, ids) => {
     return new Promise((resolve, reject) => {
-        let query = `UPDATE ngay SET ? WHERE id IN (`;
-        for (let i = 0; i < ids.length; i++) {
-            if (i === ids.length - 1) {
-                query += `${ids[i]})`;
-            } else {
-                query += `${ids[i]}, `;
+        if (ids.length) {
+            let query = `UPDATE ngay SET ? WHERE id IN (`;
+            for (let i = 0; i < ids.length; i++) {
+                if (i === ids.length - 1) {
+                    query += `${ids[i]})`;
+                } else {
+                    query += `${ids[i]}, `;
+                }
             }
-        }
-
-        sql.query(query, newDate, (err, res) => {
-            if (err) {
-                console.log("error: ", err);
-                return reject(err);
-            }
-
-            if (res.affectedRows == 0) {
-                // not found Date with the id
-                return reject({ kind: "not_found" });
-            }
-
+    
+            sql.query(query, newDate, (err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    return reject(err);
+                }
+    
+                if (res.affectedRows == 0) {
+                    // not found Date with the id
+                    return reject({ kind: "not_found" });
+                }
+    
+                resolve();
+            });
+        } else {
             resolve();
-        });
+        }
     });
 };
 
