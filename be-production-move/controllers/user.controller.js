@@ -3487,7 +3487,8 @@ exports.DistributionAgentProductSummon = async (req, res) => {
     );
     let customerIds = [],
       allProductHasCustomer = [],
-      allProductHasNoCustomer = [];
+      allProductHasNoCustomer = [],
+      allCustomer = [];
     for (let i = 0; i < products.length; i++) {
       if (products[i].id_khach_hang) {
         allProductHasCustomer.push(products[i]);
@@ -3496,7 +3497,9 @@ exports.DistributionAgentProductSummon = async (req, res) => {
         allProductHasNoCustomer.push(products[i]);
       }
     }
-    const allCustomer = await Customer.getAll(customerIds);
+    if (customerIds.length) {
+      allCustomer = await Customer.getAll(customerIds);
+    }
     res.status(200).send({
       allProductHasCustomer: allProductHasCustomer,
       allProductHasNoCustomer: allProductHasNoCustomer,
