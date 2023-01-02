@@ -43,45 +43,46 @@ const ProductAvailableToDeliverToAgentDistribution = () => {
   const [open, setOpen] = useState(false);
   const updateStatusProduct = () => {
     setLoading(true);
-    facilityService
-      .postSttProductIsDeliveringToAgentDistribution(selectedRowKeys)
-      .then(
-        (response) => {
-          facilityService.getProductAbleToTransferToAgentDistribution().then(
-            (response) => {
-              for (let i = 0; i < response.data.length; i++) {
-                response.data[i].key = response.data[i].id;
-              }
-              setData(response.data);
-            },
-            (error) => {
-              const _content =
-                (error.response &&
-                  error.response.data &&
-                  error.response.data.message) ||
-                error.message ||
-                error.toString();
+    showModal();
+    // facilityService
+    //   .postSttProductIsDeliveringToAgentDistribution(selectedRowKeys)
+    //   .then(
+    //     (response) => {
+    //       facilityService.getProductAbleToTransferToAgentDistribution().then(
+    //         (response) => {
+    //           for (let i = 0; i < response.data.length; i++) {
+    //             response.data[i].key = response.data[i].id;
+    //           }
+    //           setData(response.data);
+    //         },
+    //         (error) => {
+    //           const _content =
+    //             (error.response &&
+    //               error.response.data &&
+    //               error.response.data.message) ||
+    //             error.message ||
+    //             error.toString();
 
-              console.log(_content);
-            }
-          );
-        },
-        (error) => {
-          const _content =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString();
+    //           console.log(_content);
+    //         }
+    //       );
+    //     },
+    //     (error) => {
+    //       const _content =
+    //         (error.response &&
+    //           error.response.data &&
+    //           error.response.data.message) ||
+    //         error.message ||
+    //         error.toString();
 
-          console.log(_content);
-        }
-      );
+    //       console.log(_content);
+    //     }
+    //   );
 
-    setTimeout(() => {
-      setSelectedRowKeys([]);
-      setLoading(false);
-    }, 1000);
+    // setTimeout(() => {
+    //   setSelectedRowKeys([]);
+    //   setLoading(false);
+    // }, 1000);
   };
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -118,6 +119,8 @@ const ProductAvailableToDeliverToAgentDistribution = () => {
         .then(
           (response) => {
             console.log(response);
+            setLoading(false);
+            alert("chuyển sang đại lý thành công");
           },
           (error) => {
             console.log(error);
@@ -325,7 +328,6 @@ const ProductAvailableToDeliverToAgentDistribution = () => {
           type="primary"
           onClick={updateStatusProduct}
           disabled={!hasSelected}
-          loading={loading}
         >
           Chuyển sang đại lý
         </Button>

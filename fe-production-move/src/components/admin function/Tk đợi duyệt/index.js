@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Table } from "antd";
+import { Button, Table, message } from "antd";
 import ModeratorService from "../../../services/moderator.service";
 import { useEffect } from "react";
 const columns = [
@@ -22,7 +22,7 @@ const AccountWaiting = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const hasSelected = selectedRowKeys.length > 0;
-  useEffect(() => {
+  const getDataFunction = () => {
     ModeratorService.getWaitingAccountList().then(
       (response) => {
         const _data = [];
@@ -47,12 +47,23 @@ const AccountWaiting = () => {
         console.log(_content);
       }
     );
+  };
+  useEffect(() => {
+    getDataFunction();
   }, [loading]);
   const start = () => {
     setLoading(true);
     ModeratorService.acceptWaitingAccount(selectedRowKeys).then(
       (response) => {
         console.log(response);
+        setTimeout(() => {
+          message.success({
+            content: `Chấp nhận tài khoản`,
+            key: "message",
+            duration: 2,
+          });
+        }, 1000);
+        getDataFunction();
       },
       (error) => {
         const _content =
@@ -77,6 +88,7 @@ const AccountWaiting = () => {
     ModeratorService.rejectWaitingAccount(selectedRowKeys).then(
       (response) => {
         console.log(response);
+        getDataFunction();
       },
       (error) => {
         const _content =

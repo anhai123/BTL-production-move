@@ -180,9 +180,24 @@ const CssxCategory = () => {
     setLoading(true);
     ModeratorService.deleteProductFacilityCategory(selectedRecordKey).then(
       (response) => {
+        ModeratorService.getDirectoryCssx().then(
+          (response) => {
+            setData(handleCssxCategoryReturnedFromBE(response.data));
+          },
+          (error) => {
+            const _content =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+
+            console.log(_content);
+          }
+        );
         setTimeout(() => {
           message.success({
-            content: `${response}`,
+            content: `Xóa danh mục thành công`,
             key: "message",
             duration: 2,
           });
@@ -265,22 +280,20 @@ const CssxCategory = () => {
           marginBottom: 16,
         }}
       >
-        CheckStrictly:{" "}
-        <Switch checked={checkStrictly} onChange={setCheckStrictly} />
         <Button
           type="primary"
           onClick={deleteCssxCategory}
           disabled={!hasSelected}
           loading={loading}
         >
-          Delete product category
+          Xóa danh mục cơ sở sản xuất
         </Button>
       </Space>
       <Table
         columns={columns}
         rowSelection={{
           ...rowSelection,
-          checkStrictly,
+          checkStrictly: true,
         }}
         dataSource={data}
       />

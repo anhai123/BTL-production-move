@@ -221,7 +221,7 @@ const ReturnFinishProductToAgentDistribution = () => {
       render: (_, record) => (
         <Space size="middle">
           <Tag color="green" onClick={() => updateStatusProduct(record.id, 12)}>
-            Đã bảo hành xong
+            Đã bảo hành xong, chuyển về đại lý
           </Tag>
         </Space>
       ),

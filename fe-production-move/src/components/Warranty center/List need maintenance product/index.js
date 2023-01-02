@@ -28,6 +28,7 @@ const ListProductNeedMaintenance = () => {
                 response.data[i].key = response.data[i].id;
               }
               setData(response.data);
+              alert("Cập nhật trạng thái thành công");
             },
             (error) => {
               const _content =

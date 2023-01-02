@@ -8,6 +8,10 @@ import {
   MailOutlined,
   SettingOutlined,
   PlusOutlined,
+  ContainerOutlined,
+  MenuFoldOutlined,
+  PieChartOutlined,
+  DesktopOutlined,
 } from "@ant-design/icons";
 import {
   BrowserRouter as Router,
@@ -47,6 +51,10 @@ const tailLayout = {
   },
 };
 const BoardAdmin = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
+  };
   const [content, setContent] = useState("");
   const [current, setCurrent] = useState("mail");
   const [openProductCategoryDrawer, setOpenProductCategoryDrawer] =
@@ -79,7 +87,97 @@ const BoardAdmin = () => {
   const showCreateTtbhCategoryDrawer = () => {
     setOpenTtbhCategoryDrawer(true);
   };
+  function getItem(label, key, icon, children, type) {
+    return {
+      key,
+      icon,
+      children,
+      label,
+      type,
+    };
+  }
   const items = [
+    // getItem("Option 1", "1", <PieChartOutlined />),
+    // getItem("Option 2", "2", <DesktopOutlined />),
+    // getItem("Option 3", "3", <ContainerOutlined />),
+    getItem("Quản lý danh mục", "sub1", <MailOutlined />, [
+      getItem("Sản phẩm", "1.1", null, [
+        getItem(
+          <Link to={"/admin/product-category-mn"}>Danh mục sản phẩm</Link>,
+          "sub1.2",
+          null
+        ),
+        getItem(
+          <Button
+            type="primary"
+            onClick={showCreateProductCategoryDrawer}
+            icon={<PlusOutlined />}
+          >
+            Tạo mới danh mục sản phẩm
+          </Button>,
+          "sub1.3",
+          null
+        ),
+      ]),
+
+      getItem("Trung tâm bảo hành", "2.1", null, [
+        getItem(
+          <Link to={"/admin/ttbh-category-mn"}>Danh mục ttbh</Link>,
+          "sub2.2",
+          null
+        ),
+        getItem(
+          <Button
+            type="primary"
+            onClick={showCreateTtbhCategoryDrawer}
+            icon={<PlusOutlined />}
+          >
+            Tạo mới danh mục TTBH
+          </Button>,
+          "sub2.3",
+          null
+        ),
+      ]),
+      getItem("Cơ sở sản xuất", "3.1", null, [
+        getItem(
+          <Link to={"/admin/cssx-category-mn"}>Danh mục CSSX</Link>,
+          "sub3.2",
+          null
+        ),
+        getItem(
+          <Button
+            type="primary"
+            onClick={showCreateCssxCategoryDrawer}
+            icon={<PlusOutlined />}
+          >
+            Tạo mới danh mục CSSX
+          </Button>,
+          "sub3.3",
+          null
+        ),
+      ]),
+
+      getItem("Đại lý phân phối", "4.1", null, [
+        getItem(
+          <Link to={"/admin/dlpp-category-mn"}>Danh mục DLPP</Link>,
+          "sub4.2",
+          null
+        ),
+        getItem(
+          <Button
+            type="primary"
+            onClick={showCreateDlppCategoryDrawer}
+            icon={<PlusOutlined />}
+          >
+            Tạo mới danh mục DLPP
+          </Button>,
+          "sub4.3",
+          null
+        ),
+      ]),
+    ]),
+  ];
+  const itemss = [
     {
       label: (
         <span
@@ -205,15 +303,12 @@ const BoardAdmin = () => {
               }}
             >
               <Menu
-                theme={"light"}
-                onClick={onClick}
-                selectedKeys={[current]}
+                defaultSelectedKeys={["1"]}
+                defaultOpenKeys={["sub1"]}
                 mode="horizontal"
+                theme="dark"
+                inlineCollapsed={collapsed}
                 items={items}
-                style={{
-                  backgroundColor: "black",
-                  display: "inline",
-                }}
               />
             </li>
             <li className="nav-item">

@@ -23,16 +23,33 @@ const getCustomerInformation = (name, dateOfBirth) => {
   });
 };
 //customername, dateOfBirth, customerSelected.dia_chi, customerSelected.so_dien_thoai, customerSelected.email, customerSelected.id_khach_hang , productId
-const putProductStatusAfterSelling = (id) => {
+const putProductStatusAfterSelling = (
+  ho_ten,
+  ngay_sinh,
+  dia_chi,
+  so_dien_thoai,
+  email,
+  id_khach_hang,
+  id
+) => {
   return axios.put(
     API_URL + "product/sell",
-    { id },
+    { ho_ten, ngay_sinh, dia_chi, so_dien_thoai, email, id_khach_hang, id },
     {
       headers: authHeader(),
     }
   );
 };
 
+const putProductStatusAfterSelling1 = (id_khach_hang, id) => {
+  return axios.put(
+    API_URL + "product/sell",
+    { id_khach_hang, id },
+    {
+      headers: authHeader(),
+    }
+  );
+};
 const putProductNeedMaintanance = (id) => {
   const id1 = parseInt(id);
   return axios.put(
@@ -228,6 +245,7 @@ const distributionAgentServices = {
   ProductStatisticData,
   ProductStatisticNumber,
   StatusProduct,
+  putProductStatusAfterSelling1,
 };
 
 export default distributionAgentServices;

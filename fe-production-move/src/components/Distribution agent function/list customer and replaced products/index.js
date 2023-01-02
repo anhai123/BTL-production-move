@@ -62,6 +62,7 @@ const ListCustomerAndReplacedProduct = () => {
             console.log(_content);
           }
         );
+        alert("Cập nhật trạng thái thành công");
       },
       (error) => {
         const _content =
@@ -84,7 +85,7 @@ const ListCustomerAndReplacedProduct = () => {
       let customer = data.allCustomer.filter((cus) => {
         return cus.id === data.allProduct[i].id_khach_hang;
       });
-      if (customer !== undefined) {
+      if (customer !== undefined && customer.length > 0) {
         data.allProduct[i].email_khach_hang = customer[0].email;
         data.allProduct[i].sdt_khach_hang = customer[0].so_dien_thoai;
       }

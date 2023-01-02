@@ -65,10 +65,13 @@ const CreateNewBuyingCustomers = ({ open, setClose }) => {
       ).then(
         (response) => {
           console.log(response);
-          message.success("Bán sản phẩm thành công");
+          message.success("Bán sản phẩm và tạo mới khách hàng thành công");
+          setClose(false);
+          form.resetFields();
         },
         (error) => {
           console.log(error);
+          alert(error.message);
         }
       );
       setClose(false);

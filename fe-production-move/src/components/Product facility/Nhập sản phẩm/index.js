@@ -138,6 +138,7 @@ const NhapSanPham = () => {
       .then(
         (response) => {
           console.log(response);
+          alert("Nhập sản phẩm thành công");
         },
         (error) => {
           const _content =

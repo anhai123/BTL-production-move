@@ -84,6 +84,7 @@ const CreateNewProductCategory = ({ open, setClose }) => {
       ).then(
         (response) => {
           console.log(response);
+          alert("tạo mói danh mục thành công");
         },
         (error) => {
           console.log(error);

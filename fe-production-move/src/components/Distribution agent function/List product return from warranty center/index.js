@@ -22,6 +22,27 @@ const ReceivingProductFromWarrantyCenter = () => {
     ).then(
       (response) => {
         console.log(response);
+        DistributionAgentServices.getIncomingMaintenanceCompleteOrUnfixedProduct().then(
+          (response) => {
+            if (response.data.length > 0) {
+              for (let i = 0; i < response.data.length; i++) {
+                response.data[i].key = response.data[i].id;
+              }
+              setData(response.data);
+            }
+          },
+          (error) => {
+            const _content =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+            setData([]);
+            console.log(_content);
+          }
+        );
+        alert("Cập nhật trạng thái thành công");
       },
       (error) => {
         const _content =
@@ -236,8 +257,6 @@ const ReceivingProductFromWarrantyCenter = () => {
         >
           Trạng thái đã về đến đại lý.
         </Button>
-        CheckStrictly:{" "}
-        <Switch checked={checkStrictly} onChange={setCheckStrictly} />
       </Space>
       <Table
         columns={columns}

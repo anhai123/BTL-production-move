@@ -35,27 +35,26 @@ const AgentSellProduct = () => {
     // console.log(form.getFieldValue("description"));
     const values = await form.validateFields();
     console.log("Success:", values);
-    // try {
-    //   const values = await form.validateFields();
-    //   console.log("Success:", values);
-    //   ModeratorService.submitCreateNpdForm(
-    //     type,
-    //     RootProductCategory,
-    //     index,
-    //     form.getFieldValue("description")
-    //   ).then(
-    //     (response) => {
-    //       console.log(response);
-    //     },
-    //     (error) => {
-    //       console.log(error);
-    //     }
-    //   );
-    //   setClose(false);
-    //   form.resetFields();
-    // } catch (errorInfo) {
-    //   console.log("Failed:", errorInfo);
-    // }
+    try {
+      const values = await form.validateFields();
+      console.log("Success:", values);
+      DistributionAgentServices.putProductStatusAfterSelling1(
+        values.customerId,
+        values.productId
+      ).then(
+        (response) => {
+          console.log(response);
+          message.success("Cập nhật trạng thái thành công");
+          setCreateNewCustomerForm(false);
+          setCustomerList([]);
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+    } catch (errorInfo) {
+      console.log("Failed:", errorInfo);
+    }
   };
   const showDrawer = () => {
     setCreateNewCustomerForm(true);
@@ -64,28 +63,32 @@ const AgentSellProduct = () => {
     setCreateNewCustomerForm(false);
   };
   const onFinish = (values) => {
-    form.validateFields();
-    console.log("Success:", values);
-    const { customername, customerId, productId } = values;
+    // form.validateFields();
+    // console.log("Success:", values);
+    // const { customername, customerId, productId } = values;
 
-    const customerSelected = customerList.filter(
-      (cus) => cus.id === customerId
-    );
-    DistributionAgentServices.putProductStatusAfterSelling(productId).then(
-      (response) => {
-        console.log(response);
-      },
-      (error) => {
-        const _content =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-
-        console.log(_content);
-      }
-    );
+    // const customerSelected = customerList.filter(
+    //   (cus) => cus.id === customerId
+    // );
+    // DistributionAgentServices.putProductStatusAfterSelling(productId).then(
+    //   (response) => {
+    //     console.log(response);
+    //     setCreateNewCustomerForm(false);
+    //   },
+    //   (error) => {
+    //     const _content =
+    //       (error.response &&
+    //         error.response.data &&
+    //         error.response.data.message) ||
+    //       error.message ||
+    //       error.toString();
+    //     setCreateNewCustomerForm(false);
+    //     console.log(_content);
+    //   }
+    // );
+    console.log(values);
+    setCreateNewCustomerForm(false);
+    console.log(createNewCustomerForm);
   };
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
@@ -151,6 +154,7 @@ const AgentSellProduct = () => {
       );
     }
   };
+  console.log(createNewCustomerForm);
   return (
     <>
       <Form
