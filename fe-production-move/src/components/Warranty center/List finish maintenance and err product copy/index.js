@@ -220,7 +220,7 @@ const ReturnUnfixedProductToAgentDistribution = () => {
       render: (_, record) => (
         <Space size="middle">
           <Tag color="green" onClick={() => updateStatusProduct(record.id, 13)}>
-            Lỗi, không thể sửa chữa
+            Lỗi, không thể sửa chữa, chuyển về đại lý
           </Tag>
         </Space>
       ),

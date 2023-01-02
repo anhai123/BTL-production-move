@@ -82,7 +82,7 @@ const CreateNewCssxCategory = ({ open, setClose }) => {
         form.getFieldValue("description")
       ).then(
         (response) => {
-          console.log(response);
+          alert("Tạo mới danh mục thành công");
         },
         (error) => {
           console.log(error);

@@ -82,6 +82,7 @@ const CreateNewTtbhCategory = ({ open, setClose }) => {
       ).then(
         (response) => {
           console.log(response);
+          alert("Tạo mới danh mục thành công");
         },
         (error) => {
           console.log(error);

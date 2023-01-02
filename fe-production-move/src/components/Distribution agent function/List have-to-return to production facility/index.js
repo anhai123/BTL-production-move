@@ -40,6 +40,7 @@ const ListHaveToReturnToProductionFacilityProduct = () => {
             setData([]);
           }
         );
+        alert("Cập nhật trạng thái thành công");
       },
       (error) => {
         const _content =

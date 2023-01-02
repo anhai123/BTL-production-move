@@ -39,7 +39,7 @@ const ProductCategory = () => {
       (response) => {
         setTimeout(() => {
           message.success({
-            content: `${response}`,
+            content: `Xóa danh mục thành công`,
             key: "message",
             duration: 2,
           });
@@ -301,8 +301,6 @@ const ProductCategory = () => {
           marginBottom: 16,
         }}
       >
-        CheckStrictly:{" "}
-        <Switch checked={checkStrictly} onChange={setCheckStrictly} />
         <Button
           type="primary"
           onClick={deleteProductCategory}
@@ -316,7 +314,7 @@ const ProductCategory = () => {
         columns={columns}
         rowSelection={{
           ...rowSelection,
-          checkStrictly,
+          checkStrictly: true,
         }}
         dataSource={data}
       />

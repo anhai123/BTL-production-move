@@ -20,6 +20,7 @@ const UnfixProductTransferedToFacility = () => {
     facilityService.putSttWhenProductDelivered(selectedRowKeys).then(
       (response) => {
         console.log(response);
+        alert("Sản phẩm đã được gửi về thành công");
       },
       (error) => {
         const _content =

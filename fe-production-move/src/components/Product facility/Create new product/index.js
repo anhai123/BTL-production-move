@@ -65,7 +65,7 @@ const CreateNewProduct = () => {
     );
   }, []);
   const onFinish = (values) => {
-    console.log(values);
+    alert("Nhập sản phẩm vào kho thành công");
   };
   const [form] = Form.useForm();
 

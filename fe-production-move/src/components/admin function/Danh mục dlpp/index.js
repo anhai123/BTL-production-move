@@ -37,9 +37,23 @@ const Dlpp = () => {
     setLoading(true);
     ModeratorService.deleteDlppCategory(selectedRecordKey).then(
       (response) => {
+        ModeratorService.getDirectoryDlpp().then(
+          (response) => {
+            setData(handleDlppCategoryReturnedFromBE(response.data));
+          },
+          (error) => {
+            const _content =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+            console.log(_content);
+          }
+        );
         setTimeout(() => {
           message.success({
-            content: `${response}`,
+            content: `Xóa danh mục thành công`,
             key: "message",
             duration: 2,
           });
@@ -260,22 +274,20 @@ const Dlpp = () => {
           marginBottom: 16,
         }}
       >
-        CheckStrictly:{" "}
-        <Switch checked={checkStrictly} onChange={setCheckStrictly} />
         <Button
           type="primary"
           onClick={deleteDlppCategory}
           disabled={!hasSelected}
           loading={loading}
         >
-          Delete product category
+          Xóa danh mục dại lý phân phối
         </Button>
       </Space>
       <Table
         columns={columns}
         rowSelection={{
           ...rowSelection,
-          checkStrictly,
+          checkStrictly: true,
         }}
         dataSource={data}
       />

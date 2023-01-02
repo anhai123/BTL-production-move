@@ -30,6 +30,7 @@ const ListSummonProductHasCustomer = () => {
             setData([]);
           }
         );
+        alert("Cập nhật trạng thái thành công");
       },
       (error) => {
         const _content =
@@ -51,7 +52,7 @@ const ListSummonProductHasCustomer = () => {
         return cus.id === data.allProductHasCustomer[i].id_khach_hang;
       });
       console.log(customer);
-      if (customer !== undefined) {
+      if (customer !== undefined && customer.length > 0) {
         data.allProductHasCustomer[i].email_khach_hang = customer[0].email;
         data.allProductHasCustomer[i].sdt_khach_hang =
           customer[0].so_dien_thoai;

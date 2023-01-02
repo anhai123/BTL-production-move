@@ -159,6 +159,7 @@ const ListSummonProductNoCustomer = () => {
                 response.data.allProductHasNoCustomer[i].id;
             }
             setData(response.data.allProductHasNoCustomer);
+            alert("Cập nhật trạng thái sản phẩm thành công");
           },
           (error) => {
             const _content =

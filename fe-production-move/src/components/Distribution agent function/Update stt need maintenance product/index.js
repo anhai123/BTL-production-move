@@ -85,7 +85,6 @@ const ReceivingInNeedMaintainedProduct = () => {
       (response) => {
         message.success("Đã nhận sản phẩm cần bảo hành từ khách hàng");
         console.log("jsjlca");
-        alert("Đã nhận sản phẩm cần bảo hành từ khách hàng");
       },
       (error) => {
         const _content =

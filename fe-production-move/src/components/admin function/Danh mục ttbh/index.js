@@ -39,11 +39,25 @@ const TtbhCategory = () => {
       (response) => {
         setTimeout(() => {
           message.success({
-            content: `${response}`,
+            content: `Xóa danh mục thành công`,
             key: "message",
             duration: 2,
           });
         }, 1000);
+        ModeratorService.getDirectoryTtbh().then(
+          (response) => {
+            setData(handleTtbhCategoryReturnedFromBE(response.data));
+          },
+          (error) => {
+            const _content =
+              (error.response &&
+                error.response.data &&
+                error.response.data.message) ||
+              error.message ||
+              error.toString();
+            console.log(_content);
+          }
+        );
       },
       (error) => {
         const _content =
@@ -259,22 +273,20 @@ const TtbhCategory = () => {
           marginBottom: 16,
         }}
       >
-        CheckStrictly:{" "}
-        <Switch checked={checkStrictly} onChange={setCheckStrictly} />
         <Button
           type="primary"
           onClick={deleteWarrantyCenterCategory}
           disabled={!hasSelected}
           loading={loading}
         >
-          Delete product category
+          Xóa danh mục trung tâm bảo hành
         </Button>
       </Space>
       <Table
         columns={columns}
         rowSelection={{
           ...rowSelection,
-          checkStrictly,
+          checkStrictly: true,
         }}
         dataSource={data}
       />

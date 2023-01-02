@@ -110,6 +110,24 @@ const NeedMaintenanceProduct = () => {
       ).then(
         (response) => {
           console.log(response);
+          DistributionAgentServices.getNeedMaintenanceProduct().then(
+            (response) => {
+              for (let i = 0; i < response.data.length; i++) {
+                response.data[i].key = response.data[i].id;
+              }
+              setData(response.data);
+            },
+            (error) => {
+              const _content =
+                (error.response &&
+                  error.response.data &&
+                  error.response.data.message) ||
+                error.message ||
+                error.toString();
+              console.log(_content);
+            }
+          );
+          alert("Cập nhật trạng thái thành công");
         },
         (error) => {
           console.log(error);
