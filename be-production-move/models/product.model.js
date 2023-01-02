@@ -87,10 +87,19 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds, id_
         let query = "SELECT * FROM san_pham", count = 0;
 
         if (id_trang_thai || id_co_so_sx || id_dai_ly || ids || id_ngay || oIds || id_danh_muc_sp) {
-            query += ` WHERE `;
+            if (id_trang_thai || id_co_so_sx || id_dai_ly || ids || id_ngay || id_danh_muc_sp) {
+                query += ` WHERE `;
+            } else
+            if (oIds) {
+                if (oIds.length > 0) {
+                    query += ` WHERE `;
+                }
+            }
         }
         if (oIds) {
-            query += `( `;
+            if (oIds.length > 0) {
+                query += `( `;
+            }
         }
         if (id_trang_thai) {
             count++;
@@ -142,6 +151,7 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds, id_
             query += `)`;
         }
         if (oIds) {
+            if (oIds.length > 0) {
             count++;
             if (count > 1) {
                 query += " ) OR ";
@@ -155,6 +165,7 @@ Product.getAll = (id_trang_thai, id_co_so_sx, id_dai_ly, ids, id_ngay, oIds, id_
                 }
             }
             query += `)`;
+        }
         }
         
         if (id_danh_muc_sp) {
