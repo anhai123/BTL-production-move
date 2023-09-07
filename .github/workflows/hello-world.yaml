@@ -4,7 +4,7 @@ on:
     branches: [main]
 jobs:
   say-hello:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - run: echo "TODAY=$(date +%y-%m-%d)" >> $GITHUB_ENV
       - run: echo Hello World, today is $TODAY
