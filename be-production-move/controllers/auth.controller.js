@@ -19,7 +19,7 @@ exports.signup = async (req, res) => {
           hop_le = 1;
         } else {
           res.status(500).send({
-            message: `Lỗi khi đăng ký!`,
+            message: `Lỗi khi đăng ký!.`,
           });
           return;
         }
